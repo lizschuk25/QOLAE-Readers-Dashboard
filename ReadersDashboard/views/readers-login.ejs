@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QOLAE Readers Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 450px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #667eea;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .logo p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .step-indicator {
+            text-align: center;
+            margin-bottom: 24px;
+            color: #6b7280;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        #step2 {
+            display: none;
+        }
+
+        .resend-link {
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .resend-link button {
+            background: none;
+            border: none;
+            color: #667eea;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: underline;
+        }
+
+        .resend-link button:hover {
+            color: #5568d3;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>📖 QOLAE Readers Portal</h1>
+            <p>Secure Access for Report Reviewers</p>
+        </div>
+
+        <div id="messageBox"></div>
+
+        <!-- STEP 1: PIN & Email -->
+        <div id="step1">
+            <div class="step-indicator">Step 1 of 2: Enter Your Credentials</div>
+            <form id="step1Form">
+                <div class="form-group">
+                    <label class="form-label" for="pin">Reader PIN</label>
+                    <input type="text" id="pin" class="form-input" placeholder="RDR-XX123456" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="email" id="email" class="form-input" placeholder="your@email.com" required>
+                </div>
+
+                <button type="submit" class="btn" id="requestCodeBtn">Request Verification Code</button>
+            </form>
+        </div>
+
+        <!-- STEP 2: Verification Code -->
+        <div id="step2">
+            <div class="step-indicator">Step 2 of 2: Enter Verification Code</div>
+            <form id="step2Form">
+                <div class="form-group">
+                    <label class="form-label" for="code">6-Digit Verification Code</label>
+                    <input type="text" id="code" class="form-input" placeholder="123456" maxlength="6" required>
+                    <small style="color: #6b7280; display: block; margin-top: 8px;">
+                        Code sent to <span id="emailDisplay"></span>
+                    </small>
+                </div>
+
+                <button type="submit" class="btn" id="verifyCodeBtn">Verify & Login</button>
+            </form>
+
+            <div class="resend-link">
+                <button id="resendCodeBtn">Resend Code</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const step1Form = document.getElementById('step1Form');
+        const step2Form = document.getElementById('step2Form');
+        const step1Div = document.getElementById('step1');
+        const step2Div = document.getElementById('step2');
+        const messageBox = document.getElementById('messageBox');
+        const pinInput = document.getElementById('pin');
+        const emailInput = document.getElementById('email');
+        const codeInput = document.getElementById('code');
+        const requestCodeBtn = document.getElementById('requestCodeBtn');
+        const verifyCodeBtn = document.getElementById('verifyCodeBtn');
+        const resendCodeBtn = document.getElementById('resendCodeBtn');
+        const emailDisplay = document.getElementById('emailDisplay');
+
+        // Show message helper
+        function showMessage(message, type) {
+            messageBox.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => {
+                messageBox.innerHTML = '';
+            }, 5000);
+        }
+
+        // STEP 1: Request verification code
+        step1Form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const pin = pinInput.value.trim();
+            const email = emailInput.value.trim();
+
+            requestCodeBtn.disabled = true;
+            requestCodeBtn.textContent = 'Sending...';
+
+            try {
+                const response = await fetch('/api/readers/request-email-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ pin, email })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    emailDisplay.textContent = email;
+                    step1Div.style.display = 'none';
+                    step2Div.style.display = 'block';
+                    setTimeout(() => codeInput.focus(), 100);
+                } else {
+                    showMessage(data.error, 'error');
+                    requestCodeBtn.disabled = false;
+                    requestCodeBtn.textContent = 'Request Verification Code';
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.', 'error');
+                requestCodeBtn.disabled = false;
+                requestCodeBtn.textContent = 'Request Verification Code';
+            }
+        });
+
+        // STEP 2: Verify code and login
+        step2Form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const pin = pinInput.value.trim();
+            const email = emailInput.value.trim();
+            const code = codeInput.value.trim();
+
+            verifyCodeBtn.disabled = true;
+            verifyCodeBtn.textContent = 'Verifying...';
+
+            try {
+                const response = await fetch('/api/readers/verify-email-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ pin, email, code })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('Login successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = data.redirectTo;
+                    }, 1000);
+                } else {
+                    showMessage(data.error, 'error');
+                    verifyCodeBtn.disabled = false;
+                    verifyCodeBtn.textContent = 'Verify & Login';
+                    codeInput.value = '';
+                    codeInput.focus();
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.', 'error');
+                verifyCodeBtn.disabled = false;
+                verifyCodeBtn.textContent = 'Verify & Login';
+            }
+        });
+
+        // Resend code
+        resendCodeBtn.addEventListener('click', async () => {
+            const pin = pinInput.value.trim();
+            const email = emailInput.value.trim();
+
+            resendCodeBtn.disabled = true;
+            resendCodeBtn.textContent = 'Sending...';
+
+            try {
+                const response = await fetch('/api/readers/request-email-code', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ pin, email })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('New code sent!', 'success');
+                } else {
+                    showMessage(data.error, 'error');
+                }
+            } catch (error) {
+                showMessage('Network error. Please try again.', 'error');
+            } finally {
+                resendCodeBtn.disabled = false;
+                resendCodeBtn.textContent = 'Resend Code';
+            }
+        });
+    </script>
+</body>
+</html>
