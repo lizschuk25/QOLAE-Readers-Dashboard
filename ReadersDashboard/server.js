@@ -2,7 +2,7 @@
 // QOLAE READERS DASHBOARD SERVER
 // ==============================================
 // Purpose: Secure workspace for readers to review and correct INA reports
-// Author: Liz & Claude
+// Author: Liz
 // Date: October 7, 2025
 // ==============================================
 

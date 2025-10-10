@@ -2,7 +2,7 @@
 // READERS DASHBOARD - AUTHENTICATION ROUTES
 // ==============================================
 // Purpose: 2FA authentication for readers (PIN + Email verification)
-// Author: Liz & Claude
+// Author: Liz
 // Date: October 7, 2025
 // ==============================================
 

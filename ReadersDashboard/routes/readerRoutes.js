@@ -2,7 +2,7 @@
 // READERS DASHBOARD - READER ROUTES
 // ==============================================
 // Purpose: NDA, Report Viewer, Corrections, Payment Tracking
-// Author: Liz & Claude
+// Author: Liz
 // Date: October 7, 2025
 // ==============================================
 

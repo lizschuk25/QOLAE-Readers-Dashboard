@@ -2,7 +2,7 @@
 // QOLAE CUSTOMIZED NDA GENERATOR
 // ==============================================
 // Purpose: Auto-populate TemplateReadersNDA.pdf with reader data
-// Author: Liz & Claude
+// Author: Liz
 // Date: October 7, 2025
 // Pattern: Following generateCustomizedTOB.js pattern
 // ==============================================

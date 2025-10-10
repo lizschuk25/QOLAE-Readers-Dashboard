@@ -3,7 +3,7 @@
 -- ==============================================
 -- Purpose: Manages reader registration, authentication, NDA tracking,
 --          report assignments, and payment workflows
--- Author: Liz & Claude
+-- Author: Liz
 -- Date: October 7, 2025
 -- Database: qolae_readers (separate from lawyers and admin)
 -- ==============================================
