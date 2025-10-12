@@ -1,9 +1,20 @@
 # 📖 READERS DASHBOARD - SETUP & DEPLOYMENT GUIDE
 
-**Date**: October 7, 2025
+**Date**: October 7, 2025 (Updated: October 11, 2025)
 **Author**: Liz & Claude
 **System**: Secure workspace for readers to review and correct INA reports
-**Database**: qolae_readers + qolae_casemanagers (PostgreSQL)
+**Database**: qolae_readers + qolae_casemanagers + qolae_hrcompliance (PostgreSQL)
+
+---
+
+## 📚 **WHICH DOCUMENT TO USE?**
+
+| Document | Purpose | When to Use |
+|----------|---------|-------------|
+| **DailyWorkingDocument.md** | Master checklist (200 tasks, all dashboards) | Daily progress tracking |
+| **READERS_DASHBOARD_SETUP.md** (this file) | Technical deployment guide | Server setup, routes, configs |
+| **READERS_COMPLIANCE_IMPLEMENTATION_CHECKLIST.md** | Detailed implementation tasks (67 items) | Building features step-by-step |
+| **ReadersWorkflow.md** | User-facing workflow narrative | Understanding user experience |
 
 ---
 
@@ -322,21 +333,24 @@ curl -X POST http://91.99.184.77:3008/api/readers/verify-email-code \
 
 ## ✅ CURRENT STATUS
 
-**✅ Completed**:
-- Server infrastructure (server.js, package.json)
-- 2FA authentication system (PIN + email)
-- Login view (readers-login.ejs)
-- Reader routes (dashboard, NDA, reports, corrections, payment)
-- Database integration (2 databases)
-- JWT middleware and security
-- GDPR audit logging
+**✅ Deployed on Live Server (91.99.184.77)**:
+- ✅ Server infrastructure (server.js, package.json) - **RUNNING ON PORT 3008**
+- ✅ 2FA authentication system (PIN + email verification)
+- ✅ Login view (readers-login.ejs)
+- ✅ Reader routes (dashboard, NDA, reports, corrections, payment)
+- ✅ Database schemas created (qolae_readers, qolae_casemanagers)
+- ✅ JWT middleware and security
+- ✅ GDPR audit logging structure
+- ✅ PM2 ecosystem configuration with cache prevention
 
-**⏳ Pending** (Liz working on NDA, then we'll continue):
-- NDA review view
-- Report viewer view
-- Corrections editor view
-- Payment status view
-- Email integration
+**⏳ Pending (Not Yet Built)**:
+- HR Compliance Gate view (readers-compliance.ejs)
+- NDA review view (nda-review.ejs)
+- Report viewer view (report-viewer.ejs)
+- Corrections editor view (corrections-editor.ejs)
+- Payment status view (payment-status.ejs)
+- Email integration (verification codes, invitations)
+- Reference forms (reference-form.ejs, referee-signature.ejs)
 
 ---
 

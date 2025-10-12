@@ -11,7 +11,7 @@ READERS WORKFLOW.
 
 **Location:** `readers.qolae.com/compliance`
 
-**Database:** `qolae_hr_compliance` (separate secure HR database)
+**Database:** `qolae_hrcompliance` (separate secure HR database)
 
 ### Reader's Compliance Submission:
 

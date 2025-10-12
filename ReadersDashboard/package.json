@@ -2,11 +2,11 @@
   "name": "qolae-readers-dashboard",
   "version": "1.0.0",
   "description": "QOLAE Readers Dashboard - Secure Report Review & Corrections Workspace",
-  "main": "server.js",
+  "main": "rd_server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
+    "start": "node rd_server.js",
+    "dev": "node --watch rd_server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

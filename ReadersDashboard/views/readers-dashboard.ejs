@@ -1,10 +1,33 @@
+<!-- 
+  * QOLAE Readers Dashboard
+  * Secure workspace for Admin/Lay and Medical Professional readers
+  * Organized by Location Block Protocol
+  * Author: Liz
+  * Date: October 11, 2025
+  * 
+  * WORKFLOW STEPS (Mirrored in Location Blocks):
+  * 1. Header & Security Badges
+  * 2. Reader Type Selector (Admin vs Medical)
+  * 3. Welcome Section & Session Info
+  * 4. Workflow Progress Tracker
+  * 5. NDA Card (Workflow Step 1)
+  * 6. Report Review Card (Workflow Step 2)
+  * 7. Payment Card (Workflow Step 3)
+  * 8. Document Library & Support
+  * 9. Security Notice & Footer
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QOLAE Readers Dashboard</title>
+
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 0: ALL CSS STYLES -->
+<!-- ========================================== -->
     <style>
+        /* ===== RESET & BASE STYLES ===== */
         * {
             margin: 0;
             padding: 0;
@@ -23,6 +46,7 @@
             margin: 0 auto;
         }
 
+        /* ===== HEADER STYLES ===== */
         .header {
             background: rgba(255, 255, 255, 0.95);
             padding: 20px 30px;
@@ -61,6 +85,74 @@
         .secure { background: #dcfce7; color: #166534; }
         .nda { background: #fef3c7; color: #92400e; }
 
+        /* ===== READER TYPE SELECTOR STYLES ===== */
+        .reader-selector {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .reader-selector h3 {
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .reader-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .reader-option {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .reader-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .reader-option.active {
+            border-color: #667eea;
+            background: #f8faff;
+        }
+
+        .option-icon {
+            font-size: 32px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 50%;
+        }
+
+        .option-content h4 {
+            color: #1e293b;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .option-content p {
+            color: #64748b;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* ===== WELCOME SECTION STYLES ===== */
         .welcome-section {
             background: rgba(255, 255, 255, 0.95);
             padding: 25px 30px;
@@ -90,6 +182,7 @@
             color: #64748b;
         }
 
+        /* ===== WORKFLOW PROGRESS STYLES ===== */
         .workflow-progress {
             background: rgba(255, 255, 255, 0.95);
             padding: 25px 30px;
@@ -170,6 +263,7 @@
             font-weight: 500;
         }
 
+        /* ===== DASHBOARD CARD STYLES ===== */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -224,6 +318,7 @@
             flex-wrap: wrap;
         }
 
+        /* ===== BUTTON STYLES ===== */
         .btn {
             padding: 10px 20px;
             border-radius: 8px;
@@ -272,6 +367,7 @@
             cursor: not-allowed;
         }
 
+        /* ===== STATUS INDICATOR STYLES ===== */
         .status-indicator {
             display: inline-flex;
             align-items: center;
@@ -287,6 +383,7 @@
         .status-active { background: #dbeafe; color: #1e40af; }
         .status-completed { background: #d1fae5; color: #065f46; }
 
+        /* ===== SECURITY NOTICE STYLES ===== */
         .security-notice {
             background: rgba(239, 246, 255, 0.95);
             border: 1px solid #3b82f6;
@@ -304,6 +401,7 @@
             gap: 8px;
         }
 
+        /* ===== FOOTER STYLES ===== */
         .footer {
             text-align: center;
             padding: 20px;
@@ -311,85 +409,7 @@
             font-size: 14px;
         }
 
-        .reader-selector {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px 30px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .reader-selector h3 {
-            color: #1e293b;
-            margin-bottom: 20px;
-            font-size: 18px;
-        }
-
-        .reader-options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .reader-option {
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .reader-option:hover {
-            border-color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-        }
-
-        .reader-option.active {
-            border-color: #667eea;
-            background: #f8faff;
-        }
-
-        .option-icon {
-            font-size: 32px;
-            width: 50px;
-            height: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 50%;
-        }
-
-        .option-content h4 {
-            color: #1e293b;
-            margin-bottom: 5px;
-            font-size: 16px;
-        }
-
-        .option-content p {
-            color: #64748b;
-            font-size: 14px;
-            margin: 0;
-        }
-
-        .reader-category {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            color: white;
-            font-size: 14px;
-            font-weight: 600;
-            backdrop-filter: blur(10px);
-        }
-
+        /* ===== RESPONSIVE STYLES ===== */
         @media (max-width: 768px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
@@ -408,6 +428,10 @@
 </head>
 <body>
     <div class="container">
+
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 1: HEADER & SECURITY BADGES -->
+<!-- ========================================== -->
         <div class="header">
             <div class="logo">QOLAE</div>
             <div class="tagline">Secure Legal Document Review Portal</div>
@@ -417,7 +441,10 @@
             </div>
         </div>
 
-        <!-- Reader Type Selector -->
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 2: READER TYPE SELECTOR -->
+<!-- Maps to: Reader type selection (Admin/Lay vs Medical Professional) -->
+<!-- ========================================== -->
         <div class="reader-selector">
             <h3>Select Reader Type:</h3>
             <div class="reader-options">
@@ -438,6 +465,10 @@
             </div>
         </div>
 
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 3: WELCOME SECTION & SESSION INFO -->
+<!-- Dynamic content based on reader type selection -->
+<!-- ========================================== -->
         <div class="welcome-section">
             <div class="reader-type" id="readerType">Admin/Lay Reader</div>
             <h2 id="welcomeName">Welcome Ms. Jennifer Adams</h2>
@@ -449,6 +480,10 @@
             </div>
         </div>
 
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 4: WORKFLOW PROGRESS TRACKER -->
+<!-- Maps to: 3-step workflow (NDA → Review → Payment) -->
+<!-- ========================================== -->
         <div class="workflow-progress">
             <h3 class="progress-title">Your Review Progress</h3>
             <div class="progress-steps">
@@ -470,6 +505,10 @@
             </div>
         </div>
 
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 5: NDA CARD (WORKFLOW STEP 1) -->
+<!-- Maps to: Reader signs NDA -->
+<!-- ========================================== -->
         <div class="dashboard-grid">
             <div class="dashboard-card nda-card">
                 <div class="status-indicator status-completed">✅ Completed</div>
@@ -485,6 +524,10 @@
                 </div>
             </div>
 
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 6: REPORT REVIEW CARD (WORKFLOW STEP 2) -->
+<!-- Maps to: Reader reviews redacted report -->
+<!-- ========================================== -->
             <div class="dashboard-card review-card">
                 <div class="status-indicator status-active">🔄 Active</div>
                 <div class="card-icon">📖</div>
@@ -499,6 +542,10 @@
                 </div>
             </div>
 
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 7: PAYMENT CARD (WORKFLOW STEP 3) -->
+<!-- Maps to: Payment processing after review -->
+<!-- ========================================== -->
             <div class="dashboard-card payment-card">
                 <div class="status-indicator status-pending">⏳ Pending</div>
                 <div class="card-icon">💰</div>
@@ -513,6 +560,10 @@
             </div>
         </div>
 
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 8: DOCUMENT LIBRARY & SUPPORT -->
+<!-- Additional workspace features -->
+<!-- ========================================== -->
         <div class="dashboard-grid">
             <div class="dashboard-card">
                 <div class="card-icon" style="background: #f3e8ff;">📚</div>
@@ -539,6 +590,9 @@
             </div>
         </div>
 
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 9: SECURITY NOTICE & FOOTER -->
+<!-- ========================================== -->
         <div class="security-notice">
             <div class="security-notice-title">
                 🔒 Security Notice
@@ -555,8 +609,11 @@
         <a href="#" style="color: rgba(255,255,255,0.8); margin: 0 10px;">Support</a>
     </div>
 
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 10: JAVASCRIPT - READER TYPE & WORKFLOW MANAGEMENT -->
+<!-- ========================================== -->
     <script>
-        // Reader type management
+        // ===== READER TYPE MANAGEMENT =====
         let currentReaderType = 'admin';
 
         function switchToAdmin() {
@@ -597,47 +654,7 @@
             }
         }
 
-        // Reader type selector
-        const readerTypes = {
-            admin: {
-                category: "Admin Reader",
-                type: "Admin/Lay Reader",
-                description: "Non-medical professional review"
-            },
-            medical: {
-                category: "Medical Reader", 
-                type: "Medical Professional",
-                description: "Professional Nurse/Doctor review"
-            }
-        };
-
-        function switchReaderType() {
-            currentReaderType = currentReaderType === 'admin' ? 'medical' : 'admin';
-            updateReaderType();
-        }
-
-        function updateReaderType() {
-            const reader = readerTypes[currentReaderType];
-            document.getElementById('readerCategory').textContent = reader.category;
-            document.getElementById('readerType').textContent = reader.type;
-            
-            // Update welcome message based on reader type
-            const welcomeSection = document.querySelector('.welcome-section h2');
-            if (currentReaderType === 'medical') {
-                welcomeSection.textContent = 'Welcome Dr. Sarah Mitchell';
-                document.querySelector('.welcome-section p').textContent = 'Access your professional medical review workspace. All data is encrypted and requires NDA compliance.';
-            } else {
-                welcomeSection.textContent = 'Welcome Ms. Jennifer Adams';
-                document.querySelector('.welcome-section p').textContent = 'Access your secure admin review workspace. All data is encrypted and requires NDA compliance.';
-            }
-        }
-
-        // Add click handler to reader category badge
-        document.getElementById('readerCategory').addEventListener('click', switchReaderType);
-        document.getElementById('readerCategory').style.cursor = 'pointer';
-        document.getElementById('readerCategory').title = 'Click to switch between Admin and Medical reader views';
-
-        // Simulate workflow progress
+        // ===== WORKFLOW PROGRESS MANAGEMENT =====
         function updateProgress(step) {
             const progressFill = document.getElementById('progressFill');
             const steps = document.querySelectorAll('.step');
@@ -657,16 +674,17 @@
             progressFill.style.width = `${((step - 1) / 2) * 100}%`;
         }
 
+        // ===== INITIALIZATION =====
         // Initialize with step 2 (Document Review)
         updateProgress(2);
 
-        // Add interactive features
+        // ===== INTERACTIVE FEATURES =====
         document.addEventListener('DOMContentLoaded', function() {
             // Add click handlers for buttons
             const buttons = document.querySelectorAll('.btn:not(:disabled)');
             buttons.forEach(button => {
                 button.addEventListener('click', function() {
-                    // Simulate button actions
+                    // Simulate button actions (to be replaced with actual API calls)
                     console.log('Button clicked:', this.textContent);
                 });
             });

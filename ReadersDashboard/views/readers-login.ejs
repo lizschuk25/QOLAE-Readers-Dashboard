@@ -1,10 +1,22 @@
+<!-- 
+  * QOLAE Readers Login Page
+  * 2FA Authentication with PIN + Email Verification
+  * Organized by Location Block Protocol
+  * Author: Liz
+  * Date: October 11, 2025
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QOLAE Readers Login</title>
+
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 0: ALL CSS STYLES -->
+<!-- ========================================== -->
     <style>
+        /* ===== RESET & BASE STYLES ===== */
         * {
             margin: 0;
             padding: 0;
@@ -21,6 +33,7 @@
             padding: 20px;
         }
 
+        /* ===== LOGIN CONTAINER ===== */
         .login-container {
             background: white;
             border-radius: 16px;
@@ -30,6 +43,7 @@
             padding: 40px;
         }
 
+        /* ===== LOGO & BRANDING ===== */
         .logo {
             text-align: center;
             margin-bottom: 30px;
@@ -47,6 +61,7 @@
             margin-top: 8px;
         }
 
+        /* ===== FORM STYLES ===== */
         .form-group {
             margin-bottom: 24px;
         }
@@ -74,6 +89,7 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
+        /* ===== BUTTON STYLES ===== */
         .btn {
             width: 100%;
             padding: 14px;
@@ -99,6 +115,7 @@
             transform: none;
         }
 
+        /* ===== MESSAGE STYLES ===== */
         .message {
             padding: 12px 16px;
             border-radius: 8px;
@@ -118,6 +135,7 @@
             border: 1px solid #fca5a5;
         }
 
+        /* ===== STEP INDICATOR ===== */
         .step-indicator {
             text-align: center;
             margin-bottom: 24px;
@@ -126,10 +144,12 @@
             font-weight: 600;
         }
 
+        /* ===== STEP VISIBILITY ===== */
         #step2 {
             display: none;
         }
 
+        /* ===== RESEND LINK ===== */
         .resend-link {
             text-align: center;
             margin-top: 16px;
@@ -150,6 +170,10 @@
     </style>
 </head>
 <body>
+
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 1: LOGO & BRANDING -->
+<!-- ========================================== -->
     <div class="login-container">
         <div class="logo">
             <h1>📖 QOLAE Readers Portal</h1>
@@ -158,7 +182,9 @@
 
         <div id="messageBox"></div>
 
-        <!-- STEP 1: PIN & Email -->
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 2: STEP 1 - PIN & EMAIL FORM -->
+<!-- ========================================== -->
         <div id="step1">
             <div class="step-indicator">Step 1 of 2: Enter Your Credentials</div>
             <form id="step1Form">
@@ -176,7 +202,9 @@
             </form>
         </div>
 
-        <!-- STEP 2: Verification Code -->
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 3: STEP 2 - VERIFICATION CODE FORM -->
+<!-- ========================================== -->
         <div id="step2">
             <div class="step-indicator">Step 2 of 2: Enter Verification Code</div>
             <form id="step2Form">
@@ -197,7 +225,11 @@
         </div>
     </div>
 
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 4: JAVASCRIPT - 2FA AUTHENTICATION LOGIC -->
+<!-- ========================================== -->
     <script>
+        // ===== DOM ELEMENT REFERENCES =====
         const step1Form = document.getElementById('step1Form');
         const step2Form = document.getElementById('step2Form');
         const step1Div = document.getElementById('step1');
@@ -211,7 +243,7 @@
         const resendCodeBtn = document.getElementById('resendCodeBtn');
         const emailDisplay = document.getElementById('emailDisplay');
 
-        // Show message helper
+        // ===== UTILITY FUNCTION: SHOW MESSAGE =====
         function showMessage(message, type) {
             messageBox.innerHTML = `<div class="message ${type}">${message}</div>`;
             setTimeout(() => {
@@ -219,7 +251,7 @@
             }, 5000);
         }
 
-        // STEP 1: Request verification code
+        // ===== STEP 1: REQUEST VERIFICATION CODE =====
         step1Form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -258,7 +290,7 @@
             }
         });
 
-        // STEP 2: Verify code and login
+        // ===== STEP 2: VERIFY CODE AND LOGIN =====
         step2Form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -300,7 +332,7 @@
             }
         });
 
-        // Resend code
+        // ===== RESEND VERIFICATION CODE =====
         resendCodeBtn.addEventListener('click', async () => {
             const pin = pinInput.value.trim();
             const email = emailInput.value.trim();
