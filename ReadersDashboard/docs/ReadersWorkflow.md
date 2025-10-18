@@ -9,7 +9,7 @@ READERS WORKFLOW.
 
 **Purpose:** Collect CV and references for audit-ready compliance records before granting access to the Readers Dashboard.
 
-**Location:** `readers.qolae.com/compliance`
+**Location:** `readers.qolae.com/compliance` (this has been changed to hrcompliance.qolae.com)
 
 **Database:** `qolae_hrcompliance` (separate secure HR database)
 
@@ -40,7 +40,7 @@ The reader must complete the following **once** at initial login:
 
 **Submission:**
 - On submit, compliance data is saved to `qolae_hrcompliance` database
-- Reader's `compliance_submitted` flag is set to `true` in `qolae_readers` database
+- Reader's `compliance_submitted` flag is set to `true` in `qolae_readers` database (is this db still necessary????)
 - Case Manager (Liz) receives notification in her workspace
 - Reader sees: "Thank you! Your compliance documents are being reviewed. You'll receive dashboard access shortly."
 
@@ -98,7 +98,7 @@ Step 4 Completion: Download NDA.pdf and View NDA.pdf is here, copy of NDA is sav
 b) INA Report - (perhaps with a Read, Edit & Review clickable button)
 This opens to a Modal with a copy of the INA report or a "Read" 
 
-Step 1(that opens the redacted INA report copy, up), then an 
+Step 1(that opens up the redacted INA report copy,  that has been allocated to the Readers Dashhboard workspace from the CaseManager's Workspace), then an 
 
 "Edit" Step 2 allows the Reader to edit within the modal and "Save" changes, 
 
@@ -115,7 +115,7 @@ c) Receive Payment - this workflow Modal card opens to a Banking details form to
 
 d) Readers Management Hub this keeps the Documents Library - which has the redacted inaReports1 that they have completed. 
 
-**Note:** Reader's CV and compliance documentation (references) are stored separately in the secure `qolae_hr_compliance` database and are NOT accessible from the Readers Dashboard for security/privacy reasons. Only Case Managers have access to HR compliance records.
+**Note:** Reader's CV and compliance documentation (references) are stored separately in the secure `qolae_hrcompliance` database and are NOT accessible from the Readers Dashboard for security/privacy reasons. Only Case Managers have access to HR compliance records.
 
 6. The second reader will go through the same motions as above except that they will have the reviewed second redacted draft - in the INA Report Modal and once they have completed correcting this draft and this has been reviewed by Liz/other CM, they will be paid.
 
