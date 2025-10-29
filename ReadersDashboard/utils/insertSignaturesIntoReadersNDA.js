@@ -3,7 +3,7 @@
 // ==============================================
 // Purpose: Insert reader + Liz's signatures into signed NDA
 // Pattern: Follows generateCustomizedTOB.js signature workflow
-// Author: Phoenix Agent
+// Author: Liz
 // Date: October 14, 2025
 // ==============================================
 

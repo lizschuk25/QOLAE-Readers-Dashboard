@@ -3,7 +3,7 @@
   * Secure workspace for Admin/Lay and Medical Professional readers
   * Organized by Location Block Protocol
   * Author: Liz
-  * Date: October 11, 2025
+  * Date: 28th October 2025
   * 
   * WORKFLOW STEPS (Mirrored in Location Blocks):
   * 1. Header & Security Badges
@@ -219,14 +219,17 @@
         .progress-fill {
             height: 100%;
             background: #667eea;
-            width: 33.33%;
-            transition: width 0.3s ease;
+            width: 50%;
+            transition: width 0.5s ease;
         }
 
         .step {
             position: relative;
             z-index: 2;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
             flex: 1;
         }
 
@@ -234,36 +237,45 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            margin: 0 auto 10px;
+            background: #fff;
+            border: 3px solid #e2e8f0;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 600;
-            font-size: 16px;
-        }
-
-        .step.active .step-circle {
-            background: #667eea;
-            color: white;
+            color: #94a3b8;
+            transition: all 0.3s ease;
         }
 
         .step.completed .step-circle {
             background: #10b981;
+            border-color: #10b981;
             color: white;
         }
 
-        .step.pending .step-circle {
-            background: #e2e8f0;
-            color: #64748b;
+        .step.active .step-circle {
+            border-color: #667eea;
+            color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
 
         .step-label {
-            font-size: 14px;
-            color: #64748b;
+            font-size: 13px;
             font-weight: 500;
+            color: #64748b;
+            text-align: center;
         }
 
-        /* ===== DASHBOARD CARD STYLES ===== */
+        .step.completed .step-label {
+            color: #10b981;
+        }
+
+        .step.active .step-label {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* ===== DASHBOARD GRID STYLES ===== */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -273,64 +285,96 @@
 
         .dashboard-card {
             background: rgba(255, 255, 255, 0.95);
-            padding: 25px;
+            padding: 30px;
             border-radius: 12px;
             backdrop-filter: blur(10px);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .dashboard-card:hover {
             transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-active {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
         }
 
         .card-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            margin-bottom: 15px;
+            font-size: 48px;
+            width: 80px;
+            height: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            background: #f8faff;
+            border-radius: 16px;
+            margin-bottom: 20px;
         }
 
-        .nda-card .card-icon { background: #fef3c7; }
-        .review-card .card-icon { background: #e0e7ff; }
-        .payment-card .card-icon { background: #d1fae5; }
-
         .card-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 600;
             color: #1e293b;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .card-description {
             color: #64748b;
-            line-height: 1.5;
+            line-height: 1.6;
             margin-bottom: 20px;
         }
 
         .card-actions {
             display: flex;
-            gap: 10px;
             flex-wrap: wrap;
+            gap: 10px;
         }
 
-        /* ===== BUTTON STYLES ===== */
         .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 10px 18px;
             border: none;
+            border-radius: 8px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            text-decoration: none;
+            transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-            font-size: 14px;
+            gap: 6px;
+        }
+
+        .btn:not(:disabled):hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .btn-primary {
@@ -339,17 +383,7 @@
         }
 
         .btn-primary:hover {
-            background: #5a67d8;
-        }
-
-        .btn-secondary {
-            background: #f8fafc;
-            color: #475569;
-            border: 1px solid #e2e8f0;
-        }
-
-        .btn-secondary:hover {
-            background: #f1f5f9;
+            background: #5568d3;
         }
 
         .btn-success {
@@ -362,119 +396,414 @@
             color: white;
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #475569;
         }
 
-        /* ===== STATUS INDICATOR STYLES ===== */
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 15px;
+        .btn-secondary:hover {
+            background: #cbd5e1;
         }
-
-        .status-pending { background: #fef3c7; color: #92400e; }
-        .status-active { background: #dbeafe; color: #1e40af; }
-        .status-completed { background: #d1fae5; color: #065f46; }
 
         /* ===== SECURITY NOTICE STYLES ===== */
         .security-notice {
-            background: rgba(239, 246, 255, 0.95);
-            border: 1px solid #3b82f6;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 30px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #10b981;
         }
 
         .security-notice-title {
+            font-size: 16px;
             font-weight: 600;
-            color: #1e40af;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            color: #1e293b;
+            margin-bottom: 10px;
+        }
+
+        .security-notice p {
+            color: #64748b;
+            line-height: 1.6;
+            margin: 0;
         }
 
         /* ===== FOOTER STYLES ===== */
         .footer {
             text-align: center;
             padding: 20px;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .footer a {
+            text-decoration: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .footer a:hover {
+            opacity: 0.7;
+        }
+
+        /* ===== READERS MANAGEMENT HUB STYLES ===== */
+        .management-hub-card {
+            grid-column: 1 / -1;
+        }
+
+        .tab-navigation {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            padding: 20px 0;
+        }
+
+        .tab-content.hidden {
+            display: none;
+        }
+
+        .doc-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .doc-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .doc-item:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .doc-item.completed {
+            opacity: 0.7;
+            background: #f1f5f9;
+        }
+
+        .doc-icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .doc-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .doc-info strong {
+            color: #1e293b;
             font-size: 14px;
         }
 
-        /* ===== RESPONSIVE STYLES ===== */
+        .doc-info .strikethrough {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+
+        .doc-date {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .btn-mini {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            background: #667eea;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+        .btn-mini:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+
+        .btn-mini:disabled {
+            background: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .btn-mini-delete {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            background: #fee2e2;
+            color: #991b1b;
+            transition: all 0.2s ease;
+        }
+
+        .btn-mini-delete:hover {
+            background: #fecaca;
+            transform: translateY(-1px);
+        }
+
+        .btn-mini-info {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #dcfce7;
+            color: #166534;
+            cursor: default;
+        }
+
+        /* ===== UPLOAD SECTION STYLES ===== */
+        .upload-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .upload-header h4 {
+            color: #1e293b;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .upload-subtext {
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .doc-type-selector {
+            margin-bottom: 15px;
+        }
+
+        .doc-type-selector label {
+            display: block;
+            color: #1e293b;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .category-dropdown {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1e293b;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .category-dropdown:hover {
+            border-color: #cbd5e1;
+        }
+
+        .category-dropdown:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .category-dropdown option {
+            padding: 10px;
+        }
+
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            display: block;
+            color: #1e293b;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .upload-hint {
+            display: block;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        /* ===== DOCUMENT CATEGORIES STYLES ===== */
+        .doc-categories {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .doc-category {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .category-header {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 25px;
+            text-align: center;
+            opacity: 0.6;
+        }
+
+        .empty-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            color: #64748b;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
         @media (max-width: 768px) {
             .dashboard-grid {
                 grid-template-columns: 1fr;
             }
-            
-            .session-info {
-                flex-direction: column;
-                gap: 10px;
-            }
 
             .reader-options {
                 grid-template-columns: 1fr;
+            }
+
+            .session-info {
+                flex-direction: column;
+                gap: 10px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-
 <!-- ========================================== -->
 <!-- LOCATION BLOCK 1: HEADER & SECURITY BADGES -->
 <!-- ========================================== -->
         <div class="header">
             <div class="logo">QOLAE</div>
-            <div class="tagline">Secure Legal Document Review Portal</div>
+            <div class="tagline">Secure Legal Document Review Platform</div>
             <div class="security-badges">
-                <span class="badge secure">🔒 Secure</span>
+                <span class="badge secure">🔒 SSL Encrypted</span>
                 <span class="badge nda">📋 NDA Required</span>
             </div>
         </div>
 
 <!-- ========================================== -->
 <!-- LOCATION BLOCK 2: READER TYPE SELECTOR -->
-<!-- Maps to: Reader type selection (Admin/Lay vs Medical Professional) -->
+<!-- Maps to: User role selection (Professional vs Medical) -->
+<!-- NOTE: This section is COMMENTED OUT - Reader type is automatically -->
+<!-- determined by HR Compliance & Operations backend system -->
 <!-- ========================================== -->
+        <!-- READER TYPE SELECTOR - DISABLED (Auto-assigned by backend)
         <div class="reader-selector">
-            <h3>Select Reader Type:</h3>
+            <h3>Select Your Reader Type</h3>
             <div class="reader-options">
-                <div class="reader-option active" id="adminOption" onclick="switchToAdmin()">
-                    <div class="option-icon">👤</div>
+                <div class="reader-option active" id="professionalOption" onclick="switchToProfessional()">
+                    <div class="option-icon">👔</div>
                     <div class="option-content">
-                        <h4>Admin/Lay Reader</h4>
-                        <p>Non-medical professional review</p>
+                        <h4>Professional Reader</h4>
+                        <p>General review and professional assessment</p>
                     </div>
                 </div>
                 <div class="reader-option" id="medicalOption" onclick="switchToMedical()">
-                    <div class="option-icon">🩺</div>
+                    <div class="option-icon">⚕️</div>
                     <div class="option-content">
                         <h4>Medical Professional</h4>
-                        <p>Nurse/Doctor clinical review</p>
+                        <p>Clinical review and medical assessment</p>
                     </div>
                 </div>
             </div>
         </div>
+        -->
 
 <!-- ========================================== -->
 <!-- LOCATION BLOCK 3: WELCOME SECTION & SESSION INFO -->
-<!-- Dynamic content based on reader type selection -->
+<!-- Maps to: Personalized greeting and session details -->
 <!-- ========================================== -->
         <div class="welcome-section">
-            <div class="reader-type" id="readerType">Admin/Lay Reader</div>
+            <span class="reader-type" id="readerType">Professional Reader</span>
             <h2 id="welcomeName">Welcome Ms. Jennifer Adams</h2>
-            <p id="welcomeDesc">Access your secure admin review workspace. All data is encrypted and requires NDA compliance.</p>
+            <p id="welcomeDesc">Access your secure professional review workspace. All data is encrypted and requires NDA compliance.</p>
             <div class="session-info">
-                <span><strong>Last login:</strong> 24th August 2025</span>
+                <span><strong>Last Login:</strong> October 27, 2025 at 14:32 GMT</span>
                 <span><strong>Session:</strong> Encrypted & Secure</span>
                 <span><strong>Review ID:</strong> <span id="reviewId">RW-002847</span></span>
             </div>
@@ -519,8 +848,8 @@
                 </p>
                 <div class="card-actions">
                     <button class="btn btn-success" disabled>✅ NDA Signed</button>
-                    <button class="btn btn-secondary">📄 View NDA</button>
-                    <button class="btn btn-secondary">💾 Download Copy</button>
+                    <button class="btn btn-secondary" onclick="viewNDA()">📄 View NDA</button>
+                    <button class="btn btn-secondary" onclick="downloadNDA()">💾 Download Copy</button>
                 </div>
             </div>
 
@@ -531,14 +860,14 @@
             <div class="dashboard-card review-card">
                 <div class="status-indicator status-active">🔄 Active</div>
                 <div class="card-icon">📖</div>
-                <h3 class="card-title">Report Review - Stage 1</h3>
+                <h3 class="card-title">Report Review<!-- Stage 1 --></h3>
                 <p class="card-description">
                     Review the redacted report and provide feedback. Confidential details are blacked out for security. Submit corrections to proceed to payment.
                 </p>
                 <div class="card-actions">
-                    <button class="btn btn-primary">📖 Start Review</button>
-                    <button class="btn btn-secondary">👁️ Preview Document</button>
-                    <button class="btn btn-secondary">💬 View Instructions</button>
+                    <button class="btn btn-primary" onclick="startReview()">📖 Start Review</button>
+                    <button class="btn btn-secondary" onclick="previewDocument()">👁️ Preview Document</button>
+                    <button class="btn btn-secondary" onclick="viewInstructions()">💬 View Instructions</button>
                 </div>
             </div>
 
@@ -551,41 +880,155 @@
                 <div class="card-icon">💰</div>
                 <h3 class="card-title">Payment Processing</h3>
                 <p class="card-description">
-                    Payment will be processed immediately after you submit your corrected draft. Secure payment methods available.
+                    Payment will be processed immediately after you submit your corrected draft. Your payment method is securely on file from your HR Compliance onboarding.
                 </p>
                 <div class="card-actions">
                     <button class="btn btn-warning" disabled>⏳ Awaiting Review</button>
-                    <button class="btn btn-secondary">📊 View Payment Details</button>
+                    <button class="btn btn-secondary" onclick="viewPaymentInfo()">📊 View Payment Info</button>
                 </div>
             </div>
         </div>
 
 <!-- ========================================== -->
-<!-- LOCATION BLOCK 8: DOCUMENT LIBRARY & SUPPORT -->
-<!-- Additional workspace features -->
+<!-- LOCATION BLOCK 8: READERS MANAGEMENT HUB -->
+<!-- Hub for returning readers with document management -->
 <!-- ========================================== -->
         <div class="dashboard-grid">
-            <div class="dashboard-card">
+            <div class="dashboard-card management-hub-card">
                 <div class="card-icon" style="background: #f3e8ff;">📚</div>
-                <h3 class="card-title">Document Library</h3>
+                <h3 class="card-title">Readers Management Hub</h3>
                 <p class="card-description">
-                    Access redacted reports, review materials, and your submitted feedback. All documents are securely stored and encrypted.
+                    Your centralized workspace for document management. Access your NDAs, review materials, and track completed assignments.
                 </p>
-                <div class="card-actions">
-                    <button class="btn btn-secondary">📁 Browse Library</button>
-                    <button class="btn btn-secondary">🔍 View Current Report</button>
+                
+                <!-- Tab Navigation -->
+                <div class="tab-navigation">
+                    <button class="tab-btn active" onclick="switchTab('myDocs')">📄 My Documents</button>
+                    <button class="tab-btn" onclick="switchTab('clientDocs')">📁 Client Documents</button>
                 </div>
-            </div>
-
-            <div class="dashboard-card">
-                <div class="card-icon" style="background: #ecfdf5;">💬</div>
-                <h3 class="card-title">Support & Assistance</h3>
-                <p class="card-description">
-                    Need help with the review process? Contact our support team for technical assistance or review guidance.
-                </p>
-                <div class="card-actions">
-                    <button class="btn btn-primary">💬 Contact Support</button>
-                    <button class="btn btn-secondary">📖 Help Center</button>
+                
+                <!-- My Documents Tab Content -->
+                <div class="tab-content" id="myDocsTab">
+                    <!-- Upload Section -->
+                    <div class="upload-section">
+                        <div class="upload-header">
+                            <h4>Upload Compliance Documents</h4>
+                            <p class="upload-subtext">Keep your certifications, licenses, and compliance documents organized in one place</p>
+                        </div>
+                        
+                        <!-- Document Type Selector -->
+                        <div class="doc-type-selector">
+                            <label for="docCategory">Document Type</label>
+                            <select id="docCategory" class="category-dropdown">
+                                <option value="">Select document type...</option>
+                                <option value="certification">🎓 Certification or License</option>
+                                <option value="insurance">🛡️ Insurance Document</option>
+                                <option value="tax">💰 Tax or Payment Document</option>
+                                <option value="other">📋 Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="upload-area" onclick="triggerFileUpload()">
+                            <span class="upload-icon">📤</span>
+                            <span class="upload-text">Click to upload or drag and drop</span>
+                            <span class="upload-hint">PDF, JPG, PNG up to 10MB</span>
+                            <input type="file" id="fileUpload" style="display: none;" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(event)">
+                        </div>
+                    </div>
+                    
+                    <!-- Document Categories -->
+                    <div class="doc-categories">
+                        <!-- NDA Section -->
+                        <div class="doc-category">
+                            <div class="category-header">📋 Legal Documents</div>
+                            <div class="doc-list">
+                                <div class="doc-item">
+                                    <span class="doc-icon">📋</span>
+                                    <div class="doc-info">
+                                        <strong>NDA Agreement</strong>
+                                        <span class="doc-date">Signed: October 15, 2025</span>
+                                    </div>
+                                    <button class="btn-mini" onclick="viewNDA()">View</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Certifications Section -->
+                        <!-- BACKEND NOTE: Populate this section dynamically from documents with category='certification' -->
+                        <div class="doc-category">
+                            <div class="category-header">🎓 Certifications & Licenses</div>
+                            <div class="doc-list">
+                                <div class="doc-item">
+                                    <span class="doc-icon">🎓</span>
+                                    <div class="doc-info">
+                                        <strong>Medical License - State of California</strong>
+                                        <span class="doc-date">Uploaded: September 12, 2025 • Valid until: June 2026</span>
+                                    </div>
+                                    <button class="btn-mini" onclick="viewDocument('cert-001')">View</button>
+                                    <button class="btn-mini-delete" onclick="deleteDocument('cert-001')">🗑️</button>
+                                </div>
+                                <div class="empty-state">
+                                    <span class="empty-icon">📄</span>
+                                    <span class="empty-text">Upload your professional licenses and certifications</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Insurance Section -->
+                        <!-- BACKEND NOTE: Populate this section dynamically from documents with category='insurance' -->
+                        <div class="doc-category">
+                            <div class="category-header">🛡️ Insurance Documents</div>
+                            <div class="doc-list">
+                                <div class="empty-state">
+                                    <span class="empty-icon">📄</span>
+                                    <span class="empty-text">Upload liability insurance certificates</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tax Documents Section -->
+                        <!-- BACKEND NOTE: Populate this section dynamically from documents with category='tax' -->
+                        <!-- Payment method info comes from HR Compliance system -->
+                        <div class="doc-category">
+                            <div class="category-header">💰 Tax & Payment Documents</div>
+                            <div class="doc-list">
+                                <div class="doc-item">
+                                    <span class="doc-icon">💰</span>
+                                    <div class="doc-info">
+                                        <strong>Payment Method</strong>
+                                        <span class="doc-date">Bank account ending in ••••4892 ✓ Verified</span>
+                                    </div>
+                                    <button class="btn-mini-info" disabled>On File</button>
+                                </div>
+                                <div class="empty-state">
+                                    <span class="empty-icon">📄</span>
+                                    <span class="empty-text">Upload W-9 or tax-related documents</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Client Documents Tab Content -->
+                <div class="tab-content hidden" id="clientDocsTab">
+                    <div class="doc-list">
+                        <div class="doc-item completed">
+                            <span class="doc-icon">✅</span>
+                            <div class="doc-info">
+                                <strong class="strikethrough">Medical Report RW-002745</strong>
+                                <span class="doc-date">Completed: October 20, 2025</span>
+                            </div>
+                            <button class="btn-mini" disabled>Completed</button>
+                        </div>
+                        <div class="doc-item">
+                            <span class="doc-icon">📄</span>
+                            <div class="doc-info">
+                                <strong>Medical Report RW-002847</strong>
+                                <span class="doc-date">Assigned: October 27, 2025</span>
+                            </div>
+                            <button class="btn-mini" onclick="openDocument('RW-002847')">Open</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -611,28 +1054,37 @@
 
 <!-- ========================================== -->
 <!-- LOCATION BLOCK 10: JAVASCRIPT - READER TYPE & WORKFLOW MANAGEMENT -->
+<!-- All handlers are endpoint-ready with placeholder API calls -->
 <!-- ========================================== -->
     <script>
-        // ===== READER TYPE MANAGEMENT =====
-        let currentReaderType = 'admin';
+        // ===== API ENDPOINT CONFIGURATION =====
+        // TODO: Replace with actual API endpoints
+        const API_ENDPOINTS = {
+            viewNDA: '/api/nda/view',
+            downloadNDA: '/api/nda/download',
+            startReview: '/api/review/start',
+            previewDocument: '/api/review/preview',
+            viewInstructions: '/api/review/instructions',
+            viewPaymentDetails: '/api/payment/details',
+            openDocument: '/api/documents/open',
+            browseLibrary: '/api/library/browse',
+            uploadDocument: '/api/documents/upload',
+            viewDocument: '/api/documents/view',
+            deleteDocument: '/api/documents/delete'
+        };
 
-        function switchToAdmin() {
-            currentReaderType = 'admin';
+        // ===== READER TYPE MANAGEMENT =====
+        // Note: Reader type is now auto-assigned by HR Compliance backend
+        let currentReaderType = 'professional'; // or 'medical' - set by backend
+
+        function switchToProfessional() {
+            currentReaderType = 'professional';
             updateReaderDisplay();
-            updateActiveOption('adminOption');
         }
 
         function switchToMedical() {
             currentReaderType = 'medical';
             updateReaderDisplay();
-            updateActiveOption('medicalOption');
-        }
-
-        function updateActiveOption(activeId) {
-            document.querySelectorAll('.reader-option').forEach(option => {
-                option.classList.remove('active');
-            });
-            document.getElementById(activeId).classList.add('active');
         }
 
         function updateReaderDisplay() {
@@ -647,10 +1099,212 @@
                 welcomeDesc.textContent = 'Access your professional medical review workspace. All clinical data is encrypted and requires NDA compliance.';
                 reviewId.textContent = 'MW-003421';
             } else {
-                readerType.textContent = 'Admin/Lay Reader';
+                readerType.textContent = 'Professional Reader';
                 welcomeName.textContent = 'Welcome Ms. Jennifer Adams';
-                welcomeDesc.textContent = 'Access your secure admin review workspace. All data is encrypted and requires NDA compliance.';
+                welcomeDesc.textContent = 'Access your secure professional review workspace. All data is encrypted and requires NDA compliance.';
                 reviewId.textContent = 'RW-002847';
+            }
+        }
+
+        // ===== NDA HANDLERS (ENDPOINT READY) =====
+        function viewNDA() {
+            console.log('Calling API:', API_ENDPOINTS.viewNDA);
+            // TODO: Implement API call
+            // Example: fetch(API_ENDPOINTS.viewNDA).then(response => response.blob()).then(openPDFViewer);
+            alert('View NDA - Ready for endpoint integration');
+        }
+
+        function downloadNDA() {
+            console.log('Calling API:', API_ENDPOINTS.downloadNDA);
+            // TODO: Implement API call
+            // Example: fetch(API_ENDPOINTS.downloadNDA).then(response => response.blob()).then(downloadFile);
+            alert('Download NDA - Ready for endpoint integration');
+        }
+
+        // ===== REPORT REVIEW HANDLERS (ENDPOINT READY) =====
+        function startReview() {
+            console.log('Calling API:', API_ENDPOINTS.startReview);
+            // TODO: Implement API call
+            // Example: window.location.href = '/review/start';
+            alert('Start Review - Ready for endpoint integration');
+        }
+
+        function previewDocument() {
+            console.log('Calling API:', API_ENDPOINTS.previewDocument);
+            // TODO: Implement API call
+            // Example: fetch(API_ENDPOINTS.previewDocument).then(response => response.blob()).then(openPDFViewer);
+            alert('Preview Document - Ready for endpoint integration');
+        }
+
+        function viewInstructions() {
+            console.log('Calling API:', API_ENDPOINTS.viewInstructions);
+            // TODO: Implement API call
+            // Example: openModal with instructions content
+            alert('View Instructions - Ready for endpoint integration');
+        }
+
+        // ===== PAYMENT HANDLERS (ENDPOINT READY) =====
+        function viewPaymentInfo() {
+            // Get current assignment ID (you may need to adjust this)
+            const assignmentId = getCurrentAssignmentId(); // TODO: Implement this
+            
+            // Open payment modal
+            window.location.href = `/payment-processing?assignmentId=${assignmentId}`;
+        }
+
+        // Helper function to get current assignment ID
+        // TODO: Replace with actual logic to fetch from session or API
+        function getCurrentAssignmentId() {
+            // For now, return a placeholder
+            // In production, this should:
+            // 1. Get from session storage
+            // 2. Get from URL parameter
+            // 3. Fetch from API: /api/readers/current-assignment
+            return 'PLACEHOLDER_ASSIGNMENT_ID';
+        }
+
+        // ===== DOCUMENT MANAGEMENT HANDLERS (ENDPOINT READY) =====
+        function openDocument(documentId) {
+            console.log('Opening document:', documentId, 'via', API_ENDPOINTS.openDocument);
+            // TODO: Implement API call
+            // Example: fetch(`${API_ENDPOINTS.openDocument}/${documentId}`).then(openReviewInterface);
+            alert(`Open Document ${documentId} - Ready for endpoint integration`);
+        }
+
+        function viewDocument(documentId) {
+            console.log('Viewing document:', documentId, 'via', API_ENDPOINTS.viewDocument);
+            // TODO: Implement API call
+            // Example: fetch(`${API_ENDPOINTS.viewDocument}/${documentId}`).then(response => response.blob()).then(openViewer);
+            alert(`View Document ${documentId} - Ready for endpoint integration`);
+        }
+
+        function deleteDocument(documentId) {
+            if (confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+                console.log('Deleting document:', documentId, 'via', API_ENDPOINTS.deleteDocument);
+                // TODO: Implement API call
+                // Example: fetch(`${API_ENDPOINTS.deleteDocument}/${documentId}`, { method: 'DELETE' }).then(refreshDocumentList);
+                alert(`Delete Document ${documentId} - Ready for endpoint integration`);
+            }
+        }
+
+        // ===== FILE UPLOAD HANDLERS (ENDPOINT READY) =====
+        // CATEGORY MAPPING FOR BACKEND:
+        // 'certification' → Appears in "🎓 Certifications & Licenses" section
+        // 'insurance'     → Appears in "🛡️ Insurance Documents" section  
+        // 'tax'           → Appears in "💰 Tax & Payment Documents" section
+        // 'other'         → Could appear in "📋 Legal Documents" or new "Other" section
+        
+        function triggerFileUpload() {
+            // Check if category is selected
+            const categorySelect = document.getElementById('docCategory');
+            if (!categorySelect.value) {
+                alert('Please select a document type before uploading.');
+                categorySelect.focus();
+                return;
+            }
+            document.getElementById('fileUpload').click();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Get selected category
+            const category = document.getElementById('docCategory').value;
+            if (!category) {
+                alert('Please select a document type before uploading.');
+                return;
+            }
+
+            // Validate file size (10MB limit)
+            const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+            if (file.size > maxSize) {
+                alert('File size exceeds 10MB limit. Please choose a smaller file.');
+                event.target.value = '';
+                return;
+            }
+
+            // Validate file type
+            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Invalid file type. Please upload PDF, JPG, or PNG files only.');
+                event.target.value = '';
+                return;
+            }
+
+            // Get category display name for confirmation
+            const categoryNames = {
+                'certification': '🎓 Certification or License',
+                'insurance': '🛡️ Insurance Document',
+                'tax': '💰 Tax or Payment Document',
+                'other': '📋 Other'
+            };
+
+            console.log('Uploading file:', file.name, 'to category:', category, 'via', API_ENDPOINTS.uploadDocument);
+            
+            // TODO: Implement actual file upload with category
+            // Example implementation:
+            /*
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('category', category);
+            formData.append('userId', getCurrentUserId()); // Get from session/auth
+            
+            fetch(API_ENDPOINTS.uploadDocument, {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + getAuthToken()
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Upload successful:', data);
+                alert('Document uploaded successfully!');
+                // Refresh document list to show new upload
+                refreshDocumentList();
+                // Reset form
+                document.getElementById('docCategory').value = '';
+            })
+            .catch(error => {
+                console.error('Upload failed:', error);
+                alert('Upload failed. Please try again.');
+            });
+            */
+
+            alert(`✅ Ready to upload:\n\nFile: "${file.name}"\nSize: ${(file.size / 1024).toFixed(2)} KB\nType: ${file.type}\nCategory: ${categoryNames[category]}\n\nEndpoint ready for integration!`);
+            
+            // Reset form after upload
+            event.target.value = '';
+            document.getElementById('docCategory').value = '';
+        }
+
+        // Placeholder for refreshing document list after upload/delete
+        function refreshDocumentList() {
+            console.log('Refreshing document list');
+            // TODO: Re-fetch and re-render document list from backend
+            // This would call GET /api/documents/list and update the DOM
+        }
+
+        // ===== TAB SWITCHING FOR READERS MANAGEMENT HUB =====
+        function switchTab(tabName) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Show selected tab
+            if (tabName === 'myDocs') {
+                document.querySelector('.tab-btn:first-child').classList.add('active');
+                document.getElementById('myDocsTab').classList.remove('hidden');
+            } else if (tabName === 'clientDocs') {
+                document.querySelector('.tab-btn:last-child').classList.add('active');
+                document.getElementById('clientDocsTab').classList.remove('hidden');
             }
         }
 
@@ -678,17 +1332,8 @@
         // Initialize with step 2 (Document Review)
         updateProgress(2);
 
-        // ===== INTERACTIVE FEATURES =====
-        document.addEventListener('DOMContentLoaded', function() {
-            // Add click handlers for buttons
-            const buttons = document.querySelectorAll('.btn:not(:disabled)');
-            buttons.forEach(button => {
-                button.addEventListener('click', function() {
-                    // Simulate button actions (to be replaced with actual API calls)
-                    console.log('Button clicked:', this.textContent);
-                });
-            });
-        });
+        // Log ready status
+        console.log('QOLAE Dashboard initialized - All handlers ready for endpoint integration');
     </script>
 </body>
 </html>

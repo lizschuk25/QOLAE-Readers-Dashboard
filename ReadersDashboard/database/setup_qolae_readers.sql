@@ -17,7 +17,7 @@
 -- ==============================================
 -- TABLE 1: READERS (Master Registry)
 -- ==============================================
--- Stores reader identity, authentication, NDA status, and payment rates
+-- Stores reader identity, authentication, NDA status and payment rates
 -- Reader PIN is their unique identifier (e.g., RDR-JS123456)
 -- NO case information stored here (confidentiality/GDPR)
 -- ==============================================

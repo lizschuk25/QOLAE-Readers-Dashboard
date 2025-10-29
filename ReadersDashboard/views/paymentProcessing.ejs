@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Processing - <%= readerName %> | QOLAE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Modal Container */
+        .modal-container {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        /* Modal Header */
+        .modal-header {
+            padding: 30px;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: linear-gradient(to right, #f8faff, #faf5ff);
+        }
+
+        .modal-header-content {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .modal-icon {
+            font-size: 48px;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .modal-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .modal-subtitle {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .modal-close {
+            font-size: 36px;
+            color: #94a3b8;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            color: #1e293b;
+            background: #f1f5f9;
+        }
+
+        /* Modal Body */
+        .modal-body {
+            padding: 30px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Status Banner */
+        .status-banner {
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            border: 2px solid;
+        }
+
+        .status-banner.pending {
+            background: #fef3c7;
+            border-color: #fbbf24;
+        }
+
+        .status-banner.approved {
+            background: #dbeafe;
+            border-color: #3b82f6;
+        }
+
+        .status-banner.processing {
+            background: #ddd6fe;
+            border-color: #8b5cf6;
+        }
+
+        .status-banner.paid {
+            background: #dcfce7;
+            border-color: #10b981;
+        }
+
+        .banner-icon {
+            font-size: 32px;
+            flex-shrink: 0;
+        }
+
+        .banner-content h4 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .status-banner.pending .banner-content h4 {
+            color: #92400e;
+        }
+
+        .status-banner.approved .banner-content h4 {
+            color: #1e40af;
+        }
+
+        .status-banner.processing .banner-content h4 {
+            color: #5b21b6;
+        }
+
+        .status-banner.paid .banner-content h4 {
+            color: #166534;
+        }
+
+        .banner-content p {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .status-banner.pending .banner-content p {
+            color: #78350f;
+        }
+
+        .status-banner.approved .banner-content p {
+            color: #1e40af;
+        }
+
+        .status-banner.processing .banner-content p {
+            color: #5b21b6;
+        }
+
+        .status-banner.paid .banner-content p {
+            color: #166534;
+        }
+
+        /* Payment Info Card */
+        .payment-info-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .payment-info-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid #e2e8f0;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .info-value {
+            color: #1e293b;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .pending-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            background: #fef3c7;
+            color: #92400e;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Payment Timeline */
+        .payment-timeline {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .payment-timeline h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 20px;
+        }
+
+        .timeline-step {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .timeline-step:last-child {
+            margin-bottom: 0;
+        }
+
+        .timeline-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            left: 18px;
+            top: 45px;
+            width: 2px;
+            height: calc(100% - 25px);
+            background: #e2e8f0;
+        }
+
+        .timeline-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timeline-step.completed .timeline-icon {
+            background: #10b981;
+            color: white;
+        }
+
+        .timeline-step.current .timeline-icon {
+            background: #fbbf24;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .timeline-step.pending .timeline-icon {
+            background: #e2e8f0;
+            color: #94a3b8;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(251, 191, 36, 0); }
+        }
+
+        .timeline-content h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .timeline-content p {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .timeline-step.completed .timeline-content h4 {
+            color: #10b981;
+        }
+
+        .timeline-step.current .timeline-content h4 {
+            color: #f59e0b;
+        }
+
+        /* Amount Display */
+        .amount-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .amount-display h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            opacity: 0.9;
+        }
+
+        .amount-value {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .amount-note {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Support Section */
+        .support-section {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .support-section h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .support-section p {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .support-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .support-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .support-link:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: translateY(-1px);
+        }
+
+        /* Modal Actions */
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            padding-top: 25px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .modal-container {
+                max-width: 100%;
+                border-radius: 12px;
+            }
+
+            .modal-header {
+                padding: 20px;
+            }
+
+            .modal-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 32px;
+            }
+
+            .modal-title {
+                font-size: 22px;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .info-value {
+                text-align: left;
+            }
+
+            .amount-value {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="modal-overlay">
+        <div class="modal-container">
+            <!-- Header -->
+            <div class="modal-header">
+                <div class="modal-header-content">
+                    <div class="modal-icon">💰</div>
+                    <div>
+                        <div class="modal-title">Payment Processing</div>
+                        <div class="modal-subtitle">Your payment details and status</div>
+                    </div>
+                </div>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+                <!-- Status Banner -->
+                <div class="status-banner <%= paymentStatus %>" id="statusBanner">
+                    <div class="banner-icon">
+                        <% if (paymentStatus === 'pending') { %>⏳<% } %>
+                        <% if (paymentStatus === 'approved') { %>✅<% } %>
+                        <% if (paymentStatus === 'processing') { %>⚙️<% } %>
+                        <% if (paymentStatus === 'paid') { %>🎉<% } %>
+                    </div>
+                    <div class="banner-content">
+                        <h4>
+                            <% if (paymentStatus === 'pending') { %>Payment Pending Review<% } %>
+                            <% if (paymentStatus === 'approved') { %>Payment Approved!<% } %>
+                            <% if (paymentStatus === 'processing') { %>Payment Processing<% } %>
+                            <% if (paymentStatus === 'paid') { %>Payment Complete!<% } %>
+                        </h4>
+                        <p>
+                            <% if (paymentStatus === 'pending') { %>
+                                Your payment will be processed automatically once Liz completes her review of your edited report. You'll receive an email notification when payment has been sent.
+                            <% } %>
+                            <% if (paymentStatus === 'approved') { %>
+                                Your report has been reviewed and approved by Liz. Payment of £<%= paymentAmount.toFixed(2) %> is being prepared for processing.
+                            <% } %>
+                            <% if (paymentStatus === 'processing') { %>
+                                Your payment of £<%= paymentAmount.toFixed(2) %> is currently being processed. This typically takes 1-2 business days.
+                            <% } %>
+                            <% if (paymentStatus === 'paid') { %>
+                                Your payment of £<%= paymentAmount.toFixed(2) %> has been sent to your account. Reference: <%= paymentReference || 'N/A' %>
+                            <% } %>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Amount Display -->
+                <div class="amount-display">
+                    <h3>Payment Amount</h3>
+                    <div class="amount-value">£<%= paymentAmount.toFixed(2) %></div>
+                    <div class="amount-note">
+                        <%= readerType === 'first' ? '1st Reader - Professional Review' : '2nd Reader - Clinical Review' %>
+                    </div>
+                </div>
+
+                <!-- Payment Info Card -->
+                <div class="payment-info-card">
+                    <h3>💳 Payment Method on File</h3>
+                    <div class="info-row">
+                        <span class="info-label">Payment Type:</span>
+                        <span class="info-value">
+                            <%= accountType === 'uk_domestic' ? 'UK Bank Transfer' : 'International Transfer' %>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Bank Name:</span>
+                        <span class="info-value"><%= bankName || 'Not provided' %></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Account Holder:</span>
+                        <span class="info-value"><%= accountHolderName %></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">
+                            <% if (accountType === 'uk_domestic') { %>
+                                Account Number:
+                            <% } else { %>
+                                IBAN:
+                            <% } %>
+                        </span>
+                        <span class="info-value">****<%= lastFourDigits %></span>
+                    </div>
+                    <% if (accountType === 'uk_domestic' && sortCode) { %>
+                    <div class="info-row">
+                        <span class="info-label">Sort Code:</span>
+                        <span class="info-value"><%= sortCode %></span>
+                    </div>
+                    <% } %>
+                    <div class="info-row">
+                        <span class="info-label">Verification Status:</span>
+                        <span class="info-value">
+                            <% if (paymentDetailsVerified) { %>
+                                <span class="verified-badge">✔ Verified</span>
+                            <% } else { %>
+                                <span class="pending-badge">⏳ Pending</span>
+                            <% } %>
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Added During:</span>
+                        <span class="info-value">HR Compliance Onboarding</span>
+                    </div>
+                </div>
+
+                <!-- Payment Timeline -->
+                <div class="payment-timeline">
+                    <h3>📊 Payment Timeline</h3>
+                    
+                    <!-- Step 1: Report Submitted -->
+                    <div class="timeline-step <%= timeline.step1 %>">
+                        <div class="timeline-icon">
+                            <%= timeline.step1 === 'completed' ? '✔' : '1' %>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>Step 1: Report Submitted</h4>
+                            <p>
+                                <% if (timeline.step1 === 'completed' && assignedAt) { %>
+                                    Your edited report was successfully submitted on <%= new Date(assignedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                                <% } else { %>
+                                    Submit your edited report to proceed
+                                <% } %>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Under Review -->
+                    <div class="timeline-step <%= timeline.step2 %>">
+                        <div class="timeline-icon">
+                            <%= timeline.step2 === 'completed' ? '✔' : (timeline.step2 === 'current' ? '⏳' : '2') %>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>Step 2: Under Review by Liz</h4>
+                            <p>
+                                <% if (timeline.step2 === 'completed' && paymentApprovedAt) { %>
+                                    Report reviewed and approved on <%= new Date(paymentApprovedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                                <% } else if (timeline.step2 === 'current') { %>
+                                    Liz is currently reviewing your edited report. This typically takes 1-2 business days.
+                                <% } else { %>
+                                    Awaiting report submission
+                                <% } %>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Payment Processing -->
+                    <div class="timeline-step <%= timeline.step3 %>">
+                        <div class="timeline-icon">
+                            <%= timeline.step3 === 'completed' ? '✔' : (timeline.step3 === 'current' ? '⏳' : '3') %>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>Step 3: Payment Processing</h4>
+                            <p>
+                                <% if (timeline.step3 === 'completed' && paymentProcessedAt) { %>
+                                    Payment processed on <%= new Date(paymentProcessedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                                <% } else if (timeline.step3 === 'current') { %>
+                                    Payment is being processed and will be sent to your verified bank account.
+                                <% } else { %>
+                                    Once approved, payment will be automatically sent to your verified bank account.
+                                <% } %>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Payment Confirmation -->
+                    <div class="timeline-step <%= timeline.step4 %>">
+                        <div class="timeline-icon">
+                            <%= timeline.step4 === 'completed' ? '✔' : '4' %>
+                        </div>
+                        <div class="timeline-content">
+                            <h4>Step 4: Payment Confirmation</h4>
+                            <p>
+                                <% if (timeline.step4 === 'completed' && paymentReference) { %>
+                                    Payment completed. Reference: <%= paymentReference %>
+                                <% } else { %>
+                                    You'll receive email confirmation with payment reference number.
+                                <% } %>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Support Section -->
+                <div class="support-section">
+                    <h4>💬 Need Help with Payment?</h4>
+                    <p>Payment details were collected during your HR Compliance onboarding. If you need to update your banking information or have questions about payment processing, please contact support.</p>
+                    <div class="support-links">
+                        <button class="support-link" onclick="contactSupport()">
+                            <span>📧</span>
+                            <span>Contact Support</span>
+                        </button>
+                        <button class="support-link" onclick="viewPaymentHistory()">
+                            <span>📜</span>
+                            <span>Payment History</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="modal-actions">
+                    <button class="btn btn-primary" onclick="closeModal()">
+                        ← Return to Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration from backend
+        const CONFIG = {
+            assignmentId: '<%= assignmentId %>',
+            readerId: '<%= readerId %>',
+            paymentStatus: '<%= paymentStatus %>'
+        };
+
+        // Auto-refresh payment status every 30 seconds (only if pending/approved/processing)
+        let autoRefreshInterval;
+        
+        function startAutoRefresh() {
+            if (['pending', 'approved', 'processing'].includes(CONFIG.paymentStatus)) {
+                autoRefreshInterval = setInterval(async () => {
+                    try {
+                        const response = await fetch(`/api/readers/payment/status/${CONFIG.assignmentId}`);
+                        const data = await response.json();
+                        
+                        if (data.paymentStatus !== CONFIG.paymentStatus) {
+                            // Status changed, reload page to show updated info
+                            location.reload();
+                        }
+                    } catch (error) {
+                        console.error('Error checking payment status:', error);
+                    }
+                }, 30000); // 30 seconds
+            }
+        }
+
+        function stopAutoRefresh() {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+        }
+
+        function closeModal() {
+            stopAutoRefresh();
+            window.location.href = '/readers-dashboard';
+        }
+
+        function contactSupport() {
+            window.location.href = `/readers/support?assignmentId=${CONFIG.assignmentId}&subject=Payment Inquiry`;
+        }
+
+        function viewPaymentHistory() {
+            window.location.href = `/readers/payment-history`;
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            startAutoRefresh();
+            console.log('Payment Processing Modal loaded');
+            console.log('Assignment ID:', CONFIG.assignmentId);
+            console.log('Payment Status:', CONFIG.paymentStatus);
+        });
+
+        // Clean up on unload
+        window.addEventListener('beforeunload', stopAutoRefresh);
+
+        // Pause auto-refresh when tab not visible
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopAutoRefresh();
+            } else {
+                startAutoRefresh();
+            }
+        });
+    </script>
+</body>
+</html>

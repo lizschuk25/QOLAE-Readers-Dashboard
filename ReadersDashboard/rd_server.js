@@ -3,7 +3,7 @@
 // ==============================================
 // Purpose: Secure workspace for readers to review and correct INA reports
 // Author: Liz
-// Date: October 7, 2025
+// Date: 28th October 2025
 // ==============================================
 
 import Fastify from 'fastify';
@@ -102,6 +102,69 @@ server.get('/', async (request, reply) => {
 });
 
 // ==============================================
+// READERS MANAGEMENT HUB
+// ==============================================
+
+server.get('/readers-management-hub', async (request, reply) => {
+  try {
+    // Get reader from session (or JWT)
+    await request.jwtVerify();
+    const { pin } = request.user;
+
+    // Fetch data from database
+    const reader = await getReaderById(pin);
+    const documents = await getReaderDocuments(pin);
+    const reports = await getReaderReports(pin);
+    const payments = await getReaderPayments(pin);
+
+    return reply.view('readersManagementHub.ejs', {
+      reader,
+      documents,
+      reports,
+      payments
+    });
+
+  } catch (error) {
+    server.log.error('Error loading Readers Management Hub:', error);
+    return reply.redirect('/readers-login');
+  }
+});
+
+// ==============================================
+// DATABASE HELPER FUNCTIONS (TODO: Move to separate file)
+// ==============================================
+
+async function getReaderById(readerPin) {
+  // TODO: Implement database query
+  // Example: SELECT * FROM readers WHERE reader_pin = $1
+  return {
+    pin: readerPin,
+    name: 'Reader Name',
+    email: 'reader@example.com',
+    type: 'first_reader',
+    totalEarnings: 0
+  };
+}
+
+async function getReaderDocuments(readerPin) {
+  // TODO: Implement database query
+  // Example: SELECT * FROM reader_documents WHERE reader_pin = $1
+  return [];
+}
+
+async function getReaderReports(readerPin) {
+  // TODO: Implement database query
+  // Example: SELECT * FROM reader_assignments WHERE reader_pin = $1
+  return [];
+}
+
+async function getReaderPayments(readerPin) {
+  // TODO: Implement database query
+  // Example: SELECT * FROM reader_assignments WHERE reader_pin = $1 AND payment_status IS NOT NULL
+  return [];
+}
+
+// ==============================================
 // HEALTH CHECK
 // ==============================================
 
@@ -153,10 +216,12 @@ const start = async () => {
     console.log('Available Routes:');
     console.log('  🔐 Login: /readers-login');
     console.log('  🏠 Dashboard: /readers-dashboard');
+    console.log('  📚 Management Hub: /readers-management-hub');
     console.log('  📝 NDA Workflow: /nda-review');
     console.log('  📄 Report Viewer: /report-viewer');
     console.log('  ✏️ Corrections Editor: /corrections-editor');
     console.log('  💰 Payment Tracking: /payment-status');
+    console.log('  💳 Payment Processing: /payment-processing');
     console.log('  ❤️ Health Check: /health');
     console.log('');
     console.log('Ready for readers to access their workspace! 🚀');
