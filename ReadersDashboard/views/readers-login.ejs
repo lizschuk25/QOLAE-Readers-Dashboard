@@ -243,6 +243,19 @@
         const resendCodeBtn = document.getElementById('resendCodeBtn');
         const emailDisplay = document.getElementById('emailDisplay');
 
+        // ===== AUTO-POPULATE PIN FROM URL =====
+        (function autofillPinFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pinFromUrl = urlParams.get('pin');
+            
+            if (pinFromUrl) {
+                pinInput.value = pinFromUrl;
+                console.log('✅ PIN auto-populated from URL:', pinFromUrl);
+                // Auto-focus email field since PIN is already filled
+                setTimeout(() => emailInput.focus(), 100);
+            }
+        })();
+
         // ===== UTILITY FUNCTION: SHOW MESSAGE =====
         function showMessage(message, type) {
             messageBox.innerHTML = `<div class="message ${type}">${message}</div>`;

@@ -8,6 +8,7 @@
 
 import pg from 'pg';
 import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 
 const { Pool } = pg;
 
@@ -32,19 +33,27 @@ export default async function authRoutes(fastify, options) {
     const { pin, email } = request.body;
 
     try {
+      console.log('🔍 Step 1: Received request - PIN:', pin, 'Email:', email);
+      
       // Validate input
       if (!pin || !email) {
+        console.log('❌ Step 2: Validation failed - missing PIN or email');
         return reply.code(400).send({
           success: false,
           error: 'PIN and email are required'
         });
       }
 
+      console.log('✅ Step 2: Validation passed');
+      console.log('🔍 Step 3: Querying database for reader...');
+
       // Check if reader exists with this PIN and email
       const readerResult = await readersDb.query(
         'SELECT reader_pin, reader_name, email, portal_access_status FROM readers WHERE reader_pin = $1 AND email = $2',
         [pin, email]
       );
+
+      console.log('✅ Step 3: Query completed. Found', readerResult.rows.length, 'readers');
 
       if (readerResult.rows.length === 0) {
         return reply.code(401).send({
@@ -79,13 +88,62 @@ export default async function authRoutes(fastify, options) {
 
       // Log activity
       await readersDb.query(
-        `INSERT INTO reader_activity_log (reader_pin, activity_type, activity_description, performed_by, ip_address)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [pin, 'email_code_requested', 'Reader requested email verification code', reader.reader_name, request.ip]
+        `INSERT INTO reader_activity_log (reader_pin, activity_type, activity_description, ip_address)
+         VALUES ($1, $2, $3, $4)`,
+        [pin, 'email_code_requested', 'Reader requested email verification code', request.ip]
       );
 
-      // TODO: Send email with verification code
+      // Send email with verification code
       fastify.log.info(`Email verification code for ${email}: ${verificationCode}`);
+      
+      try {
+        const transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: parseInt(process.env.SMTP_PORT || '587'),
+          secure: process.env.SMTP_SECURE === 'true',
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
+          }
+        });
+
+        await transporter.sendMail({
+          from: process.env.EMAIL_FROM || 'Liz Chukwu <Liz.Chukwu@qolae.com>',
+          to: email,
+          subject: 'QOLAE Readers Portal - Verification Code',
+          html: `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <style>
+                body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+                .container { background: white; padding: 30px; border-radius: 8px; }
+                .code-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; }
+                .code { font-size: 32px; font-weight: bold; letter-spacing: 8px; font-family: 'Courier New', monospace; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <h2 style="color: #667eea;">📖 QOLAE Readers Portal</h2>
+                <p>Hello,</p>
+                <p>Your verification code for the QOLAE Readers Portal is:</p>
+                <div class="code-box">
+                  <div class="code">${verificationCode}</div>
+                </div>
+                <p>This code will expire in <strong>10 minutes</strong>.</p>
+                <p>If you didn't request this code, please ignore this email.</p>
+                <p style="margin-top: 30px; color: #6b7280;">Best regards,<br><strong>QOLAE Team</strong></p>
+              </div>
+            </body>
+            </html>
+          `
+        });
+
+        console.log('✅ Verification code email sent successfully to:', email);
+      } catch (emailError) {
+        console.error('⚠️  Failed to send email (code still valid):', emailError.message);
+        // Don't fail the request if email fails - code is still in database
+      }
 
       return reply.send({
         success: true,
@@ -94,6 +152,9 @@ export default async function authRoutes(fastify, options) {
       });
 
     } catch (error) {
+      console.log('❌ CAUGHT ERROR:', error.message);
+      console.log('❌ ERROR STACK:', error.stack);
+      console.log('❌ ERROR DETAILS:', JSON.stringify(error, null, 2));
       fastify.log.error('Error requesting email code:', error);
       return reply.code(500).send({
         success: false,
@@ -191,9 +252,9 @@ export default async function authRoutes(fastify, options) {
 
       // Log successful login
       await readersDb.query(
-        `INSERT INTO reader_activity_log (reader_pin, activity_type, activity_description, performed_by, ip_address)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [pin, 'login_success', 'Reader logged in successfully', reader.reader_name, request.ip]
+        `INSERT INTO reader_activity_log (reader_pin, activity_type, activity_description, ip_address)
+         VALUES ($1, $2, $3, $4)`,
+        [pin, 'login_success', 'Reader logged in successfully', request.ip]
       );
 
       // Set cookie with token

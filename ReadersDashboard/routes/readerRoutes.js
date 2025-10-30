@@ -176,9 +176,9 @@ export default async function readerRoutes(fastify, options) {
 
       // Log activity
       await readersDb.query(
-        `INSERT INTO reader_activity_log (reader_pin, activity_type, activity_description, performed_by)
-         VALUES ($1, $2, $3, $4)`,
-        [pin, 'nda_signed', `Reader signed NDA version ${nda.version_number}`, name]
+        `INSERT INTO reader_activity_log (reader_pin, activity_type, activity_description)
+         VALUES ($1, $2, $3)`,
+        [pin, 'nda_signed', `Reader signed NDA version ${nda.version_number}`]
       );
 
       return reply.send({
@@ -293,9 +293,9 @@ export default async function readerRoutes(fastify, options) {
 
       // Log activity
       await readersDb.query(
-        `INSERT INTO reader_activity_log (reader_pin, activity_type, activity_description, performed_by)
-         VALUES ($1, $2, $3, $4)`,
-        [pin, 'corrections_saved', `Reader saved corrections for assignment ${assignmentId}`, name]
+        `INSERT INTO reader_activity_log (reader_pin, activity_type, activity_description)
+         VALUES ($1, $2, $3)`,
+        [pin, 'corrections_saved', `Reader saved corrections for assignment ${assignmentId}`]
       );
 
       return reply.send({
@@ -344,9 +344,9 @@ export default async function readerRoutes(fastify, options) {
 
       // Log activity
       await readersDb.query(
-        `INSERT INTO reader_activity_log (reader_pin, activity_type, activity_description, performed_by)
-         VALUES ($1, $2, $3, $4)`,
-        [pin, 'corrections_submitted', `Reader submitted corrections for assignment ${assignmentId}`, name]
+        `INSERT INTO reader_activity_log (reader_pin, activity_type, activity_description)
+         VALUES ($1, $2, $3)`,
+        [pin, 'corrections_submitted', `Reader submitted corrections for assignment ${assignmentId}`]
       );
 
       return reply.send({

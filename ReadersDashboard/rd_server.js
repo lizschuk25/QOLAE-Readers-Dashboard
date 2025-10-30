@@ -19,7 +19,7 @@ import fastifyCookie from '@fastify/cookie';
 import dotenv from 'dotenv';
 
 // Load environment variables
-dotenv.config({ path: path.join(process.cwd(), '..', '.env') });
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
