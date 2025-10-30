@@ -183,7 +183,7 @@ export default async function authRoutes(fastify, options) {
         `SELECT reader_pin, reader_name, email, reader_type,
                 email_verification_code, email_verification_code_expires_at,
                 email_verification_code_attempts, nda_signed,
-                portal_access_status
+                portal_access_status, compliance_submitted, compliance_submitted_at
          FROM readers
          WHERE reader_pin = $1 AND email = $2`,
         [pin, email]
@@ -273,9 +273,10 @@ export default async function authRoutes(fastify, options) {
           pin: reader.reader_pin,
           name: reader.reader_name,
           type: reader.reader_type,
-          ndaSigned: reader.nda_signed
+          ndaSigned: reader.nda_signed,
+          complianceSubmitted: reader.compliance_submitted
         },
-        redirectTo: reader.nda_signed ? '/readers-dashboard' : '/nda-review'
+        redirectTo: reader.compliance_submitted ? '/readers-dashboard' : 'https://hrcompliance.qolae.com/readers-compliance?readerPin=' + reader.reader_pin
       });
 
     } catch (error) {
