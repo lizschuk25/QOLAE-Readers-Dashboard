@@ -82,15 +82,17 @@ The reader must complete the following **once** at initial login:
 
 **Submission:**
 - On submit, compliance data is saved to `qolae_hrcompliance` database
-- Reader's portal_access_status remains 'pending' until Liz approves
+- ✅ **IMMEDIATE ACCESS GRANTED:** Reader's `portal_access_status` is set to `'active'` immediately upon submission
+- Reader is redirected to their customized Readers Dashboard Workspace
 - ✅ **Note:** The `qolae_readers` database is ESSENTIAL for:
   - Reader authentication (PIN, password, JWT tokens)
   - NDA signing workflow
   - Report assignments
   - Payment tracking
   - Performance metrics
-- Case Manager (Liz) receives notification in HR Compliance Dashboard
-- Reader sees: "Thank you! Your compliance documents are being reviewed. You'll receive dashboard access shortly."
+- Case Manager (Liz) receives notification in HR Compliance Dashboard for background review
+- Reader can start NDA workflow and begin working immediately
+- **HR Approval is a background process** - only matters if compliance is rejected
 
 ### Case Manager's Review Process:
 
@@ -114,20 +116,20 @@ The reader must complete the following **once** at initial login:
 3. Referee fills out form themselves and signs digitally
 4. Signed reference saved to `qolae_hrcompliance` database
 
-**Approval:**
+**Approval (Background Process):**
 - Once both references are signed and saved
 - Liz reviews payment details and verifies banking information
 - Liz clicks "Approve Compliance"
-- Compliance record is locked in HR database
-- Reader's `portal_access_status` updated to 'active' in `qolae_readers` database
-- Workspace access granted
-- Reader receives email: "Your compliance has been approved. You can now access your dashboard."
+- Compliance record is marked as 'approved' in HR database
+- ✅ **NOTE:** Reader's `portal_access_status` is already 'active' (granted immediately on submission)
+- ✅ **Reader is already working** - approval confirms their compliance is good
+- Approval email is optional (Reader is already productive)
 
-**Next Login:**
-- Reader logs in at `readers.qolae.com/login`
-- Completes 2FA authentication
-- Automatically redirected to their customized Readers Dashboard at `readers.qolae.com/readers-dashboard`
-- HR Compliance gate is no longer shown (compliance completed)
+**If Rejected (Rare):**
+- Liz clicks "Reject Compliance" with reason
+- Reader's `portal_access_status` is set to 'suspended'
+- Reader sees "Access suspended - HR needs to review your documents" on next login
+- Liz contacts Reader to resolve issues
 
 ---
 
