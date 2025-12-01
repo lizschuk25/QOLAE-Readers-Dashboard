@@ -603,7 +603,7 @@
                     <div class="info-row">
                         <span class="info-label">Payment Type:</span>
                         <span class="info-value">
-                            <%= accountType === 'uk_domestic' ? 'UK Bank Transfer' : 'International Transfer' %>
+                            <%= accountType === 'ukDomestic' ? 'UK Bank Transfer' : 'International Transfer' %>
                         </span>
                     </div>
                     <div class="info-row">
@@ -616,7 +616,7 @@
                     </div>
                     <div class="info-row">
                         <span class="info-label">
-                            <% if (accountType === 'uk_domestic') { %>
+                            <% if (accountType === 'ukDomestic') { %>
                                 Account Number:
                             <% } else { %>
                                 IBAN:
@@ -624,7 +624,7 @@
                         </span>
                         <span class="info-value">****<%= lastFourDigits %></span>
                     </div>
-                    <% if (accountType === 'uk_domestic' && sortCode) { %>
+                    <% if (accountType === 'ukDomestic' && sortCode) { %>
                     <div class="info-row">
                         <span class="info-label">Sort Code:</span>
                         <span class="info-value"><%= sortCode %></span>

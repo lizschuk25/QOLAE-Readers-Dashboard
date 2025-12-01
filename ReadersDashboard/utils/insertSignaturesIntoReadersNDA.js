@@ -184,7 +184,7 @@ async function flattenNDA(readerPin) {
 
     // Update database - save NDA PDF path
     await readersDb.query(
-      'UPDATE readers SET nda_pdf_path = $1 WHERE reader_pin = $2',
+      'UPDATE readers SET "ndaPdfPath" = $1 WHERE "readerPin" = $2',
       [pdfPath, readerPin]
     );
 

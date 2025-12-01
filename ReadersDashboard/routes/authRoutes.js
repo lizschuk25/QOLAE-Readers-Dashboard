@@ -49,7 +49,7 @@ export default async function authRoutes(fastify, options) {
 
       // Check if reader exists with this PIN and email
       const readerResult = await readersDb.query(
-        'SELECT reader_pin, reader_name, email, portal_access_status FROM readers WHERE reader_pin = $1 AND email = $2',
+        'SELECT "readerPin", "readerName", email, "portalAccessStatus" FROM readers WHERE "readerPin" = $1 AND email = $2',
         [pin, email]
       );
 
@@ -65,7 +65,7 @@ export default async function authRoutes(fastify, options) {
       const reader = readerResult.rows[0];
 
       // Check if reader access is active
-      if (reader.portal_access_status !== 'active' && reader.portal_access_status !== 'pending') {
+      if (reader.portalAccessStatus !== 'active' && reader.portalAccessStatus !== 'pending') {
         return reply.code(403).send({
           success: false,
           error: 'Your access has been suspended. Please contact QOLAE.'
@@ -79,18 +79,18 @@ export default async function authRoutes(fastify, options) {
       // Save verification code to database
       await readersDb.query(
         `UPDATE readers
-         SET email_verification_code = $1,
-             email_verification_code_expires_at = $2,
-             email_verification_code_attempts = 0
-         WHERE reader_pin = $3`,
+         SET "emailVerificationCode" = $1,
+             "emailVerificationCodeExpiresAt" = $2,
+             "emailVerificationCodeAttempts" = 0
+         WHERE "readerPin" = $3`,
         [verificationCode, expiresAt, pin]
       );
 
       // Log activity
       await readersDb.query(
-        `INSERT INTO reader_activity_log (reader_pin, activity_type, activity_description, ip_address)
+        `INSERT INTO "readerActivityLog" ("readerPin", "activityType", "activityDescription", "ipAddress")
          VALUES ($1, $2, $3, $4)`,
-        [pin, 'email_code_requested', 'Reader requested email verification code', request.ip]
+        [pin, 'emailCodeRequested', 'Reader requested email verification code', request.ip]
       );
 
       // Send email with verification code
@@ -180,12 +180,12 @@ export default async function authRoutes(fastify, options) {
 
       // Get reader with verification code
       const readerResult = await readersDb.query(
-        `SELECT reader_pin, reader_name, email, reader_type,
-                email_verification_code, email_verification_code_expires_at,
-                email_verification_code_attempts, nda_signed,
-                portal_access_status, compliance_submitted, compliance_submitted_at
+        `SELECT "readerPin", "readerName", email, "readerType",
+                "emailVerificationCode", "emailVerificationCodeExpiresAt",
+                "emailVerificationCodeAttempts", "ndaSigned",
+                "portalAccessStatus", "complianceSubmitted", "complianceSubmittedAt"
          FROM readers
-         WHERE reader_pin = $1 AND email = $2`,
+         WHERE "readerPin" = $1 AND email = $2`,
         [pin, email]
       );
 
@@ -199,7 +199,7 @@ export default async function authRoutes(fastify, options) {
       const reader = readerResult.rows[0];
 
       // Check if code has expired
-      if (new Date() > new Date(reader.email_verification_code_expires_at)) {
+      if (new Date() > new Date(reader.emailVerificationCodeExpiresAt)) {
         return reply.code(401).send({
           success: false,
           error: 'Verification code has expired. Please request a new one.'
@@ -207,7 +207,7 @@ export default async function authRoutes(fastify, options) {
       }
 
       // Check attempts (max 3)
-      if (reader.email_verification_code_attempts >= 3) {
+      if (reader.emailVerificationCodeAttempts >= 3) {
         return reply.code(403).send({
           success: false,
           error: 'Too many failed attempts. Please request a new code.'
@@ -215,50 +215,50 @@ export default async function authRoutes(fastify, options) {
       }
 
       // Verify code
-      if (code !== reader.email_verification_code) {
+      if (code !== reader.emailVerificationCode) {
         // Increment attempts
         await readersDb.query(
-          'UPDATE readers SET email_verification_code_attempts = email_verification_code_attempts + 1 WHERE reader_pin = $1',
+          'UPDATE readers SET "emailVerificationCodeAttempts" = "emailVerificationCodeAttempts" + 1 WHERE "readerPin" = $1',
           [pin]
         );
 
         return reply.code(401).send({
           success: false,
           error: 'Invalid verification code',
-          attemptsRemaining: 3 - (reader.email_verification_code_attempts + 1)
+          attemptsRemaining: 3 - (reader.emailVerificationCodeAttempts + 1)
         });
       }
 
       // Code is valid - Generate JWT token
       const token = fastify.jwt.sign({
-        pin: reader.reader_pin,
-        name: reader.reader_name,
+        pin: reader.readerPin,
+        name: reader.readerName,
         email: reader.email,
-        type: reader.reader_type,
+        type: reader.readerType,
         role: 'reader'
       });
 
       // Clear verification code
       await readersDb.query(
         `UPDATE readers
-         SET email_verification_code = NULL,
-             email_verification_code_expires_at = NULL,
-             email_verification_code_attempts = 0,
-             last_login = NOW(),
-             last_login_ip = $1
-         WHERE reader_pin = $2`,
+         SET "emailVerificationCode" = NULL,
+             "emailVerificationCodeExpiresAt" = NULL,
+             "emailVerificationCodeAttempts" = 0,
+             "lastLogin" = NOW(),
+             "lastLoginIp" = $1
+         WHERE "readerPin" = $2`,
         [request.ip, pin]
       );
 
       // Log successful login
       await readersDb.query(
-        `INSERT INTO reader_activity_log (reader_pin, activity_type, activity_description, ip_address)
+        `INSERT INTO "readerActivityLog" ("readerPin", "activityType", "activityDescription", "ipAddress")
          VALUES ($1, $2, $3, $4)`,
-        [pin, 'login_success', 'Reader logged in successfully', request.ip]
+        [pin, 'loginSuccess', 'Reader logged in successfully', request.ip]
       );
 
       // Set cookie with token
-      reply.setCookie('qolae_reader_token', token, {
+      reply.setCookie('qolaeReaderToken', token, {
         path: '/',
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -270,13 +270,13 @@ export default async function authRoutes(fastify, options) {
         success: true,
         message: 'Login successful',
         reader: {
-          pin: reader.reader_pin,
-          name: reader.reader_name,
-          type: reader.reader_type,
-          ndaSigned: reader.nda_signed,
-          complianceSubmitted: reader.compliance_submitted
+          pin: reader.readerPin,
+          name: reader.readerName,
+          type: reader.readerType,
+          ndaSigned: reader.ndaSigned,
+          complianceSubmitted: reader.complianceSubmitted
         },
-        redirectTo: reader.compliance_submitted ? '/readers-dashboard' : 'https://hrcompliance.qolae.com/readers-compliance?readerPin=' + reader.reader_pin
+        redirectTo: reader.complianceSubmitted ? '/readers-dashboard' : 'https://hrcompliance.qolae.com/readers-compliance?readerPin=' + reader.readerPin
       });
 
     } catch (error) {
@@ -294,7 +294,7 @@ export default async function authRoutes(fastify, options) {
   fastify.post('/api/readers/logout', async (request, reply) => {
     try {
       // Clear cookie
-      reply.clearCookie('qolae_reader_token', { path: '/' });
+      reply.clearCookie('qolaeReaderToken', { path: '/' });
 
       return reply.send({
         success: true,

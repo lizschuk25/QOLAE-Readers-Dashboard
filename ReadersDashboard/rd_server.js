@@ -55,7 +55,7 @@ await server.register(fastifyCors, {
 await server.register(fastifyJwt, {
   secret: process.env.JWT_SECRET || 'readers-secret-key-2025',
   cookie: {
-    cookieName: 'qolae_reader_token',
+    cookieName: 'qolaeReaderToken',
     signed: false,
   },
 });
@@ -141,7 +141,7 @@ async function getReaderById(readerPin) {
     pin: readerPin,
     name: 'Reader Name',
     email: 'reader@example.com',
-    type: 'first_reader',
+    type: 'firstReader',
     totalEarnings: 0
   };
 }

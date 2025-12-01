@@ -52,11 +52,11 @@ export default async function readerRoutes(fastify, options) {
     try {
       // Get reader data
       const readerResult = await readersDb.query(
-        `SELECT reader_pin, reader_name, reader_type, email, phone,
-                nda_signed, portal_access_status, total_assignments_completed,
-                average_turnaround_hours, total_earnings
+        `SELECT "readerPin", "readerName", "readerType", email, phone,
+                "ndaSigned", "portalAccessStatus", "totalAssignmentsCompleted",
+                "averageTurnaroundHours", "totalEarnings"
          FROM readers
-         WHERE reader_pin = $1`,
+         WHERE "readerPin" = $1`,
         [pin]
       );
 
@@ -68,11 +68,11 @@ export default async function readerRoutes(fastify, options) {
 
       // Get active assignments
       const assignmentsResult = await readersDb.query(
-        `SELECT assignment_id, assignment_number, report_type,
-                assigned_at, deadline, assignment_status, payment_amount
-         FROM reader_assignments
-         WHERE reader_pin = $1
-         AND assignment_status IN ('pending', 'in_progress')
+        `SELECT "assignmentId", "assignmentNumber", "reportType",
+                "assignedAt", deadline, "assignmentStatus", "paymentAmount"
+         FROM "readerAssignments"
+         WHERE "readerPin" = $1
+         AND "assignmentStatus" IN ('pending', 'inProgress')
          ORDER BY deadline ASC`,
         [pin]
       );
@@ -99,7 +99,7 @@ export default async function readerRoutes(fastify, options) {
     try {
       // Get reader data
       const readerResult = await readersDb.query(
-        'SELECT reader_pin, reader_name, nda_signed FROM readers WHERE reader_pin = $1',
+        'SELECT "readerPin", "readerName", "ndaSigned" FROM readers WHERE "readerPin" = $1',
         [pin]
       );
 
@@ -111,7 +111,7 @@ export default async function readerRoutes(fastify, options) {
 
       // Get current NDA version
       const ndaResult = await readersDb.query(
-        'SELECT version_number, effective_date, nda_content FROM reader_nda_versions WHERE is_current = TRUE'
+        'SELECT "versionNumber", "effectiveDate", "ndaContent" FROM "readerNdaVersions" WHERE "isCurrent" = TRUE'
       );
 
       return reply.view('nda-review.ejs', {
@@ -137,7 +137,7 @@ export default async function readerRoutes(fastify, options) {
     try {
       // Get current NDA version
       const ndaResult = await readersDb.query(
-        'SELECT id, version_number FROM reader_nda_versions WHERE is_current = TRUE'
+        'SELECT id, "versionNumber" FROM "readerNdaVersions" WHERE "isCurrent" = TRUE'
       );
 
       if (ndaResult.rows.length === 0) {
@@ -166,19 +166,19 @@ export default async function readerRoutes(fastify, options) {
       // Step 3: Update reader - NDA signed
       await readersDb.query(
         `UPDATE readers
-         SET nda_signed = TRUE,
-             nda_signed_at = NOW(),
-             nda_version_id = $1,
-             portal_access_status = 'active'
-         WHERE reader_pin = $2`,
+         SET "ndaSigned" = TRUE,
+             "ndaSignedAt" = NOW(),
+             "ndaVersionId" = $1,
+             "portalAccessStatus" = 'active'
+         WHERE "readerPin" = $2`,
         [nda.id, pin]
       );
 
       // Log activity
       await readersDb.query(
-        `INSERT INTO reader_activity_log (reader_pin, activity_type, activity_description)
+        `INSERT INTO "readerActivityLog" ("readerPin", "activityType", "activityDescription")
          VALUES ($1, $2, $3)`,
-        [pin, 'nda_signed', `Reader signed NDA version ${nda.version_number}`]
+        [pin, 'ndaSigned', `Reader signed NDA version ${nda.versionNumber}`]
       );
 
       return reply.send({
@@ -206,10 +206,10 @@ export default async function readerRoutes(fastify, options) {
     try {
       // Get assignment details
       const assignmentResult = await readersDb.query(
-        `SELECT assignment_id, assignment_number, reader_pin, report_type,
-                assignment_status, redacted_report_path, deadline
-         FROM reader_assignments
-         WHERE assignment_id = $1 AND reader_pin = $2`,
+        `SELECT "assignmentId", "assignmentNumber", "readerPin", "reportType",
+                "assignmentStatus", "redactedReportPath", deadline
+         FROM "readerAssignments"
+         WHERE "assignmentId" = $1 AND "readerPin" = $2`,
         [assignmentId, pin]
       );
 
@@ -220,7 +220,7 @@ export default async function readerRoutes(fastify, options) {
       const assignment = assignmentResult.rows[0];
 
       // Check if assignment is accessible
-      if (assignment.assignment_status === 'completed' || assignment.assignment_status === 'cancelled') {
+      if (assignment.assignmentStatus === 'completed' || assignment.assignmentStatus === 'cancelled') {
         return reply.code(403).send({ success: false, error: 'This assignment is no longer accessible' });
       }
 
@@ -247,11 +247,11 @@ export default async function readerRoutes(fastify, options) {
     try {
       // Get assignment details
       const assignmentResult = await readersDb.query(
-        `SELECT assignment_id, assignment_number, reader_pin, report_type,
-                assignment_status, redacted_report_path, corrections_content,
+        `SELECT "assignmentId", "assignmentNumber", "readerPin", "reportType",
+                "assignmentStatus", "redactedReportPath", "correctionsContent",
                 deadline
-         FROM reader_assignments
-         WHERE assignment_id = $1 AND reader_pin = $2`,
+         FROM "readerAssignments"
+         WHERE "assignmentId" = $1 AND "readerPin" = $2`,
         [assignmentId, pin]
       );
 
@@ -284,18 +284,18 @@ export default async function readerRoutes(fastify, options) {
     try {
       // Update assignment with corrections
       await readersDb.query(
-        `UPDATE reader_assignments
-         SET corrections_content = $1,
-             corrections_updated_at = NOW()
-         WHERE assignment_id = $2 AND reader_pin = $3`,
+        `UPDATE "readerAssignments"
+         SET "correctionsContent" = $1,
+             "correctionsUpdatedAt" = NOW()
+         WHERE "assignmentId" = $2 AND "readerPin" = $3`,
         [JSON.stringify(corrections), assignmentId, pin]
       );
 
       // Log activity
       await readersDb.query(
-        `INSERT INTO reader_activity_log (reader_pin, activity_type, activity_description)
+        `INSERT INTO "readerActivityLog" ("readerPin", "activityType", "activityDescription")
          VALUES ($1, $2, $3)`,
-        [pin, 'corrections_saved', `Reader saved corrections for assignment ${assignmentId}`]
+        [pin, 'correctionsSaved', `Reader saved corrections for assignment ${assignmentId}`]
       );
 
       return reply.send({
@@ -321,12 +321,12 @@ export default async function readerRoutes(fastify, options) {
     try {
       // Update assignment status
       const result = await readersDb.query(
-        `UPDATE reader_assignments
-         SET assignment_status = 'completed',
-             corrections_submitted_at = NOW(),
-             actual_turnaround_hours = EXTRACT(EPOCH FROM (NOW() - assigned_at)) / 3600
-         WHERE assignment_id = $1 AND reader_pin = $2
-         RETURNING payment_amount`,
+        `UPDATE "readerAssignments"
+         SET "assignmentStatus" = 'completed',
+             "correctionsSubmittedAt" = NOW(),
+             "actualTurnaroundHours" = EXTRACT(EPOCH FROM (NOW() - "assignedAt")) / 3600
+         WHERE "assignmentId" = $1 AND "readerPin" = $2
+         RETURNING "paymentAmount"`,
         [assignmentId, pin]
       );
 
@@ -337,22 +337,22 @@ export default async function readerRoutes(fastify, options) {
       // Update reader stats
       await readersDb.query(
         `UPDATE readers
-         SET total_assignments_completed = total_assignments_completed + 1
-         WHERE reader_pin = $1`,
+         SET "totalAssignmentsCompleted" = "totalAssignmentsCompleted" + 1
+         WHERE "readerPin" = $1`,
         [pin]
       );
 
       // Log activity
       await readersDb.query(
-        `INSERT INTO reader_activity_log (reader_pin, activity_type, activity_description)
+        `INSERT INTO "readerActivityLog" ("readerPin", "activityType", "activityDescription")
          VALUES ($1, $2, $3)`,
-        [pin, 'corrections_submitted', `Reader submitted corrections for assignment ${assignmentId}`]
+        [pin, 'correctionsSubmitted', `Reader submitted corrections for assignment ${assignmentId}`]
       );
 
       return reply.send({
         success: true,
         message: 'Corrections submitted successfully! Payment pending review.',
-        paymentAmount: result.rows[0].payment_amount
+        paymentAmount: result.rows[0].paymentAmount
       });
 
     } catch (error) {
@@ -372,24 +372,24 @@ export default async function readerRoutes(fastify, options) {
     try {
       // Get payment history
       const paymentsResult = await readersDb.query(
-        `SELECT assignment_id, assignment_number, payment_amount,
-                corrections_submitted_at, corrections_approved,
-                payment_approved, payment_approved_at, payment_processed_at
-         FROM reader_assignments
-         WHERE reader_pin = $1
-         AND assignment_status = 'completed'
-         ORDER BY corrections_submitted_at DESC`,
+        `SELECT "assignmentId", "assignmentNumber", "paymentAmount",
+                "correctionsSubmittedAt", "correctionsApproved",
+                "paymentApproved", "paymentApprovedAt", "paymentProcessedAt"
+         FROM "readerAssignments"
+         WHERE "readerPin" = $1
+         AND "assignmentStatus" = 'completed'
+         ORDER BY "correctionsSubmittedAt" DESC`,
         [pin]
       );
 
       // Get total earnings
       const earningsResult = await readersDb.query(
-        'SELECT total_earnings FROM readers WHERE reader_pin = $1',
+        'SELECT "totalEarnings" FROM readers WHERE "readerPin" = $1',
         [pin]
       );
 
       return reply.view('payment-status.ejs', {
-        reader: { pin, name, totalEarnings: earningsResult.rows[0].total_earnings },
+        reader: { pin, name, totalEarnings: earningsResult.rows[0].totalEarnings },
         payments: paymentsResult.rows
       });
 
@@ -425,22 +425,22 @@ export default async function readerRoutes(fastify, options) {
       // Get payment data from qolae_readers
       const paymentQuery = `
         SELECT 
-          ra.id as assignment_id,
-          ra.reader_pin,
-          ra.payment_status,
-          ra.payment_amount,
-          ra.payment_reference,
-          ra.payment_approved_at,
-          ra.payment_processed_at,
-          ra.report_assigned_at as assigned_at,
-          ra.corrections_submitted_at,
-          r.reader_name,
-          r.email as reader_email,
-          r.payment_rate,
-          r.reader_type
-        FROM reader_assignments ra
-        INNER JOIN readers r ON ra.reader_pin = r.reader_pin
-        WHERE ra.id = $1 AND ra.reader_pin = $2
+          ra.id as "assignmentId",
+          ra."readerPin",
+          ra."paymentStatus",
+          ra."paymentAmount",
+          ra."paymentReference",
+          ra."paymentApprovedAt",
+          ra."paymentProcessedAt",
+          ra."reportAssignedAt" as "assignedAt",
+          ra."correctionsSubmittedAt",
+          r."readerName",
+          r.email as "readerEmail",
+          r."paymentRate",
+          r."readerType"
+        FROM "readerAssignments" ra
+        INNER JOIN readers r ON ra."readerPin" = r."readerPin"
+        WHERE ra.id = $1 AND ra."readerPin" = $2
       `;
 
       const result = await readersDb.query(paymentQuery, [assignmentId, pin]);
@@ -457,36 +457,36 @@ export default async function readerRoutes(fastify, options) {
       
       // Build timeline based on payment status
       const timeline = buildTimeline(
-        paymentData.payment_status,
-        paymentData.assigned_at,
-        paymentData.payment_approved_at,
-        paymentData.payment_processed_at
+        paymentData.paymentStatus,
+        paymentData.assignedAt,
+        paymentData.paymentApprovedAt,
+        paymentData.paymentProcessedAt
       );
 
       // Determine reader type
-      const readerType = paymentData.reader_type === 'first_reader' ? 'first' : 'second';
+      const readerType = paymentData.readerType === 'firstReader' ? 'first' : 'second';
 
       // Render EJS template
       return reply.view('paymentProcessing.ejs', {
         // Assignment info
-        assignmentId: paymentData.assignment_id,
-        readerPin: paymentData.reader_pin,
+        assignmentId: paymentData.assignmentId,
+        readerPin: paymentData.readerPin,
         
         // Reader info
-        readerName: paymentData.reader_name,
-        readerEmail: paymentData.reader_email,
+        readerName: paymentData.readerName,
+        readerEmail: paymentData.readerEmail,
         readerType: readerType,
         
         // Payment status & amount
-        paymentStatus: paymentData.payment_status || 'pending',
-        paymentAmount: paymentData.payment_amount || paymentData.payment_rate,
-        paymentReference: paymentData.payment_reference || 'N/A',
+        paymentStatus: paymentData.paymentStatus || 'pending',
+        paymentAmount: paymentData.paymentAmount || paymentData.paymentRate,
+        paymentReference: paymentData.paymentReference || 'N/A',
         
         // Timeline dates
-        assignedAt: paymentData.assigned_at,
-        correctionsSubmittedAt: paymentData.corrections_submitted_at,
-        paymentApprovedAt: paymentData.payment_approved_at,
-        paymentProcessedAt: paymentData.payment_processed_at,
+        assignedAt: paymentData.assignedAt,
+        correctionsSubmittedAt: paymentData.correctionsSubmittedAt,
+        paymentApprovedAt: paymentData.paymentApprovedAt,
+        paymentProcessedAt: paymentData.paymentProcessedAt,
         
         // Timeline status
         timeline: timeline,
@@ -519,13 +519,13 @@ export default async function readerRoutes(fastify, options) {
 
       const statusQuery = `
         SELECT 
-          payment_status,
-          payment_amount,
-          payment_reference,
-          payment_approved_at,
-          payment_processed_at
-        FROM reader_assignments
-        WHERE id = $1 AND reader_pin = $2
+          "paymentStatus",
+          "paymentAmount",
+          "paymentReference",
+          "paymentApprovedAt",
+          "paymentProcessedAt"
+        FROM "readerAssignments"
+        WHERE id = $1 AND "readerPin" = $2
       `;
 
       const result = await readersDb.query(statusQuery, [assignmentId, pin]);
@@ -535,11 +535,11 @@ export default async function readerRoutes(fastify, options) {
       }
 
       return reply.send({
-        paymentStatus: result.rows[0].payment_status,
-        paymentAmount: result.rows[0].payment_amount,
-        paymentReference: result.rows[0].payment_reference,
-        paymentApprovedAt: result.rows[0].payment_approved_at,
-        paymentProcessedAt: result.rows[0].payment_processed_at
+        paymentStatus: result.rows[0].paymentStatus,
+        paymentAmount: result.rows[0].paymentAmount,
+        paymentReference: result.rows[0].paymentReference,
+        paymentApprovedAt: result.rows[0].paymentApprovedAt,
+        paymentProcessedAt: result.rows[0].paymentProcessedAt
       });
 
     } catch (error) {
@@ -560,18 +560,18 @@ export default async function readerRoutes(fastify, options) {
 
       const historyQuery = `
         SELECT 
-          ra.id as assignment_id,
-          ra.assignment_number,
-          ra.payment_status,
-          ra.payment_amount,
-          ra.payment_reference,
-          ra.payment_approved_at,
-          ra.payment_processed_at,
-          ra.report_assigned_at as assigned_at,
-          ra.corrections_submitted_at
-        FROM reader_assignments ra
-        WHERE ra.reader_pin = $1
-        ORDER BY ra.report_assigned_at DESC
+          ra.id as "assignmentId",
+          ra."assignmentNumber",
+          ra."paymentStatus",
+          ra."paymentAmount",
+          ra."paymentReference",
+          ra."paymentApprovedAt",
+          ra."paymentProcessedAt",
+          ra."reportAssignedAt" as "assignedAt",
+          ra."correctionsSubmittedAt"
+        FROM "readerAssignments" ra
+        WHERE ra."readerPin" = $1
+        ORDER BY ra."reportAssignedAt" DESC
       `;
 
       const result = await readersDb.query(historyQuery, [pin]);

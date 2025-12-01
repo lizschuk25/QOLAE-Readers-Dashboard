@@ -25,15 +25,15 @@
     reader = {
         id: 'reader-uuid',
         name: 'Jennifer Adams',
-        reader_type: 'professional', // or 'medical'
+        readerType: 'professional', // or 'medical'
         email: 'j.adams@example.com',
-        last_active: '2025-10-27T14:32:00Z',
-        compliance_status: 'approved',
+        lastActive: '2025-10-27T14:32:00Z',
+        complianceStatus: 'approved',
         stats: {
-            completed_reports: 12,
-            active_assignments: 1,
-            documents_uploaded: 8,
-            success_rate: 100
+            completedReports: 12,
+            activeAssignments: 1,
+            documentsUploaded: 8,
+            successRate: 100
         }
     }
     
@@ -42,10 +42,10 @@
             id: 'doc-uuid',
             category: 'certification', // 'certification', 'insurance', 'tax', 'legal'
             name: 'Medical License - State of California',
-            uploaded_date: '2025-09-12',
-            expiry_date: '2026-06-30', // optional
-            file_path: '/uploads/readers/...',
-            file_type: 'pdf'
+            uploadedDate: '2025-09-12',
+            expiryDate: '2026-06-30', // optional
+            filePath: '/uploads/readers/...',
+            fileType: 'pdf'
         },
         // ... more documents
     ]
@@ -53,36 +53,36 @@
     reports = [
         {
             id: 'report-uuid',
-            report_number: 'RW-002847',
+            reportNumber: 'RW-002847',
             status: 'new', // 'new', 'in-progress', 'completed'
-            assigned_date: '2025-10-27',
-            due_date: '2025-11-03',
-            completed_date: null, // or '2025-10-20'
+            assignedDate: '2025-10-27',
+            dueDate: '2025-11-03',
+            completedDate: null, // or '2025-10-20'
             fee: 50.00,
-            payment_status: 'pending' // 'pending', 'paid'
+            paymentStatus: 'pending' // 'pending', 'paid'
         },
         // ... more reports
     ]
     
     payments = {
         method: {
-            type: 'bank_transfer',
-            account_last4: '4892',
-            account_name: 'Jennifer Adams',
+            type: 'bankTransfer',
+            accountLast4: '4892',
+            accountName: 'Jennifer Adams',
             verified: true
         },
         summary: {
-            total_earnings: 650.00,
-            payments_received: 600.00,
-            pending_payments: 50.00,
-            total_reports: 13,
-            paid_reports: 12
+            totalEarnings: 650.00,
+            paymentsReceived: 600.00,
+            pendingPayments: 50.00,
+            totalReports: 13,
+            paidReports: 12
         },
         transactions: [
             {
                 id: 'payment-uuid',
                 date: '2025-10-28',
-                report_number: 'RW-002847',
+                reportNumber: 'RW-002847',
                 description: 'Stage 1 Review',
                 amount: 50.00,
                 status: 'pending' // 'pending', 'processing', 'paid'
@@ -1104,23 +1104,23 @@
             <!-- Welcome Banner -->
             <div class="welcome-banner">
                 <h2>Welcome back, <%= reader.name %></h2>
-                <p><%= reader.reader_type === 'medical' ? 'Medical Professional' : 'Professional Reader' %> • Last active: <%= new Date(reader.last_active).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
+                <p><%= reader.readerType === 'medical' ? 'Medical Professional' : 'Professional Reader' %> • Last active: <%= new Date(reader.lastActive).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
                 <div class="stats-row">
                     <div class="stat-item">
                         <span class="stat-label">Completed Reports</span>
-                        <span class="stat-value"><%= reader.stats.completed_reports %></span>
+                        <span class="stat-value"><%= reader.stats.completedReports %></span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-label">Active Assignments</span>
-                        <span class="stat-value"><%= reader.stats.active_assignments %></span>
+                        <span class="stat-value"><%= reader.stats.activeAssignments %></span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-label">Documents Uploaded</span>
-                        <span class="stat-value"><%= reader.stats.documents_uploaded %></span>
+                        <span class="stat-value"><%= reader.stats.documentsUploaded %></span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-label">Success Rate</span>
-                        <span class="stat-value"><%= reader.stats.success_rate %>%</span>
+                        <span class="stat-value"><%= reader.stats.successRate %>%</span>
                     </div>
                 </div>
             </div>
@@ -1137,7 +1137,7 @@
                 </button>
                 <button class="tab-btn" onclick="switchTab('paymentHistory')">
                     💰 Payment History
-                    <span class="tab-badge"><%= payments.summary.pending_payments > 0 ? '1' : '0' %></span>
+                    <span class="tab-badge"><%= payments.summary.pendingPayments > 0 ? '1' : '0' %></span>
                 </button>
             </div>
 
@@ -1202,9 +1202,9 @@
                                             <div class="doc-info">
                                                 <strong><%= doc.name %></strong>
                                                 <span class="doc-date">
-                                                    Signed: <%= new Date(doc.uploaded_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %>
-                                                    <% if (doc.expiry_date) { %>
-                                                        • Valid until: <%= new Date(doc.expiry_date).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) %>
+                                                    Signed: <%= new Date(doc.uploadedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                                                    <% if (doc.expiryDate) { %>
+                                                        • Valid until: <%= new Date(doc.expiryDate).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) %>
                                                     <% } else { %>
                                                         • Valid indefinitely
                                                     <% } %>
@@ -1239,9 +1239,9 @@
                                             <div class="doc-info">
                                                 <strong><%= doc.name %></strong>
                                                 <span class="doc-date">
-                                                    Uploaded: <%= new Date(doc.uploaded_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %>
-                                                    <% if (doc.expiry_date) { %>
-                                                        • Valid until: <%= new Date(doc.expiry_date).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) %>
+                                                    Uploaded: <%= new Date(doc.uploadedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                                                    <% if (doc.expiryDate) { %>
+                                                        • Valid until: <%= new Date(doc.expiryDate).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) %>
                                                     <% } %>
                                                 </span>
                                             </div>
@@ -1274,9 +1274,9 @@
                                             <div class="doc-info">
                                                 <strong><%= doc.name %></strong>
                                                 <span class="doc-date">
-                                                    Uploaded: <%= new Date(doc.uploaded_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %>
-                                                    <% if (doc.expiry_date) { %>
-                                                        • Valid until: <%= new Date(doc.expiry_date).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) %>
+                                                    Uploaded: <%= new Date(doc.uploadedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                                                    <% if (doc.expiryDate) { %>
+                                                        • Valid until: <%= new Date(doc.expiryDate).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) %>
                                                     <% } %>
                                                 </span>
                                             </div>
@@ -1308,7 +1308,7 @@
                                     <div class="doc-info">
                                         <strong>Payment Method</strong>
                                         <span class="doc-date">
-                                            Bank account ending in ••••<%= payments.method.account_last4 %> 
+                                            Bank account ending in ••••<%= payments.method.accountLast4 %> 
                                             <%= payments.method.verified ? '✓ Verified' : '⚠ Pending Verification' %>
                                         </span>
                                     </div>
@@ -1323,9 +1323,9 @@
                                         <div class="doc-info">
                                             <strong><%= doc.name %></strong>
                                             <span class="doc-date">
-                                                Uploaded: <%= new Date(doc.uploaded_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %>
-                                                <% if (doc.expiry_date) { %>
-                                                    • Updated <%= new Date(doc.expiry_date).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) %>
+                                                Uploaded: <%= new Date(doc.uploadedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %>
+                                                <% if (doc.expiryDate) { %>
+                                                    • Updated <%= new Date(doc.expiryDate).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) %>
                                                 <% } %>
                                             </span>
                                         </div>
@@ -1374,16 +1374,16 @@
                         <div class="report-item new">
                             <div class="report-icon">📄</div>
                             <div class="report-info">
-                                <strong>🆕 Medical Report <%= report.report_number %></strong>
+                                <strong>🆕 Medical Report <%= report.reportNumber %></strong>
                                 <span class="status-badge status-new">New Assignment</span>
                                 <div class="report-meta">
-                                    <span class="report-meta-item">📅 Assigned: <%= new Date(report.assigned_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
-                                    <span class="report-meta-item">⏰ Due: <%= new Date(report.due_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+                                    <span class="report-meta-item">📅 Assigned: <%= new Date(report.assignedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+                                    <span class="report-meta-item">⏰ Due: <%= new Date(report.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
                                     <span class="report-meta-item">💷 Fee: £<%= report.fee.toFixed(2) %></span>
                                 </div>
                             </div>
                             <div class="doc-actions">
-                                <button class="btn-mini" onclick="openReportReview('<%= report.id %>', '<%= report.report_number %>')">📖 Start Review</button>
+                                <button class="btn-mini" onclick="openReportReview('<%= report.id %>', '<%= report.reportNumber %>')">📖 Start Review</button>
                             </div>
                         </div>
                     <% }); %>
@@ -1393,11 +1393,11 @@
                         <div class="report-item completed">
                             <div class="report-icon">✅</div>
                             <div class="report-info">
-                                <strong>Medical Report <%= report.report_number %></strong>
+                                <strong>Medical Report <%= report.reportNumber %></strong>
                                 <span class="status-badge status-completed">✓ Completed</span>
                                 <div class="report-meta">
-                                    <span class="report-meta-item">📅 Completed: <%= new Date(report.completed_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
-                                    <span class="report-meta-item">💷 <%= report.payment_status === 'paid' ? 'Paid' : 'Pending' %>: £<%= report.fee.toFixed(2) %></span>
+                                    <span class="report-meta-item">📅 Completed: <%= new Date(report.completedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+                                    <span class="report-meta-item">💷 <%= report.paymentStatus === 'paid' ? 'Paid' : 'Pending' %>: £<%= report.fee.toFixed(2) %></span>
                                 </div>
                             </div>
                             <div class="doc-actions">
@@ -1416,18 +1416,18 @@
 
                 <!-- Payment History Tab -->
                 <div class="tab-content" id="paymentHistoryTab">
-                    <% if (payments.summary.pending_payments > 0) { %>
-                        <% const pendingReport = reports.find(r => r.payment_status === 'pending'); %>
+                    <% if (payments.summary.pendingPayments > 0) { %>
+                        <% const pendingReport = reports.find(r => r.paymentStatus === 'pending'); %>
                         <% if (pendingReport) { %>
                             <div class="pending-payment-banner">
                                 <div class="pending-banner-icon">⏳</div>
                                 <div class="pending-banner-content">
                                     <h4>Payment Pending Review</h4>
-                                    <p>Your report <strong><%= pendingReport.report_number %></strong> has been submitted and is currently under review by Liz. Payment will be processed automatically once the review is approved.</p>
+                                    <p>Your report <strong><%= pendingReport.reportNumber %></strong> has been submitted and is currently under review by Liz. Payment will be processed automatically once the review is approved.</p>
                                     <div class="payment-details">
                                         <div class="pending-detail">
                                             <span class="pending-detail-label">Report ID</span>
-                                            <span class="pending-detail-value"><%= pendingReport.report_number %></span>
+                                            <span class="pending-detail-value"><%= pendingReport.reportNumber %></span>
                                         </div>
                                         <div class="pending-detail">
                                             <span class="pending-detail-label">Amount</span>
@@ -1435,7 +1435,7 @@
                                         </div>
                                         <div class="pending-detail">
                                             <span class="pending-detail-label">Submitted</span>
-                                            <span class="pending-detail-value"><%= new Date(pendingReport.completed_date || pendingReport.assigned_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                                            <span class="pending-detail-value"><%= new Date(pendingReport.completedDate || pendingReport.assignedDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
                                         </div>
                                         <div class="pending-detail">
                                             <span class="pending-detail-label">Status</span>
@@ -1451,18 +1451,18 @@
                     <div class="payment-summary-cards">
                         <div class="payment-summary-card">
                             <div class="payment-summary-label">Total Earnings</div>
-                            <div class="payment-summary-value">£<%= payments.summary.total_earnings.toFixed(2) %></div>
-                            <div class="payment-summary-note"><%= payments.summary.total_reports %> reports completed</div>
+                            <div class="payment-summary-value">£<%= payments.summary.totalEarnings.toFixed(2) %></div>
+                            <div class="payment-summary-note"><%= payments.summary.totalReports %> reports completed</div>
                         </div>
                         <div class="payment-summary-card secondary">
                             <div class="payment-summary-label">Payments Received</div>
-                            <div class="payment-summary-value">£<%= payments.summary.payments_received.toFixed(2) %></div>
-                            <div class="payment-summary-note"><%= payments.summary.paid_reports %> payments processed</div>
+                            <div class="payment-summary-value">£<%= payments.summary.paymentsReceived.toFixed(2) %></div>
+                            <div class="payment-summary-note"><%= payments.summary.paidReports %> payments processed</div>
                         </div>
                         <div class="payment-summary-card tertiary">
                             <div class="payment-summary-label">Pending Payments</div>
-                            <div class="payment-summary-value">£<%= payments.summary.pending_payments.toFixed(2) %></div>
-                            <div class="payment-summary-note"><%= payments.summary.total_reports - payments.summary.paid_reports %> report under review</div>
+                            <div class="payment-summary-value">£<%= payments.summary.pendingPayments.toFixed(2) %></div>
+                            <div class="payment-summary-note"><%= payments.summary.totalReports - payments.summary.paidReports %> report under review</div>
                         </div>
                     </div>
 
@@ -1476,11 +1476,11 @@
                             </div>
                             <div class="payment-detail-item">
                                 <span class="payment-detail-label">Bank Account</span>
-                                <span class="payment-detail-value">****<%= payments.method.account_last4 %></span>
+                                <span class="payment-detail-value">****<%= payments.method.accountLast4 %></span>
                             </div>
                             <div class="payment-detail-item">
                                 <span class="payment-detail-label">Account Name</span>
-                                <span class="payment-detail-value"><%= payments.method.account_name %></span>
+                                <span class="payment-detail-value"><%= payments.method.accountName %></span>
                             </div>
                             <div class="payment-detail-item">
                                 <span class="payment-detail-label">Verification Status</span>
@@ -1522,7 +1522,7 @@
                                 <% payments.transactions.forEach(transaction => { %>
                                     <tr>
                                         <td><%= new Date(transaction.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) %></td>
-                                        <td><strong><%= transaction.report_number %></strong></td>
+                                        <td><strong><%= transaction.reportNumber %></strong></td>
                                         <td><%= transaction.description %></td>
                                         <td class="amount-cell">£<%= transaction.amount.toFixed(2) %></td>
                                         <td>
@@ -1650,7 +1650,7 @@
             const formData = new FormData();
             formData.append('file', file);
             formData.append('category', category);
-            formData.append('reader_id', '<%= reader.id %>');
+            formData.append('readerId', '<%= reader.id %>');
 
             // Upload to backend
             fetch(API_ENDPOINTS.uploadDocument, {
@@ -1786,7 +1786,7 @@
         }
 
         function exportPaymentHistory() {
-            window.location.href = `${API_ENDPOINTS.exportHistory}?reader_id=<%= reader.id %>`;
+            window.location.href = `${API_ENDPOINTS.exportHistory}?readerId=<%= reader.id %>`;
         }
 
         // ═══════════════════════════════════════════════════════════════════════════════
