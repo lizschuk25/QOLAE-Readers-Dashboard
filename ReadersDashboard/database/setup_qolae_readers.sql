@@ -274,7 +274,7 @@ CREATE TRIGGER calculate_turnaround_on_submission
 
 -- Insert current NDA version
 INSERT INTO reader_nda_versions (version_number, nda_template_path, effective_date, is_current, created_by)
-VALUES ('v1.0', '/central-repository/original/TemplateNDA.pdf', CURRENT_DATE, TRUE, 'Liz')
+VALUES ('v1.0', '/central-repository/public/original/TemplateReadersNDA.pdf', CURRENT_DATE, TRUE, 'Liz')
 ON CONFLICT (version_number) DO NOTHING;
 
 -- ==============================================
