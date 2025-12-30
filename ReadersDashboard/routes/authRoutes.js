@@ -22,14 +22,14 @@ export default async function authRoutes(fastify, options) {
   // ==============================================
   // STEP 1: READERS LOGIN PAGE
   // ==============================================
-  fastify.get('/readers-login', async (request, reply) => {
-    return reply.view('readers-login.ejs');
+  fastify.get('/readersLogin', async (request, reply) => {
+    return reply.view('readersLogin.ejs');
   });
 
   // ==============================================
   // STEP 2: REQUEST EMAIL VERIFICATION CODE
   // ==============================================
-  fastify.post('/api/readers/request-email-code', async (request, reply) => {
+  fastify.post('/api/readers/requestEmailCode', async (request, reply) => {
     const { pin, email } = request.body;
 
     try {
@@ -166,7 +166,7 @@ export default async function authRoutes(fastify, options) {
   // ==============================================
   // STEP 3: VERIFY EMAIL CODE & LOGIN
   // ==============================================
-  fastify.post('/api/readers/verify-email-code', async (request, reply) => {
+  fastify.post('/api/readers/verifyEmailCode', async (request, reply) => {
     const { pin, email, code } = request.body;
 
     try {

@@ -44,7 +44,7 @@ export default async function readerRoutes(fastify, options) {
   // ==============================================
   // READERS DASHBOARD (Main Workspace)
   // ==============================================
-  fastify.get('/readers-dashboard', {
+  fastify.get('/readersDashboard', {
     preHandler: authenticateReader
   }, async (request, reply) => {
     const { pin, name, type } = request.user;
@@ -77,7 +77,7 @@ export default async function readerRoutes(fastify, options) {
         [pin]
       );
 
-      return reply.view('readers-dashboard.ejs', {
+      return reply.view('readersDashboard.ejs', {
         reader,
         assignments: assignmentsResult.rows
       });
@@ -91,7 +91,7 @@ export default async function readerRoutes(fastify, options) {
   // ==============================================
   // NDA REVIEW PAGE
   // ==============================================
-  fastify.get('/nda-review', {
+  fastify.get('/ndaReview', {
     preHandler: authenticateReader
   }, async (request, reply) => {
     const { pin, name, type } = request.user;
@@ -128,7 +128,7 @@ export default async function readerRoutes(fastify, options) {
   // ==============================================
   // SIGN NDA (API) - Complete Workflow
   // ==============================================
-  fastify.post('/api/readers/sign-nda', {
+  fastify.post('/api/readers/signNda', {
     preHandler: authenticateReader
   }, async (request, reply) => {
     const { pin, name } = request.user;
@@ -197,7 +197,7 @@ export default async function readerRoutes(fastify, options) {
   // ==============================================
   // REPORT VIEWER (In-Workspace Only - No Download)
   // ==============================================
-  fastify.get('/report-viewer/:assignmentId', {
+  fastify.get('/reportViewer/:assignmentId', {
     preHandler: authenticateReader
   }, async (request, reply) => {
     const { pin, name } = request.user;
@@ -238,7 +238,7 @@ export default async function readerRoutes(fastify, options) {
   // ==============================================
   // CORRECTIONS EDITOR (In-Workspace Only)
   // ==============================================
-  fastify.get('/corrections-editor/:assignmentId', {
+  fastify.get('/correctionsEditor/:assignmentId', {
     preHandler: authenticateReader
   }, async (request, reply) => {
     const { pin, name } = request.user;
@@ -275,7 +275,7 @@ export default async function readerRoutes(fastify, options) {
   // ==============================================
   // SAVE CORRECTIONS (API)
   // ==============================================
-  fastify.post('/api/readers/save-corrections', {
+  fastify.post('/api/readers/saveCorrections', {
     preHandler: authenticateReader
   }, async (request, reply) => {
     const { pin, name } = request.user;
@@ -312,7 +312,7 @@ export default async function readerRoutes(fastify, options) {
   // ==============================================
   // SUBMIT CORRECTIONS (API)
   // ==============================================
-  fastify.post('/api/readers/submit-corrections', {
+  fastify.post('/api/readers/submitCorrections', {
     preHandler: authenticateReader
   }, async (request, reply) => {
     const { pin, name } = request.user;
@@ -364,7 +364,7 @@ export default async function readerRoutes(fastify, options) {
   // ==============================================
   // PAYMENT STATUS
   // ==============================================
-  fastify.get('/payment-status', {
+  fastify.get('/paymentStatus', {
     preHandler: authenticateReader
   }, async (request, reply) => {
     const { pin, name } = request.user;
@@ -411,7 +411,7 @@ export default async function readerRoutes(fastify, options) {
    * ROUTE 1: RENDER PAYMENT PROCESSING MODAL
    * GET /payment-processing?assignmentId=xxx
    */
-  fastify.get('/payment-processing', {
+  fastify.get('/paymentProcessing', {
     preHandler: authenticateReader
   }, async (request, reply) => {
     try {
@@ -552,7 +552,7 @@ export default async function readerRoutes(fastify, options) {
    * ROUTE 3: VIEW PAYMENT HISTORY
    * GET /readers/payment-history
    */
-  fastify.get('/readers/payment-history', {
+  fastify.get('/readers/paymentHistory', {
     preHandler: authenticateReader
   }, async (request, reply) => {
     try {
