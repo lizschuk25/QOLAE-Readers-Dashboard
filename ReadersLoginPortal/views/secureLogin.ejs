@@ -1,0 +1,523 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QOLAE Readers - Secure Login</title>
+    <!-- ========================================== -->
+    <!-- LOCATION BLOCK 0: ALL CSS STYLES -->
+    <!-- ========================================== -->
+    <style>
+        /* ===== RESET & BASE STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        /* ===== CONTAINER ===== */
+        .secureLoginContainer {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 450px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        /* ===== LOGO & BRANDING ===== */
+        .logoSection {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logoImage {
+            max-width: 180px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        
+        .logoSection h1 {
+            color: #1e3a5f;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .logoSection p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .stepIndicator {
+            display: inline-block;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        /* ===== PROGRESS STEPS ===== */
+        .progressSteps {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .progressStep {
+            width: 40px;
+            height: 4px;
+            border-radius: 2px;
+            background: #e5e7eb;
+        }
+        
+        .progressStep.completed {
+            background: #22c55e;
+        }
+        
+        .progressStep.active {
+            background: #2c5282;
+        }
+        
+        /* ===== FORM STYLES ===== */
+        .formGroup {
+            margin-bottom: 24px;
+        }
+        
+        .formLabel {
+            display: block;
+            color: #374151;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .formInput {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .formInput:focus {
+            outline: none;
+            border-color: #2c5282;
+            box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.1);
+        }
+        
+        .formHint {
+            color: #6b7280;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+        
+        /* ===== PASSWORD STRENGTH ===== */
+        .passwordStrength {
+            margin-top: 8px;
+        }
+        
+        .strengthBar {
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+        
+        .strengthFill {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s;
+        }
+        
+        .strengthFill.weak { width: 33%; background: #ef4444; }
+        .strengthFill.medium { width: 66%; background: #f59e0b; }
+        .strengthFill.strong { width: 100%; background: #22c55e; }
+        
+        .strengthText {
+            font-size: 11px;
+            color: #6b7280;
+        }
+        
+        /* ===== BUTTON STYLES ===== */
+        .btnPrimary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btnPrimary:hover {
+            background: linear-gradient(135deg, #2c5282 0%, #3b6291 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(44, 82, 130, 0.4);
+        }
+        
+        .btnPrimary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* ===== MESSAGE STYLES ===== */
+        .messageBox {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .messageSuccess {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+        
+        .messageError {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        
+        .messageInfo {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+        
+        /* ===== READER INFO ===== */
+        .readerInfo {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .readerInfo strong {
+            color: #1e3a5f;
+        }
+        
+        /* ===== PASSWORD REQUIREMENTS ===== */
+        .passwordRequirements {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+        
+        .passwordRequirements h4 {
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+        
+        .passwordRequirements ul {
+            list-style: none;
+            color: #6b7280;
+        }
+        
+        .passwordRequirements li {
+            padding: 2px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .passwordRequirements li::before {
+            content: '○';
+            position: absolute;
+            left: 0;
+            color: #9ca3af;
+        }
+        
+        .passwordRequirements li.valid::before {
+            content: '✓';
+            color: #22c55e;
+        }
+        
+        /* ===== SECURITY BADGE ===== */
+        .securityBadge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            color: #64748b;
+            font-size: 12px;
+        }
+        
+        .securityBadge svg {
+            width: 16px;
+            height: 16px;
+            fill: #22c55e;
+        }
+        
+        /* ===== FOOTER ===== */
+        .footerText {
+            text-align: center;
+            margin-top: 20px;
+            color: #9ca3af;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ========================================== -->
+    <!-- LOCATION BLOCK 1: LOGO & HEADER -->
+    <!-- ========================================== -->
+    <div class="secureLoginContainer">
+        <div class="logoSection">
+            <img src="/public/images/qolaeNewLogo.png" alt="QOLAE Logo" class="logoImage" onerror="this.style.display='none'">
+            <% if (typeof setupCompleted !== 'undefined' && setupCompleted) { %>
+                <h1>Welcome Back</h1>
+                <p>Enter your password to access your workspace</p>
+                <span class="stepIndicator">Step 4 of 5</span>
+            <% } else { %>
+                <h1>Create Password</h1>
+                <p>Set up a secure password for your account</p>
+                <span class="stepIndicator">Step 4 of 5</span>
+            <% } %>
+        </div>
+        
+        <!-- ========================================== -->
+        <!-- LOCATION BLOCK 2: PROGRESS INDICATOR -->
+        <!-- ========================================== -->
+        <div class="progressSteps">
+            <div class="progressStep completed"></div>
+            <div class="progressStep completed"></div>
+            <div class="progressStep completed"></div>
+            <div class="progressStep active"></div>
+            <div class="progressStep"></div>
+        </div>
+        
+        <!-- ========================================== -->
+        <!-- LOCATION BLOCK 3: MESSAGE DISPLAY -->
+        <!-- ========================================== -->
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="messageBox messageError"><%= error %></div>
+        <% } %>
+        
+        <% if (typeof verified !== 'undefined' && verified) { %>
+            <div class="messageBox messageSuccess">
+                Email verified successfully! Please create your password.
+            </div>
+        <% } %>
+        
+        <% if (typeof reader !== 'undefined' && reader && reader.readerName) { %>
+            <div class="readerInfo">
+                Welcome, <strong><%= reader.readerName %></strong>
+            </div>
+        <% } %>
+        
+        <!-- ========================================== -->
+        <!-- LOCATION BLOCK 4: PASSWORD FORM -->
+        <!-- ========================================== -->
+        <form action="/readersAuth/secureLogin" method="POST" id="secureLoginForm" data-is-new-user="<%= (typeof setupCompleted === 'undefined' || !setupCompleted) ? 'true' : 'false' %>">
+            <input type="hidden" name="isNewUser" value="<%= (typeof setupCompleted === 'undefined' || !setupCompleted) ? 'true' : 'false' %>">
+            
+            <div class="formGroup">
+                <label class="formLabel" for="password">
+                    <% if (typeof setupCompleted !== 'undefined' && setupCompleted) { %>
+                        Password
+                    <% } else { %>
+                        Create Password
+                    <% } %>
+                </label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="formInput" 
+                    placeholder="Enter your password"
+                    minlength="8"
+                    required
+                    autofocus
+                >
+                
+                <% if (typeof setupCompleted === 'undefined' || !setupCompleted) { %>
+                    <div class="passwordStrength">
+                        <div class="strengthBar">
+                            <div class="strengthFill" id="strengthFill"></div>
+                        </div>
+                        <span class="strengthText" id="strengthText">Password strength</span>
+                    </div>
+                <% } %>
+            </div>
+            
+            <% if (typeof setupCompleted === 'undefined' || !setupCompleted) { %>
+                <div class="formGroup">
+                    <label class="formLabel" for="confirmPassword">Confirm Password</label>
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        name="confirmPassword" 
+                        class="formInput" 
+                        placeholder="Confirm your password"
+                        minlength="8"
+                        required
+                    >
+                    <p class="formHint" id="matchHint"></p>
+                </div>
+                
+                <div class="passwordRequirements">
+                    <h4>Password Requirements:</h4>
+                    <ul>
+                        <li id="reqLength">At least 8 characters</li>
+                        <li id="reqUpper">One uppercase letter</li>
+                        <li id="reqLower">One lowercase letter</li>
+                        <li id="reqNumber">One number</li>
+                    </ul>
+                </div>
+            <% } %>
+            
+            <button type="submit" class="btnPrimary" id="submitBtn">
+                <% if (typeof setupCompleted !== 'undefined' && setupCompleted) { %>
+                    Sign In
+                <% } else { %>
+                    Create Password & Continue
+                <% } %>
+            </button>
+        </form>
+        
+        <!-- ========================================== -->
+        <!-- LOCATION BLOCK 5: SECURITY BADGE -->
+        <!-- ========================================== -->
+        <div class="securityBadge">
+            <svg viewBox="0 0 24 24">
+                <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"/>
+            </svg>
+            <span>Password encrypted with bcrypt</span>
+        </div>
+        
+        <p class="footerText">© 2025 QOLAE. All rights reserved.</p>
+    </div>
+    
+    <!-- ========================================== -->
+    <!-- LOCATION BLOCK 6: JAVASCRIPT -->
+    <!-- ========================================== -->
+    <script>
+        const passwordInput = document.getElementById('password');
+        const confirmInput = document.getElementById('confirmPassword');
+        const strengthFill = document.getElementById('strengthFill');
+        const strengthText = document.getElementById('strengthText');
+        const matchHint = document.getElementById('matchHint');
+        const submitBtn = document.getElementById('submitBtn');
+        const secureLoginForm = document.getElementById('secureLoginForm');
+        const isNewUser = secureLoginForm.dataset.isNewUser === 'true';
+        
+        // Password strength checker
+        function checkStrength(password) {
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            
+            return strength;
+        }
+        
+        // Update requirements
+        function updateRequirements(password) {
+            document.getElementById('reqLength').classList.toggle('valid', password.length >= 8);
+            document.getElementById('reqUpper').classList.toggle('valid', /[A-Z]/.test(password));
+            document.getElementById('reqLower').classList.toggle('valid', /[a-z]/.test(password));
+            document.getElementById('reqNumber').classList.toggle('valid', /[0-9]/.test(password));
+        }
+        
+        if (isNewUser && passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                const strength = checkStrength(this.value);
+                
+                strengthFill.className = 'strengthFill';
+                if (strength <= 1) {
+                    strengthFill.classList.add('weak');
+                    strengthText.textContent = 'Weak password';
+                } else if (strength <= 3) {
+                    strengthFill.classList.add('medium');
+                    strengthText.textContent = 'Medium strength';
+                } else {
+                    strengthFill.classList.add('strong');
+                    strengthText.textContent = 'Strong password';
+                }
+                
+                updateRequirements(this.value);
+                checkMatch();
+            });
+            
+            if (confirmInput) {
+                confirmInput.addEventListener('input', checkMatch);
+            }
+        }
+        
+        function checkMatch() {
+            if (!confirmInput || !matchHint) return;
+            
+            if (confirmInput.value === '') {
+                matchHint.textContent = '';
+                matchHint.style.color = '#6b7280';
+            } else if (passwordInput.value === confirmInput.value) {
+                matchHint.textContent = '✓ Passwords match';
+                matchHint.style.color = '#22c55e';
+            } else {
+                matchHint.textContent = '✗ Passwords do not match';
+                matchHint.style.color = '#ef4444';
+            }
+        }
+        
+        // Form validation
+        document.getElementById('secureLoginForm').addEventListener('submit', function(e) {
+            if (isNewUser) {
+                const password = passwordInput.value;
+                const confirm = confirmInput ? confirmInput.value : '';
+                
+                if (password !== confirm) {
+                    e.preventDefault();
+                    matchHint.textContent = '✗ Passwords must match';
+                    matchHint.style.color = '#ef4444';
+                    return;
+                }
+                
+                if (checkStrength(password) < 4) {
+                    e.preventDefault();
+                    alert('Please ensure your password meets all requirements.');
+                    return;
+                }
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+        });
+    </script>
+</body>
+</html>
