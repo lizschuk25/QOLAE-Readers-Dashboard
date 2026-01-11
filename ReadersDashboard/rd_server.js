@@ -87,8 +87,8 @@ await server.register(fastifyView, {
 // ROUTES REGISTRATION
 // ==============================================
 
-// Authentication Routes
-await server.register(import('./routes/authRoutes.js'));
+// Authentication is handled by ReadersLoginPortal (port 3015)
+// This server (port 3008) handles the authenticated workspace only
 
 // Reader Routes (NDA, Reports, Corrections)
 await server.register(import('./routes/readerRoutes.js'));
@@ -98,7 +98,8 @@ await server.register(import('./routes/readerRoutes.js'));
 // ==============================================
 
 server.get('/', async (request, reply) => {
-  return reply.redirect('/readers-login');
+  // Redirect to ReadersLoginPortal (port 3015)
+  return reply.redirect('https://readers.qolae.com/readersLogin');
 });
 
 // ==============================================
@@ -126,7 +127,7 @@ server.get('/readers-management-hub', async (request, reply) => {
 
   } catch (error) {
     server.log.error('Error loading Readers Management Hub:', error);
-    return reply.redirect('/readers-login');
+    return reply.redirect('https://readers.qolae.com/readersLogin');
   }
 });
 
@@ -214,7 +215,7 @@ const start = async () => {
     console.log(`📊 Database: qolae_readers`);
     console.log('');
     console.log('Available Routes:');
-    console.log('  🔐 Login: /readers-login');
+    console.log('  🔐 Login: https://readers.qolae.com/readersLogin (ReadersLoginPortal - port 3015)');
     console.log('  🏠 Dashboard: /readers-dashboard');
     console.log('  📚 Management Hub: /readers-management-hub');
     console.log('  📝 NDA Workflow: /nda-review');

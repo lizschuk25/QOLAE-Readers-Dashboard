@@ -1,4 +1,3 @@
-cat > /var/www/readers.qolae.com/ReadersLoginPortal/Readers_server.js << 'EOF'
 // ==============================================
 // Readers_server.js - Readers Login Portal Server
 // QOLAE Readers Login & Authentication Hub
@@ -539,7 +538,7 @@ const start = async () => {
     await fastify.register(readersAuthRoute);
 
     await fastify.listen({
-      port: process.env.PORT || 3016,
+      port: process.env.PORT || 3015,
       host: '0.0.0.0'
     });
     const address = fastify.server.address();
