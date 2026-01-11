@@ -39,9 +39,9 @@ axios.interceptors.response.use(
 const READERS_DASHBOARD_BASE_URL = 'https://readers.qolae.com';
 
 // JWT Secret - fail fast if not configured
-const JWT_SECRET = process.env.JWT_SECRET || (() => {
-  console.error('❌ JWT_SECRET not found in environment variables!');
-  throw new Error('JWT_SECRET environment variable is required');
+const JWT_SECRET = process.env.READERS_LOGIN_JWT_SECRET || (() => {
+  console.error('❌ READERS_LOGIN_JWT_SECRET not found in environment variables!');
+  throw new Error('READERS_LOGIN_JWT_SECRET environment variable is required');
 })();
 
 // ==============================================
@@ -345,14 +345,14 @@ export default async function readersAuthRoutes(fastify, opts) {
         // ═══════════════════════════════════════════════════════════
         if (!readerData.complianceSubmitted) {
           console.log(`[2FA] Reader ${readerPin} needs compliance - redirecting to HRCompliance`);
-          return reply.code(302).redirect(`${process.env.HRCOMPLIANCE_URL || 'https://hrcompliance.qolae.com/readersCompliance'}?readerPin=${readerPin}&verified=true`);
+          return reply.code(302).redirect(`${process.env.HRCOMPLIANCE_URL || 'https://hrcompliance.qolae.com'}/readersCompliance`);
         }
 
         // Redirect based on password setup status
         if (ssotData.passwordSetupCompleted) {
-          return reply.code(302).redirect(`/secureLogin?readerPin=${readerPin}&setupCompleted=true`);
+          return reply.code(302).redirect(`/secureLogin?setupCompleted=true`);
         } else {
-          return reply.code(302).redirect(`/secureLogin?readerPin=${readerPin}&verified=true`);
+          return reply.code(302).redirect(`/secureLogin?verified=true`);
         }
       } else {
         fastify.log.warn({
@@ -456,7 +456,7 @@ export default async function readersAuthRoutes(fastify, opts) {
             path: '/',
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'lax',
             maxAge: 60 * 60 * 24
           });
 
