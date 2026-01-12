@@ -27,7 +27,7 @@ const readersDb = new Pool({
 // ==============================================
 function getDirectoryPaths() {
   // Use API Dashboard central repository (following Admin pattern)
-  const apiCentralRepo = '/var/www/api.qolae.com/central-repository';
+  const apiCentralRepo = '/var/www/api.qolae.com/centralRepository';
 
   return {
     finalNdaDir: path.join(apiCentralRepo, 'final-nda'),

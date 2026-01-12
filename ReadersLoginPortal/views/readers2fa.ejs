@@ -15,7 +15,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
@@ -25,7 +25,7 @@
             justify-content: center;
             padding: 20px;
         }
-        
+
         /* ===== CONTAINER ===== */
         .verificationContainer {
             background: white;
@@ -35,31 +35,31 @@
             width: 100%;
             padding: 40px;
         }
-        
+
         /* ===== LOGO & BRANDING ===== */
         .logoSection {
             text-align: center;
             margin-bottom: 30px;
         }
-        
+
         .logoImage {
             max-width: 180px;
             height: auto;
             margin-bottom: 15px;
         }
-        
+
         .logoSection h1 {
             color: #1e3a5f;
             font-size: 24px;
             font-weight: 700;
             margin-bottom: 8px;
         }
-        
+
         .logoSection p {
             color: #6b7280;
             font-size: 14px;
         }
-        
+
         .stepIndicator {
             display: inline-block;
             background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
@@ -70,7 +70,7 @@
             font-weight: 600;
             margin-top: 10px;
         }
-        
+
         /* ===== PROGRESS STEPS ===== */
         .progressSteps {
             display: flex;
@@ -78,27 +78,27 @@
             gap: 8px;
             margin-bottom: 30px;
         }
-        
+
         .progressStep {
             width: 40px;
             height: 4px;
             border-radius: 2px;
             background: #e5e7eb;
         }
-        
+
         .progressStep.completed {
             background: #22c55e;
         }
-        
+
         .progressStep.active {
             background: #2c5282;
         }
-        
+
         /* ===== FORM STYLES ===== */
         .formGroup {
             margin-bottom: 24px;
         }
-        
+
         .formLabel {
             display: block;
             color: #374151;
@@ -106,7 +106,7 @@
             margin-bottom: 8px;
             font-size: 14px;
         }
-        
+
         .formInput {
             width: 100%;
             padding: 12px 16px;
@@ -118,20 +118,20 @@
             font-weight: 600;
             transition: all 0.3s;
         }
-        
+
         .formInput:focus {
             outline: none;
             border-color: #2c5282;
             box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.1);
         }
-        
+
         .formHint {
             color: #6b7280;
             font-size: 12px;
             margin-top: 6px;
             text-align: center;
         }
-        
+
         /* ===== BUTTON STYLES ===== */
         .btnPrimary {
             width: 100%;
@@ -146,20 +146,20 @@
             transition: all 0.3s;
             margin-bottom: 12px;
         }
-        
+
         .btnPrimary:hover {
             background: linear-gradient(135deg, #2c5282 0%, #3b6291 100%);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(44, 82, 130, 0.4);
         }
-        
+
         .btnPrimary:disabled {
             background: #9ca3af;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
-        
+
         .btnSecondary {
             width: 100%;
             padding: 12px;
@@ -172,16 +172,16 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-        
+
         .btnSecondary:hover {
             background: #f0f4f8;
         }
-        
+
         .btnSecondary:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        
+
         /* ===== MESSAGE STYLES ===== */
         .messageBox {
             padding: 12px 16px;
@@ -189,25 +189,25 @@
             margin-bottom: 20px;
             font-size: 14px;
         }
-        
+
         .messageSuccess {
             background: #d1fae5;
             color: #065f46;
             border: 1px solid #6ee7b7;
         }
-        
+
         .messageError {
             background: #fee2e2;
             color: #991b1b;
             border: 1px solid #fca5a5;
         }
-        
+
         .messageInfo {
             background: #dbeafe;
             color: #1e40af;
             border: 1px solid #93c5fd;
         }
-        
+
         /* ===== EMAIL DISPLAY ===== */
         .emailDisplay {
             background: #f8fafc;
@@ -218,11 +218,11 @@
             color: #374151;
             font-size: 14px;
         }
-        
+
         .emailDisplay strong {
             color: #1e3a5f;
         }
-        
+
         /* ===== TIMER ===== */
         .timerDisplay {
             text-align: center;
@@ -230,11 +230,11 @@
             font-size: 13px;
             margin-top: 16px;
         }
-        
+
         .timerDisplay.expiring {
             color: #dc2626;
         }
-        
+
         /* ===== SECURITY BADGE ===== */
         .securityBadge {
             display: flex;
@@ -248,19 +248,24 @@
             color: #64748b;
             font-size: 12px;
         }
-        
+
         .securityBadge svg {
             width: 16px;
             height: 16px;
             fill: #22c55e;
         }
-        
+
         /* ===== FOOTER ===== */
         .footerText {
             text-align: center;
             margin-top: 20px;
             color: #9ca3af;
             font-size: 12px;
+        }
+
+        /* ===== AUTH OPTION ===== */
+        .authOption {
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -270,12 +275,16 @@
     <!-- ========================================== -->
     <div class="verificationContainer">
         <div class="logoSection">
-            <img src="https://api.qolae.com/central-repository/public/images/qolaeNewLogo.png" alt="QOLAE Logo" class="logoImage">
+            <img src="https://api.qolae.com/centralRepository/public/images/qolaeNewLogo.png" alt="QOLAE Logo" class="logoImage">
             <h1>Email Verification</h1>
-            <p>Enter the 6-digit code sent to your email</p>
+            <% if (typeof query !== 'undefined' && query.codeSent === 'true') { %>
+                <p>Enter the 6-digit code sent to your email</p>
+            <% } else { %>
+                <p>Request a verification code to continue</p>
+            <% } %>
             <span class="stepIndicator">Step 2 of 5</span>
         </div>
-        
+
         <!-- ========================================== -->
         <!-- LOCATION BLOCK 2: PROGRESS INDICATOR -->
         <!-- ========================================== -->
@@ -286,68 +295,93 @@
             <div class="progressStep"></div>
             <div class="progressStep"></div>
         </div>
-        
+
         <!-- ========================================== -->
         <!-- LOCATION BLOCK 3: MESSAGE DISPLAY -->
         <!-- ========================================== -->
         <% if (typeof error !== 'undefined' && error) { %>
             <div class="messageBox messageError"><%= error %></div>
         <% } %>
-        
-        <% if (typeof codeSent !== 'undefined' && codeSent) { %>
+
+        <% if (typeof query !== 'undefined' && query.error) { %>
+            <div class="messageBox messageError"><%= decodeURIComponent(query.error) %></div>
+        <% } %>
+
+        <% if (typeof query !== 'undefined' && query.codeSent === 'true') { %>
             <div class="messageBox messageSuccess">
                 Verification code sent! Check your email inbox.
             </div>
         <% } %>
-        
-        <% if (typeof reader !== 'undefined' && reader && reader.readerEmail) { %>
+
+        <% if (typeof email !== 'undefined' && email) { %>
             <div class="emailDisplay">
-                Code sent to: <strong><%= reader.readerEmail %></strong>
+                Email: <strong><%= email %></strong>
             </div>
         <% } %>
-        
+
         <!-- ========================================== -->
-        <!-- LOCATION BLOCK 4: VERIFICATION FORM -->
+        <!-- LOCATION BLOCK 4: INITIAL STATE - SEND CODE BUTTON -->
+        <!-- (Shown when codeSent is NOT true) -->
         <!-- ========================================== -->
-        <form action="/readersAuth/verify2fa" method="POST" id="verifyForm">
-            <div class="formGroup">
-                <label class="formLabel" for="verificationCode">Verification Code</label>
-                <input 
-                    type="text" 
-                    id="verificationCode" 
-                    name="verificationCode" 
-                    class="formInput" 
-                    placeholder="000000"
-                    maxlength="6"
-                    pattern="[0-9]{6}"
-                    inputmode="numeric"
-                    autocomplete="one-time-code"
-                    required
-                    autofocus
-                >
-                <p class="formHint">Enter the 6-digit code from your email</p>
+        <% if (typeof query === 'undefined' || query.codeSent !== 'true') { %>
+            <div class="authOption">
+                <p style="text-align: center; color: #6b7280; margin-bottom: 20px;">
+                    Click below to receive a 6-digit verification code via email.
+                </p>
+                <form action="/readersAuth/requestEmailCode" method="POST" id="sendCodeForm">
+                    <button type="submit" class="btnPrimary" id="sendCodeBtn">
+                        Send Verification Code
+                    </button>
+                </form>
             </div>
-            
-            <button type="submit" class="btnPrimary" id="verifyBtn">
-                Verify Code
-            </button>
-        </form>
-        
+        <% } %>
+
         <!-- ========================================== -->
-        <!-- LOCATION BLOCK 5: RESEND CODE -->
+        <!-- LOCATION BLOCK 5: VERIFICATION FORM -->
+        <!-- (Shown ONLY when codeSent === 'true') -->
         <!-- ========================================== -->
-        <form action="/readersAuth/requestEmailCode" method="POST" id="resendForm">
-            <button type="submit" class="btnSecondary" id="resendBtn">
-                Resend Code
-            </button>
-        </form>
-        
-        <div class="timerDisplay" id="timerDisplay">
-            Code expires in <span id="countdown">10:00</span>
-        </div>
-        
+        <% if (typeof query !== 'undefined' && query.codeSent === 'true') { %>
+            <form action="/readersAuth/verify2fa" method="POST" id="verifyForm">
+                <div class="formGroup">
+                    <label class="formLabel" for="verificationCode">Verification Code</label>
+                    <input
+                        type="text"
+                        id="verificationCode"
+                        name="verificationCode"
+                        class="formInput"
+                        placeholder="000000"
+                        maxlength="6"
+                        pattern="[0-9]{6}"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                        required
+                        autofocus
+                    >
+                    <p class="formHint">Enter the 6-digit code from your email</p>
+                </div>
+
+                <button type="submit" class="btnPrimary" id="verifyBtn">
+                    Verify Code
+                </button>
+            </form>
+
+            <!-- ========================================== -->
+            <!-- LOCATION BLOCK 6: RESEND CODE -->
+            <!-- (Only shown after initial code was sent) -->
+            <!-- ========================================== -->
+            <form action="/readersAuth/requestEmailCode" method="POST" id="resendForm">
+                <button type="submit" class="btnSecondary" id="resendBtn">
+                    Resend Code
+                </button>
+            </form>
+
+            <div class="timerDisplay" id="timerDisplay">
+                Code expires in <span id="countdown">10:00</span>
+            </div>
+        <% } %>
+
         <!-- ========================================== -->
-        <!-- LOCATION BLOCK 6: SECURITY BADGE -->
+        <!-- LOCATION BLOCK 7: SECURITY BADGE -->
         <!-- ========================================== -->
         <div class="securityBadge">
             <svg viewBox="0 0 24 24">
@@ -355,54 +389,74 @@
             </svg>
             <span>2-Factor Authentication Active</span>
         </div>
-        
+
         <p class="footerText">© 2025 QOLAE. All rights reserved.</p>
     </div>
-    
+
     <!-- ========================================== -->
-    <!-- LOCATION BLOCK 7: JAVASCRIPT -->
+    <!-- LOCATION BLOCK 8: JAVASCRIPT -->
+    <!-- ✅ SERVER-SIDE COMPLIANT: Minimal JavaScript -->
+    <!-- No axios, no fetch, no client-side HTTP calls -->
     <!-- ========================================== -->
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ 2FA Page loaded - Server-side compliant');
+
+            // Auto-hide success/error messages after 5 seconds
+            const messages = document.querySelectorAll('.messageBox');
+            messages.forEach(msg => {
+                setTimeout(() => {
+                    msg.style.opacity = '0';
+                    msg.style.transition = 'opacity 0.3s';
+                    setTimeout(() => msg.remove(), 300);
+                }, 5000);
+            });
+        });
+
+        <% if (typeof query !== 'undefined' && query.codeSent === 'true') { %>
+        // ===== VERIFICATION STATE JAVASCRIPT =====
+        // Only runs when code has been sent
+
         // Auto-format code input (numbers only)
         document.getElementById('verificationCode').addEventListener('input', function(e) {
             this.value = this.value.replace(/[^0-9]/g, '').substring(0, 6);
-            
-            // Auto-submit when 6 digits entered
+
+            // Auto-focus verify button when 6 digits entered
             if (this.value.length === 6) {
                 document.getElementById('verifyBtn').focus();
             }
         });
-        
+
         // Form submission handling
         document.getElementById('verifyForm').addEventListener('submit', function(e) {
             const btn = document.getElementById('verifyBtn');
             btn.disabled = true;
             btn.textContent = 'Verifying...';
         });
-        
+
         document.getElementById('resendForm').addEventListener('submit', function(e) {
             const btn = document.getElementById('resendBtn');
             btn.disabled = true;
             btn.textContent = 'Sending...';
         });
-        
+
         // Countdown timer (10 minutes)
         let timeLeft = 600;
         const countdownEl = document.getElementById('countdown');
         const timerEl = document.getElementById('timerDisplay');
-        
+
         const timer = setInterval(function() {
             timeLeft--;
-            
+
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
-            
+
             countdownEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            
+
             if (timeLeft <= 60) {
                 timerEl.classList.add('expiring');
             }
-            
+
             if (timeLeft <= 0) {
                 clearInterval(timer);
                 countdownEl.textContent = 'EXPIRED';
@@ -410,6 +464,15 @@
                 document.getElementById('verifyBtn').textContent = 'Code Expired - Request New Code';
             }
         }, 1000);
+        <% } else { %>
+        // ===== INITIAL STATE JAVASCRIPT =====
+        // Send Code button handler
+        document.getElementById('sendCodeForm').addEventListener('submit', function(e) {
+            const btn = document.getElementById('sendCodeBtn');
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+        });
+        <% } %>
     </script>
 </body>
 </html>
