@@ -30,7 +30,7 @@ function getDirectoryPaths() {
   const apiCentralRepo = '/var/www/api.qolae.com/centralRepository';
 
   return {
-    finalNdaDir: path.join(apiCentralRepo, 'final-nda'),
+    finalNdaDir: path.join(apiCentralRepo, 'finalNda'),
     signedNdaDir: path.join(apiCentralRepo, 'signed-nda'),
     signaturesDir: path.join(apiCentralRepo, 'signatures')
   };

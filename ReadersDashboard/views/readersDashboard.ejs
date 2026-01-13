@@ -22,6 +22,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QOLAE Readers Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
 <!-- ========================================== -->
 <!-- LOCATION BLOCK 0: ALL CSS STYLES -->
@@ -36,7 +37,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -48,42 +49,100 @@
 
         /* ===== HEADER STYLES ===== */
         .header {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px 30px;
-            border-radius: 12px;
-            margin-bottom: 25px;
+            background: #ffffff;
             backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .logo {
-            font-size: 32px;
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 8px;
-        }
-
-        .tagline {
-            color: #64748b;
-            font-size: 16px;
-            margin-bottom: 15px;
-        }
-
-        .security-badges {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .badge {
-            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
 
-        .secure { background: #dcfce7; color: #166534; }
-        .nda { background: #fef3c7; color: #92400e; }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-section {
+            background: transparent;
+            padding: 0;
+            margin: 0;
+            border: none;
+            outline: none;
+        }
+
+        .logo-section h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            height: 6.5rem;
+            margin: 0;
+            background: none;
+            border: none;
+            outline: none;
+            box-shadow: none;
+        }
+
+        .logo-section h1 img {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            object-fit: contain;
+            border: none;
+            outline: none;
+            box-shadow: none;
+        }
+
+        .status-indicators {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .secure {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .gdpr {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 20px;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(220, 38, 38, 0.3);
+            background: linear-gradient(135deg, #b91c1c, #991b1b);
+        }
 
         /* ===== READER TYPE SELECTOR STYLES ===== */
         .reader-selector {
@@ -154,32 +213,31 @@
 
         /* ===== WELCOME SECTION STYLES ===== */
         .welcome-section {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px 30px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            padding: 25px;
+            border-radius: 15px;
             border-left: 5px solid #667eea;
         }
 
-        .reader-type {
-            display: inline-block;
-            padding: 8px 16px;
-            background: #667eea;
-            color: white;
-            border-radius: 20px;
-            font-size: 14px;
+        .welcome-title {
+            font-size: 1.8rem;
             font-weight: 600;
+            margin-bottom: 10px;
+            color: #1e293b;
+        }
+
+        .welcome-text {
+            color: #64748b;
+            line-height: 1.6;
             margin-bottom: 15px;
         }
 
         .session-info {
             display: flex;
             gap: 30px;
-            margin-top: 15px;
-            font-size: 14px;
+            font-size: 0.9rem;
             color: #64748b;
+            flex-wrap: wrap;
         }
 
         /* ===== WORKFLOW PROGRESS STYLES ===== */
@@ -218,8 +276,8 @@
 
         .progress-fill {
             height: 100%;
-            background: #667eea;
-            width: 50%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
             transition: width 0.5s ease;
         }
 
@@ -275,27 +333,27 @@
             font-weight: 600;
         }
 
-        /* ===== DASHBOARD GRID STYLES ===== */
-        .dashboard-grid {
+        /* ===== WORKFLOW CARDS CONTAINER (GRID LAYOUT) ===== */
+        .workflow-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 25px;
-            margin-bottom: 25px;
+            margin-top: 30px;
         }
 
         .dashboard-card {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             position: relative;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: all 0.3s ease;
+            overflow: hidden;
         }
 
         .dashboard-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
         }
 
         .status-indicator {
@@ -323,23 +381,43 @@
             color: #92400e;
         }
 
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
         .card-icon {
-            font-size: 48px;
-            width: 80px;
-            height: 80px;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: #f8faff;
-            border-radius: 16px;
-            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .card-icon.primary-icon {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .card-icon.success-icon {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .card-icon.warning-icon {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .card-icon.info-icon {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
         }
 
         .card-title {
-            font-size: 20px;
+            font-size: 1.2rem;
             font-weight: 600;
             color: #1e293b;
-            margin-bottom: 12px;
         }
 
         .card-description {
@@ -350,26 +428,28 @@
 
         .card-actions {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
             gap: 10px;
         }
 
         .btn {
-            padding: 10px 18px;
+            padding: 12px 20px;
             border: none;
             border-radius: 8px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
-            display: inline-flex;
+            transition: all 0.3s ease;
+            display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
         }
 
         .btn:not(:disabled):hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
         }
 
         .btn:disabled {
@@ -378,376 +458,164 @@
         }
 
         .btn-primary {
-            background: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
         }
 
         .btn-primary:hover {
-            background: #5568d3;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
 
         .btn-success {
-            background: #10b981;
+            background: linear-gradient(135deg, #10b981, #059669);
             color: white;
         }
 
         .btn-warning {
-            background: #f59e0b;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
             color: white;
         }
 
         .btn-secondary {
-            background: #e2e8f0;
+            background: #f1f5f9;
             color: #475569;
         }
 
         .btn-secondary:hover {
-            background: #cbd5e1;
+            background: #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
-        /* ===== SECURITY NOTICE STYLES ===== */
+        /* ===== FOOTER CONTAINER (Merged Security Notice + Footer) ===== */
+        .footer-container {
+            background: white;
+            border-radius: 15px;
+            padding: 0;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
         .security-notice {
-            background: rgba(255, 255, 255, 0.95);
+            background: #fef3c7;
+            border-bottom: 2px solid #f59e0b;
             padding: 20px 30px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            border-left: 5px solid #10b981;
         }
 
-        .security-notice-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 10px;
+        .security-notice-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .security-notice p {
-            color: #64748b;
-            line-height: 1.6;
+        .security-notice-icon {
+            font-size: 24px;
+        }
+
+        .security-notice-text {
             margin: 0;
+            font-size: 14px;
+            color: #92400e;
+            line-height: 1.6;
+        }
+
+        .security-notice-text strong {
+            font-weight: 600;
         }
 
         /* ===== FOOTER STYLES ===== */
         .footer {
-            text-align: center;
-            padding: 20px;
-            color: rgba(255, 255, 255, 0.9);
+            background: white;
+            padding: 25px 30px;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-text {
+            margin: 0;
+            color: #6b7280;
             font-size: 14px;
-            line-height: 1.8;
         }
 
-        .footer a {
+        .footer-links {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #3b82f6;
             text-decoration: none;
-            transition: opacity 0.2s ease;
+            font-size: 14px;
+            transition: color 0.2s ease;
         }
 
-        .footer a:hover {
-            opacity: 0.7;
+        .footer-links a:hover {
+            color: #2563eb;
+            text-decoration: underline;
         }
 
         /* ===== READERS MANAGEMENT HUB STYLES ===== */
-        .management-hub-card {
-            grid-column: 1 / -1;
-        }
+        /* RMH is a standard card - same size as other workflow cards */
 
-        .tab-navigation {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 0;
-        }
-
-        .tab-btn {
-            padding: 10px 20px;
-            background: transparent;
-            border: none;
-            border-bottom: 3px solid transparent;
-            font-size: 14px;
-            font-weight: 600;
-            color: #64748b;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-bottom: -2px;
-        }
-
-        .tab-btn:hover {
-            color: #667eea;
-        }
-
-        .tab-btn.active {
-            color: #667eea;
-            border-bottom-color: #667eea;
-        }
-
-        .tab-content {
-            padding: 20px 0;
-        }
-
-        .tab-content.hidden {
-            display: none;
-        }
-
-        .doc-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .doc-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            background: #f8fafc;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s ease;
-        }
-
-        .doc-item:hover {
-            border-color: #cbd5e1;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .doc-item.completed {
-            opacity: 0.7;
-            background: #f1f5f9;
-        }
-
-        .doc-icon {
-            font-size: 24px;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-            border-radius: 8px;
-        }
-
-        .doc-info {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .doc-info strong {
-            color: #1e293b;
-            font-size: 14px;
-        }
-
-        .doc-info .strikethrough {
-            text-decoration: line-through;
-            color: #94a3b8;
-        }
-
-        .doc-date {
-            color: #64748b;
-            font-size: 12px;
-        }
-
-        .btn-mini {
-            padding: 6px 14px;
-            border: none;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            background: #667eea;
-            color: white;
-            transition: all 0.2s ease;
-        }
-
-        .btn-mini:hover:not(:disabled) {
-            background: #5568d3;
-            transform: translateY(-1px);
-        }
-
-        .btn-mini:disabled {
-            background: #e2e8f0;
-            color: #94a3b8;
-            cursor: not-allowed;
-        }
-
-        .btn-mini-delete {
-            padding: 6px 10px;
-            border: none;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-            background: #fee2e2;
-            color: #991b1b;
-            transition: all 0.2s ease;
-        }
-
-        .btn-mini-delete:hover {
-            background: #fecaca;
-            transform: translateY(-1px);
-        }
-
-        .btn-mini-info {
-            padding: 6px 14px;
-            border: none;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            background: #dcfce7;
-            color: #166534;
-            cursor: default;
-        }
-
-        /* ===== UPLOAD SECTION STYLES ===== */
-        .upload-section {
-            margin-bottom: 30px;
-            padding-bottom: 30px;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .upload-header h4 {
-            color: #1e293b;
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-
-        .upload-subtext {
-            color: #64748b;
-            font-size: 13px;
-            margin-bottom: 15px;
-        }
-
-        .doc-type-selector {
-            margin-bottom: 15px;
-        }
-
-        .doc-type-selector label {
-            display: block;
-            color: #1e293b;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .category-dropdown {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #1e293b;
-            background: white;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-
-        .category-dropdown:hover {
-            border-color: #cbd5e1;
-        }
-
-        .category-dropdown:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .category-dropdown option {
-            padding: 10px;
-        }
-
-        .upload-area {
-            border: 2px dashed #cbd5e1;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: #f8fafc;
-        }
-
-        .upload-area:hover {
-            border-color: #667eea;
-            background: #f0f4ff;
-        }
-
-        .upload-icon {
-            font-size: 48px;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .upload-text {
-            display: block;
-            color: #1e293b;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .upload-hint {
-            display: block;
-            color: #94a3b8;
-            font-size: 12px;
-        }
-
-        /* ===== DOCUMENT CATEGORIES STYLES ===== */
-        .doc-categories {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        .doc-category {
-            background: #f8fafc;
-            border-radius: 8px;
-            padding: 15px;
-        }
-
-        .category-header {
-            font-weight: 600;
-            color: #1e293b;
-            font-size: 14px;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 25px;
-            text-align: center;
+        .dashboard-card.locked {
             opacity: 0.6;
+            pointer-events: none;
         }
 
-        .empty-icon {
-            font-size: 32px;
-            margin-bottom: 8px;
-            opacity: 0.5;
-        }
-
-        .empty-text {
-            color: #64748b;
-            font-size: 13px;
-            font-style: italic;
+        .dashboard-card.locked::before {
+            content: '🔒';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
         }
 
         /* ===== RESPONSIVE DESIGN ===== */
         @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
             }
 
-            .reader-options {
+            .status-indicators {
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%;
+            }
+
+            .logout-btn {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .workflow-cards {
                 grid-template-columns: 1fr;
             }
 
             .session-info {
                 flex-direction: column;
                 gap: 10px;
+            }
+
+            .card-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
             }
         }
     </style>
@@ -758,54 +626,38 @@
 <!-- LOCATION BLOCK 1: HEADER & SECURITY BADGES -->
 <!-- ========================================== -->
         <div class="header">
-            <div class="logo">QOLAE</div>
-            <div class="tagline">Secure Legal Document Review Platform</div>
-            <div class="security-badges">
-                <span class="badge secure">🔒 SSL Encrypted</span>
-                <span class="badge nda">📋 NDA Required</span>
-            </div>
-        </div>
-
-<!-- ========================================== -->
-<!-- LOCATION BLOCK 2: READER TYPE SELECTOR -->
-<!-- Maps to: User role selection (Professional vs Medical) -->
-<!-- NOTE: This section is COMMENTED OUT - Reader type is automatically -->
-<!-- determined by HR Compliance & Operations backend system -->
-<!-- ========================================== -->
-        <!-- READER TYPE SELECTOR - DISABLED (Auto-assigned by backend)
-        <div class="reader-selector">
-            <h3>Select Your Reader Type</h3>
-            <div class="reader-options">
-                <div class="reader-option active" id="professionalOption" onclick="switchToProfessional()">
-                    <div class="option-icon">👔</div>
-                    <div class="option-content">
-                        <h4>Professional Reader</h4>
-                        <p>General review and professional assessment</p>
-                    </div>
+            <div class="header-top">
+                <div class="logo-section">
+                    <h1>
+                        <img src="https://api.qolae.com/centralRepository/public/images/qolaeNewLogo.png" 
+                             alt="QOLAE Logo" />
+                    </h1>
                 </div>
-                <div class="reader-option" id="medicalOption" onclick="switchToMedical()">
-                    <div class="option-icon">⚕️</div>
-                    <div class="option-content">
-                        <h4>Medical Professional</h4>
-                        <p>Clinical review and medical assessment</p>
+                <div class="status-indicators">
+                    <div class="status-badge secure">
+                        <i class="fas fa-lock"></i>
+                        <span>Secure</span>
                     </div>
+                    <div class="status-badge gdpr">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>GDPR Compliant</span>
+                    </div>
+                    <button class="logout-btn" onclick="window.location.href='/logout'">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </button>
                 </div>
             </div>
-        </div>
-        -->
 
-<!-- ========================================== -->
-<!-- LOCATION BLOCK 3: WELCOME SECTION & SESSION INFO -->
-<!-- Maps to: Personalized greeting and session details -->
-<!-- ========================================== -->
-        <div class="welcome-section">
-            <span class="reader-type" id="readerType">Professional Reader</span>
-            <h2 id="welcomeName">Welcome Ms. Jennifer Adams</h2>
-            <p id="welcomeDesc">Access your secure professional review workspace. All data is encrypted and requires NDA compliance.</p>
-            <div class="session-info">
-                <span><strong>Last Login:</strong> October 27, 2025 at 14:32 GMT</span>
-                <span><strong>Session:</strong> Encrypted & Secure</span>
-                <span><strong>Review ID:</strong> <span id="reviewId">RW-002847</span></span>
+            
+            <div class="welcome-section">
+                <h2 class="welcome-title">Welcome <span id="welcomeName"><%= reader.readerName || 'Reader' %></span></h2>
+                <p class="welcome-text">Access your secure professional review workspace. All data is encrypted and requires NDA compliance.</p>
+                <div class="session-info">
+                    <span><strong>Last login:</strong> <span id="lastLogin"><%= reader.lastLogin || 'First Login' %></span></span>
+                    <span><strong>Session:</strong> <span id="sessionStatus">Encrypted & Secure</span></span>
+                    <span><strong>Reader PIN:</strong> <span id="readerPin"><%= reader.readerPin %></span></span>
+                </div>
             </div>
         </div>
 
@@ -819,11 +671,11 @@
                 <div class="progress-line">
                     <div class="progress-fill" id="progressFill"></div>
                 </div>
-                <div class="step completed">
-                    <div class="step-circle">1</div>
-                    <div class="step-label">NDA Signed</div>
-                </div>
                 <div class="step active">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">NDA Signing</div>
+                </div>
+                <div class="step pending">
                     <div class="step-circle">2</div>
                     <div class="step-label">Document Review</div>
                 </div>
@@ -835,50 +687,50 @@
         </div>
 
 <!-- ========================================== -->
-<!-- LOCATION BLOCK 5: NDA CARD (WORKFLOW STEP 1) -->
-<!-- Maps to: Reader signs NDA -->
+<!-- LOCATION BLOCK 5: WORKFLOW CARDS (VERTICAL STACK) -->
+<!-- Core 3-step workflow: NDA → INA Review → Payment -->
 <!-- ========================================== -->
-        <div class="dashboard-grid">
+        <div class="workflow-cards">
+            <!-- Card 1: NDA (Workflow Step 1) -->
             <div class="dashboard-card nda-card">
-                <div class="status-indicator status-completed">✅ Completed</div>
-                <div class="card-icon">📋</div>
-                <h3 class="card-title">Non-Disclosure Agreement</h3>
+                <div class="status-indicator status-pending">⏳ Pending</div>
+                <div class="card-header">
+                    <div class="card-icon primary-icon">📋</div>
+                    <div class="card-title">Non-Disclosure Agreement</div>
+                </div>
                 <p class="card-description">
-                    Review and digitally sign the NDA to access confidential report materials. Your signature has been applied and copies are available in your workspace.
+                    Review and digitally sign the NDA to access confidential report materials. Once signed, you'll be able to proceed to document review.
                 </p>
                 <div class="card-actions">
-                    <button class="btn btn-success" disabled>✅ NDA Signed</button>
+                    <button class="btn btn-primary" onclick="viewNDA()">✍️ Review & Sign NDA</button>
                     <button class="btn btn-secondary" onclick="viewNDA()">📄 View NDA</button>
-                    <button class="btn btn-secondary" onclick="downloadNDA()">💾 Download Copy</button>
                 </div>
             </div>
 
-<!-- ========================================== -->
-<!-- LOCATION BLOCK 6: REPORT REVIEW CARD (WORKFLOW STEP 2) -->
-<!-- Maps to: Reader reviews redacted report -->
-<!-- ========================================== -->
+            <!-- Card 2: INA Report Review (Workflow Step 2) -->
             <div class="dashboard-card review-card">
-                <div class="status-indicator status-active">🔄 Active</div>
-                <div class="card-icon">📖</div>
-                <h3 class="card-title">Report Review<!-- Stage 1 --></h3>
+                <div class="status-indicator status-pending">🔒 Locked</div>
+                <div class="card-header">
+                    <div class="card-icon info-icon">📖</div>
+                    <div class="card-title">INA Report Review</div>
+                </div>
                 <p class="card-description">
-                    Review the redacted report and provide feedback. Confidential details are blacked out for security. Submit corrections to proceed to payment.
+                    Review the Immediate Needs Assessment (INA) report and provide feedback. Confidential details are blacked out for security. Submit corrections to proceed to payment.
                 </p>
                 <div class="card-actions">
-                    <button class="btn btn-primary" onclick="startReview()">📖 Start Review</button>
+                    <button class="btn btn-primary" onclick="startReview()" disabled>📖 Start Review</button>
                     <button class="btn btn-secondary" onclick="previewDocument()">👁️ Preview Document</button>
                     <button class="btn btn-secondary" onclick="viewInstructions()">💬 View Instructions</button>
                 </div>
             </div>
 
-<!-- ========================================== -->
-<!-- LOCATION BLOCK 7: PAYMENT CARD (WORKFLOW STEP 3) -->
-<!-- Maps to: Payment processing after review -->
-<!-- ========================================== -->
+            <!-- Card 3: Payment Processing (Workflow Step 3) -->
             <div class="dashboard-card payment-card">
-                <div class="status-indicator status-pending">⏳ Pending</div>
-                <div class="card-icon">💰</div>
-                <h3 class="card-title">Payment Processing</h3>
+                <div class="status-indicator status-pending">🔒 Locked</div>
+                <div class="card-header">
+                    <div class="card-icon warning-icon">💰</div>
+                    <div class="card-title">Payment Processing</div>
+                </div>
                 <p class="card-description">
                     Payment will be processed immediately after you submit your corrected draft. Your payment method is securely on file from your HR Compliance onboarding.
                 </p>
@@ -887,173 +739,70 @@
                     <button class="btn btn-secondary" onclick="viewPaymentInfo()">📊 View Payment Info</button>
                 </div>
             </div>
-        </div>
 
-<!-- ========================================== -->
-<!-- LOCATION BLOCK 8: READERS MANAGEMENT HUB -->
-<!-- Hub for returning readers with document management -->
-<!-- ========================================== -->
-        <div class="dashboard-grid">
+            <!-- Card 4: Professional Readers Calendar -->
+            <div class="dashboard-card schedule-card">
+                <div class="status-indicator status-pending">📅 Available</div>
+                <div class="card-header">
+                    <div class="card-icon info-icon">📅</div>
+                    <div class="card-title">Professional Readers Calendar</div>
+                </div>
+                <p class="card-description">
+                    Schedule your Independent Needs Assessment (INA) review sessions. View assigned cases and manage your availability for upcoming reviews.
+                </p>
+                <div class="card-actions">
+                    <button class="btn btn-primary" onclick="viewSchedule()">📅 View Schedule</button>
+                    <button class="btn btn-secondary" onclick="setAvailability()">⚙️ Set Availability</button>
+                </div>
+            </div>
+
+            <!-- Card 5: Readers Management Hub (RMH) -->
             <div class="dashboard-card management-hub-card">
-                <div class="card-icon" style="background: #f3e8ff;">📚</div>
-                <h3 class="card-title">Readers Management Hub</h3>
+                <div class="status-indicator status-pending">📚 Available</div>
+                <div class="card-header">
+                    <div class="card-icon info-icon">📚</div>
+                    <div class="card-title">Readers Management Hub</div>
+                </div>
                 <p class="card-description">
                     Your centralized workspace for document management. Access your NDAs, review materials, and track completed assignments.
                 </p>
-                
-                <!-- Tab Navigation -->
-                <div class="tab-navigation">
-                    <button class="tab-btn active" onclick="switchTab('myDocs')">📄 My Documents</button>
-                    <button class="tab-btn" onclick="switchTab('clientDocs')">📁 Client Documents</button>
+                <div class="card-actions">
+                    <button class="btn btn-primary" onclick="openReadersHub()">📄 My Documents</button>
+                    <button class="btn btn-secondary" onclick="openReadersHub()">📁 Client Documents</button>
                 </div>
-                
-                <!-- My Documents Tab Content -->
-                <div class="tab-content" id="myDocsTab">
-                    <!-- Upload Section -->
-                    <div class="upload-section">
-                        <div class="upload-header">
-                            <h4>Upload Compliance Documents</h4>
-                            <p class="upload-subtext">Keep your certifications, licenses, and compliance documents organized in one place</p>
-                        </div>
-                        
-                        <!-- Document Type Selector -->
-                        <div class="doc-type-selector">
-                            <label for="docCategory">Document Type</label>
-                            <select id="docCategory" class="category-dropdown">
-                                <option value="">Select document type...</option>
-                                <option value="certification">🎓 Certification or License</option>
-                                <option value="insurance">🛡️ Insurance Document</option>
-                                <option value="tax">💰 Tax or Payment Document</option>
-                                <option value="other">📋 Other</option>
-                            </select>
-                        </div>
-                        
-                        <div class="upload-area" onclick="triggerFileUpload()">
-                            <span class="upload-icon">📤</span>
-                            <span class="upload-text">Click to upload or drag and drop</span>
-                            <span class="upload-hint">PDF, JPG, PNG up to 10MB</span>
-                            <input type="file" id="fileUpload" style="display: none;" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileUpload(event)">
-                        </div>
-                    </div>
-                    
-                    <!-- Document Categories -->
-                    <div class="doc-categories">
-                        <!-- NDA Section -->
-                        <div class="doc-category">
-                            <div class="category-header">📋 Legal Documents</div>
-                            <div class="doc-list">
-                                <div class="doc-item">
-                                    <span class="doc-icon">📋</span>
-                                    <div class="doc-info">
-                                        <strong>NDA Agreement</strong>
-                                        <span class="doc-date">Signed: October 15, 2025</span>
-                                    </div>
-                                    <button class="btn-mini" onclick="viewNDA()">View</button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Certifications Section -->
-                        <!-- BACKEND NOTE: Populate this section dynamically from documents with category='certification' -->
-                        <div class="doc-category">
-                            <div class="category-header">🎓 Certifications & Licenses</div>
-                            <div class="doc-list">
-                                <div class="doc-item">
-                                    <span class="doc-icon">🎓</span>
-                                    <div class="doc-info">
-                                        <strong>Medical License - State of California</strong>
-                                        <span class="doc-date">Uploaded: September 12, 2025 • Valid until: June 2026</span>
-                                    </div>
-                                    <button class="btn-mini" onclick="viewDocument('cert-001')">View</button>
-                                    <button class="btn-mini-delete" onclick="deleteDocument('cert-001')">🗑️</button>
-                                </div>
-                                <div class="empty-state">
-                                    <span class="empty-icon">📄</span>
-                                    <span class="empty-text">Upload your professional licenses and certifications</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Insurance Section -->
-                        <!-- BACKEND NOTE: Populate this section dynamically from documents with category='insurance' -->
-                        <div class="doc-category">
-                            <div class="category-header">🛡️ Insurance Documents</div>
-                            <div class="doc-list">
-                                <div class="empty-state">
-                                    <span class="empty-icon">📄</span>
-                                    <span class="empty-text">Upload liability insurance certificates</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Tax Documents Section -->
-                        <!-- BACKEND NOTE: Populate this section dynamically from documents with category='tax' -->
-                        <!-- Payment method info comes from HR Compliance system -->
-                        <div class="doc-category">
-                            <div class="category-header">💰 Tax & Payment Documents</div>
-                            <div class="doc-list">
-                                <div class="doc-item">
-                                    <span class="doc-icon">💰</span>
-                                    <div class="doc-info">
-                                        <strong>Payment Method</strong>
-                                        <span class="doc-date">Bank account ending in ••••4892 ✓ Verified</span>
-                                    </div>
-                                    <button class="btn-mini-info" disabled>On File</button>
-                                </div>
-                                <div class="empty-state">
-                                    <span class="empty-icon">📄</span>
-                                    <span class="empty-text">Upload W-9 or tax-related documents</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            </div>
+        </div><!-- Close workflow-cards -->
+
+<!-- ========================================== -->
+<!-- LOCATION BLOCK 6: SECURITY NOTICE & FOOTER (Merged Container) -->
+<!-- ========================================== -->
+        <div class="footer-container">
+            <div class="security-notice">
+                <div class="security-notice-content">
+                    <span class="security-notice-icon">🛡️</span>
+                    <p class="security-notice-text">
+                        <strong>Security Notice:</strong> All data is encrypted in transit and at rest. This system is GDPR compliant and maintains strict audit trails for all actions. Access is restricted and monitored.
+                    </p>
                 </div>
-                
-                <!-- Client Documents Tab Content -->
-                <div class="tab-content hidden" id="clientDocsTab">
-                    <div class="doc-list">
-                        <div class="doc-item completed">
-                            <span class="doc-icon">✅</span>
-                            <div class="doc-info">
-                                <strong class="strikethrough">Medical Report RW-002745</strong>
-                                <span class="doc-date">Completed: October 20, 2025</span>
-                            </div>
-                            <button class="btn-mini" disabled>Completed</button>
-                        </div>
-                        <div class="doc-item">
-                            <span class="doc-icon">📄</span>
-                            <div class="doc-info">
-                                <strong>Medical Report RW-002847</strong>
-                                <span class="doc-date">Assigned: October 27, 2025</span>
-                            </div>
-                            <button class="btn-mini" onclick="openDocument('RW-002847')">Open</button>
-                        </div>
+            </div>
+
+            <div class="footer">
+                <div class="footer-content">
+                    <p class="footer-text">
+                        © 2025 QOLAE. All rights reserved. Secure legal document review portal.
+                    </p>
+                    <div class="footer-links">
+                        <a href="/privacy-policy">Privacy Policy</a>
+                        <a href="/terms-of-service">Terms of Service</a>
+                        <a href="/support">Support</a>
                     </div>
                 </div>
             </div>
         </div>
-
-<!-- ========================================== -->
-<!-- LOCATION BLOCK 9: SECURITY NOTICE & FOOTER -->
-<!-- ========================================== -->
-        <div class="security-notice">
-            <div class="security-notice-title">
-                🔒 Security Notice
-            </div>
-            <p>All data is encrypted in transit and at rest. This system is GDPR compliant and maintains strict audit trails for all actions. Access is restricted and monitored.</p>
-        </div>
-    </div>
-
-    <div class="footer">
-        © 2025 QOLAE. All rights reserved. Secure legal document review portal.
-        <br>
-        <a href="#" style="color: rgba(255,255,255,0.8); margin: 0 10px;">Privacy Policy</a>
-        <a href="#" style="color: rgba(255,255,255,0.8); margin: 0 10px;">Terms of Service</a>
-        <a href="#" style="color: rgba(255,255,255,0.8); margin: 0 10px;">Support</a>
     </div>
 
 <!-- ========================================== -->
-<!-- LOCATION BLOCK 10: JAVASCRIPT - READER TYPE & WORKFLOW MANAGEMENT -->
+<!-- LOCATION BLOCK 7: JAVASCRIPT - READER TYPE & WORKFLOW MANAGEMENT -->
 <!-- All handlers are endpoint-ready with placeholder API calls -->
 <!-- ========================================== -->
     <script>
@@ -1073,45 +822,15 @@
             deleteDocument: '/api/documents/delete'
         };
 
-        // ===== READER TYPE MANAGEMENT =====
-        // Note: Reader type is now auto-assigned by HR Compliance backend
-        let currentReaderType = 'professional'; // or 'medical' - set by backend
-
-        function switchToProfessional() {
-            currentReaderType = 'professional';
-            updateReaderDisplay();
-        }
-
-        function switchToMedical() {
-            currentReaderType = 'medical';
-            updateReaderDisplay();
-        }
-
-        function updateReaderDisplay() {
-            const readerType = document.getElementById('readerType');
-            const welcomeName = document.getElementById('welcomeName');
-            const welcomeDesc = document.getElementById('welcomeDesc');
-            const reviewId = document.getElementById('reviewId');
-            
-            if (currentReaderType === 'medical') {
-                readerType.textContent = 'Medical Professional';
-                welcomeName.textContent = 'Welcome Dr. Sarah Mitchell';
-                welcomeDesc.textContent = 'Access your professional medical review workspace. All clinical data is encrypted and requires NDA compliance.';
-                reviewId.textContent = 'MW-003421';
-            } else {
-                readerType.textContent = 'Professional Reader';
-                welcomeName.textContent = 'Welcome Ms. Jennifer Adams';
-                welcomeDesc.textContent = 'Access your secure professional review workspace. All data is encrypted and requires NDA compliance.';
-                reviewId.textContent = 'RW-002847';
-            }
-        }
+        // ===== READER INFORMATION =====
+        // Reader data is now server-side rendered from backend
+        // No client-side updates needed - all dynamic data comes from EJS
 
         // ===== NDA HANDLERS (ENDPOINT READY) =====
         function viewNDA() {
-            console.log('Calling API:', API_ENDPOINTS.viewNDA);
-            // TODO: Implement API call
-            // Example: fetch(API_ENDPOINTS.viewNDA).then(response => response.blob()).then(openPDFViewer);
-            alert('View NDA - Ready for endpoint integration');
+            // Open NDA modal via server-side rendering
+            const readerPin = '<%= reader.readerPin %>';
+            window.location.href = `/readersDashboard?readerPin=${readerPin}&modal=nda`;
         }
 
         function downloadNDA() {
@@ -1123,10 +842,12 @@
 
         // ===== REPORT REVIEW HANDLERS (ENDPOINT READY) =====
         function startReview() {
-            console.log('Calling API:', API_ENDPOINTS.startReview);
-            // TODO: Implement API call
-            // Example: window.location.href = '/review/start';
-            alert('Start Review - Ready for endpoint integration');
+            // Get current assignment ID (you may need to adjust this)
+            const assignmentId = getCurrentAssignmentId(); // TODO: Implement this
+            
+            // Open review modal via server-side rendering
+            const readerPin = '<%= reader.readerPin %>';
+            window.location.href = `/readersDashboard?readerPin=${readerPin}&modal=review&assignmentId=${assignmentId}`;
         }
 
         function previewDocument() {
@@ -1148,8 +869,9 @@
             // Get current assignment ID (you may need to adjust this)
             const assignmentId = getCurrentAssignmentId(); // TODO: Implement this
             
-            // Open payment modal
-            window.location.href = `/payment-processing?assignmentId=${assignmentId}`;
+            // Open payment modal via server-side rendering
+            const readerPin = '<%= reader.readerPin %>';
+            window.location.href = `/readersDashboard?readerPin=${readerPin}&modal=payment&assignmentId=${assignmentId}`;
         }
 
         // Helper function to get current assignment ID
@@ -1161,6 +883,21 @@
             // 2. Get from URL parameter
             // 3. Fetch from API: /api/readers/current-assignment
             return 'PLACEHOLDER_ASSIGNMENT_ID';
+        }
+
+        // ===== PROFESSIONAL READERS CALENDAR HANDLERS (ENDPOINT READY) =====
+        function viewSchedule() {
+            console.log('Calling API: View Professional Readers Schedule');
+            // TODO: Implement API call
+            // Example: window.location.href = '/readers/schedule';
+            alert('View Professional Readers Schedule - Ready for endpoint integration');
+        }
+
+        function setAvailability() {
+            console.log('Calling API: Set Availability');
+            // TODO: Implement API call
+            // Example: openModal with availability calendar
+            alert('Set Availability - Ready for endpoint integration');
         }
 
         // ===== DOCUMENT MANAGEMENT HANDLERS (ENDPOINT READY) =====
@@ -1187,125 +924,12 @@
             }
         }
 
-        // ===== FILE UPLOAD HANDLERS (ENDPOINT READY) =====
-        // CATEGORY MAPPING FOR BACKEND:
-        // 'certification' → Appears in "🎓 Certifications & Licenses" section
-        // 'insurance'     → Appears in "🛡️ Insurance Documents" section  
-        // 'tax'           → Appears in "💰 Tax & Payment Documents" section
-        // 'other'         → Could appear in "📋 Legal Documents" or new "Other" section
-        
-        function triggerFileUpload() {
-            // Check if category is selected
-            const categorySelect = document.getElementById('docCategory');
-            if (!categorySelect.value) {
-                alert('Please select a document type before uploading.');
-                categorySelect.focus();
-                return;
-            }
-            document.getElementById('fileUpload').click();
-        }
-
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            // Get selected category
-            const category = document.getElementById('docCategory').value;
-            if (!category) {
-                alert('Please select a document type before uploading.');
-                return;
-            }
-
-            // Validate file size (10MB limit)
-            const maxSize = 10 * 1024 * 1024; // 10MB in bytes
-            if (file.size > maxSize) {
-                alert('File size exceeds 10MB limit. Please choose a smaller file.');
-                event.target.value = '';
-                return;
-            }
-
-            // Validate file type
-            const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-            if (!allowedTypes.includes(file.type)) {
-                alert('Invalid file type. Please upload PDF, JPG, or PNG files only.');
-                event.target.value = '';
-                return;
-            }
-
-            // Get category display name for confirmation
-            const categoryNames = {
-                'certification': '🎓 Certification or License',
-                'insurance': '🛡️ Insurance Document',
-                'tax': '💰 Tax or Payment Document',
-                'other': '📋 Other'
-            };
-
-            console.log('Uploading file:', file.name, 'to category:', category, 'via', API_ENDPOINTS.uploadDocument);
-            
-            // TODO: Implement actual file upload with category
-            // Example implementation:
-            /*
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('category', category);
-            formData.append('userId', getCurrentUserId()); // Get from session/auth
-            
-            fetch(API_ENDPOINTS.uploadDocument, {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + getAuthToken()
-                },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Upload successful:', data);
-                alert('Document uploaded successfully!');
-                // Refresh document list to show new upload
-                refreshDocumentList();
-                // Reset form
-                document.getElementById('docCategory').value = '';
-            })
-            .catch(error => {
-                console.error('Upload failed:', error);
-                alert('Upload failed. Please try again.');
-            });
-            */
-
-            alert(`✅ Ready to upload:\n\nFile: "${file.name}"\nSize: ${(file.size / 1024).toFixed(2)} KB\nType: ${file.type}\nCategory: ${categoryNames[category]}\n\nEndpoint ready for integration!`);
-            
-            // Reset form after upload
-            event.target.value = '';
-            document.getElementById('docCategory').value = '';
-        }
-
-        // Placeholder for refreshing document list after upload/delete
-        function refreshDocumentList() {
-            console.log('Refreshing document list');
-            // TODO: Re-fetch and re-render document list from backend
-            // This would call GET /api/documents/list and update the DOM
-        }
-
-        // ===== TAB SWITCHING FOR READERS MANAGEMENT HUB =====
-        function switchTab(tabName) {
-            // Remove active class from all tabs
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Hide all tab contents
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('hidden');
-            });
-            
-            // Show selected tab
-            if (tabName === 'myDocs') {
-                document.querySelector('.tab-btn:first-child').classList.add('active');
-                document.getElementById('myDocsTab').classList.remove('hidden');
-            } else if (tabName === 'clientDocs') {
-                document.querySelector('.tab-btn:last-child').classList.add('active');
-                document.getElementById('clientDocsTab').classList.remove('hidden');
-            }
+        // ===== READERS MANAGEMENT HUB =====
+        function openReadersHub() {
+            console.log('Opening Readers Management Hub...');
+            // TODO: Backend integration - Open RMH modal/page
+            // This will be implemented later based on the CMH wizard workflow pattern
+            alert('Readers Management Hub\n\nThis will open your document management workspace.\n\nTo be implemented based on CMH wizard pattern.');
         }
 
         // ===== WORKFLOW PROGRESS MANAGEMENT =====
@@ -1335,5 +959,128 @@
         // Log ready status
         console.log('QOLAE Dashboard initialized - All handlers ready for endpoint integration');
     </script>
+
+<!-- ==============================================
+     SERVER-SIDE MODAL OVERLAYS (Following LawyersDashboard Pattern)
+     ============================================== -->
+
+<!-- NDA Modal Overlay -->
+<% if (showModal === 'nda' && modalData) { %>
+  <div class="server-modal-overlay">
+    <div class="server-modal-container">
+      <a href="/readersDashboard?readerPin=<%= reader.readerPin %>" class="server-modal-close" title="Close">✕</a>
+      <%- include('nda', {
+        reader: modalData.reader,
+        nda: modalData.nda
+      }) %>
+    </div>
+  </div>
+<% } %>
+
+<!-- INA Report Review Modal Overlay -->
+<% if (showModal === 'review' && modalData) { %>
+  <div class="server-modal-overlay">
+    <div class="server-modal-container">
+      <a href="/readersDashboard?readerPin=<%= reader.readerPin %>" class="server-modal-close" title="Close">✕</a>
+      <%- include('inaReportReview', {
+        assignment: modalData.assignment,
+        reader: modalData.reader
+      }) %>
+    </div>
+  </div>
+<% } %>
+
+<!-- Payment Processing Modal Overlay -->
+<% if (showModal === 'payment' && modalData) { %>
+  <div class="server-modal-overlay">
+    <div class="server-modal-container">
+      <a href="/readersDashboard?readerPin=<%= reader.readerPin %>" class="server-modal-close" title="Close">✕</a>
+      <%- include('paymentProcessing', {
+        assignmentId: modalData.assignmentId,
+        readerPin: modalData.readerPin,
+        readerName: modalData.readerName,
+        readerEmail: modalData.readerEmail,
+        readerType: modalData.readerType,
+        paymentStatus: modalData.paymentStatus,
+        paymentAmount: modalData.paymentAmount,
+        paymentReference: modalData.paymentReference,
+        assignedAt: modalData.assignedAt,
+        correctionsSubmittedAt: modalData.correctionsSubmittedAt,
+        paymentApprovedAt: modalData.paymentApprovedAt,
+        paymentProcessedAt: modalData.paymentProcessedAt
+      }) %>
+    </div>
+  </div>
+<% } %>
+
+<!-- Modal Overlay Styles -->
+<style>
+.server-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.server-modal-container {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  max-width: 95%;
+  max-height: 95%;
+  overflow: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease-in-out;
+}
+
+.server-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10000;
+  transition: all 0.2s ease;
+}
+
+.server-modal-close:hover {
+  background: #c0392b;
+  transform: scale(1.1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { 
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
+
 </body>
 </html>

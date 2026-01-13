@@ -1,523 +1,745 @@
+<!-- ==============================================
+     secure-login.ejs - Secure Login & Password Setup
+     QOLAE Readers Portal - Professional Workspace Setup
+     Author: Liz 👑
+     ============================================== -->
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QOLAE Readers - Secure Login</title>
-    <!-- ========================================== -->
-    <!-- LOCATION BLOCK 0: ALL CSS STYLES -->
-    <!-- ========================================== -->
-    <style>
-        /* ===== RESET & BASE STYLES ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
-        /* ===== CONTAINER ===== */
-        .secureLoginContainer {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 450px;
-            width: 100%;
-            padding: 40px;
-        }
-        
-        /* ===== LOGO & BRANDING ===== */
-        .logoSection {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .logoImage {
-            max-width: 180px;
-            height: auto;
-            margin-bottom: 15px;
-        }
-        
-        .logoSection h1 {
-            color: #1e3a5f;
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        
-        .logoSection p {
-            color: #6b7280;
-            font-size: 14px;
-        }
-        
-        .stepIndicator {
-            display: inline-block;
-            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
-            color: white;
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 10px;
-        }
-        
-        /* ===== PROGRESS STEPS ===== */
-        .progressSteps {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 30px;
-        }
-        
-        .progressStep {
-            width: 40px;
-            height: 4px;
-            border-radius: 2px;
-            background: #e5e7eb;
-        }
-        
-        .progressStep.completed {
-            background: #22c55e;
-        }
-        
-        .progressStep.active {
-            background: #2c5282;
-        }
-        
-        /* ===== FORM STYLES ===== */
-        .formGroup {
-            margin-bottom: 24px;
-        }
-        
-        .formLabel {
-            display: block;
-            color: #374151;
-            font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-        
-        .formInput {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        
-        .formInput:focus {
-            outline: none;
-            border-color: #2c5282;
-            box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.1);
-        }
-        
-        .formHint {
-            color: #6b7280;
-            font-size: 12px;
-            margin-top: 6px;
-        }
-        
-        /* ===== PASSWORD STRENGTH ===== */
-        .passwordStrength {
-            margin-top: 8px;
-        }
-        
-        .strengthBar {
-            height: 4px;
-            background: #e5e7eb;
-            border-radius: 2px;
-            overflow: hidden;
-            margin-bottom: 4px;
-        }
-        
-        .strengthFill {
-            height: 100%;
-            width: 0%;
-            transition: all 0.3s;
-        }
-        
-        .strengthFill.weak { width: 33%; background: #ef4444; }
-        .strengthFill.medium { width: 66%; background: #f59e0b; }
-        .strengthFill.strong { width: 100%; background: #22c55e; }
-        
-        .strengthText {
-            font-size: 11px;
-            color: #6b7280;
-        }
-        
-        /* ===== BUTTON STYLES ===== */
-        .btnPrimary {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btnPrimary:hover {
-            background: linear-gradient(135deg, #2c5282 0%, #3b6291 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(44, 82, 130, 0.4);
-        }
-        
-        .btnPrimary:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        /* ===== MESSAGE STYLES ===== */
-        .messageBox {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        
-        .messageSuccess {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #6ee7b7;
-        }
-        
-        .messageError {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-        }
-        
-        .messageInfo {
-            background: #dbeafe;
-            color: #1e40af;
-            border: 1px solid #93c5fd;
-        }
-        
-        /* ===== READER INFO ===== */
-        .readerInfo {
-            background: #f8fafc;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            margin-bottom: 20px;
-            color: #374151;
-            font-size: 14px;
-        }
-        
-        .readerInfo strong {
-            color: #1e3a5f;
-        }
-        
-        /* ===== PASSWORD REQUIREMENTS ===== */
-        .passwordRequirements {
-            background: #f8fafc;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 12px;
-        }
-        
-        .passwordRequirements h4 {
-            color: #374151;
-            margin-bottom: 8px;
-            font-size: 13px;
-        }
-        
-        .passwordRequirements ul {
-            list-style: none;
-            color: #6b7280;
-        }
-        
-        .passwordRequirements li {
-            padding: 2px 0;
-            padding-left: 20px;
-            position: relative;
-        }
-        
-        .passwordRequirements li::before {
-            content: '○';
-            position: absolute;
-            left: 0;
-            color: #9ca3af;
-        }
-        
-        .passwordRequirements li.valid::before {
-            content: '✓';
-            color: #22c55e;
-        }
-        
-        /* ===== SECURITY BADGE ===== */
-        .securityBadge {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 20px;
-            padding: 10px;
-            background: #f8fafc;
-            border-radius: 8px;
-            color: #64748b;
-            font-size: 12px;
-        }
-        
-        .securityBadge svg {
-            width: 16px;
-            height: 16px;
-            fill: #22c55e;
-        }
-        
-        /* ===== FOOTER ===== */
-        .footerText {
-            text-align: center;
-            margin-top: 20px;
-            color: #9ca3af;
-            font-size: 12px;
-        }
-    </style>
-</head>
-<body>
-    <!-- ========================================== -->
-    <!-- LOCATION BLOCK 1: LOGO & HEADER -->
-    <!-- ========================================== -->
-    <div class="secureLoginContainer">
-        <div class="logoSection">
-            <img src="https://api.qolae.com/centralRepository/public/images/qolaeNewLogo.png" alt="QOLAE Logo" class="logoImage">
-            <% if (typeof setupCompleted !== 'undefined' && setupCompleted) { %>
-                <h1>Welcome Back</h1>
-                <p>Enter your password to access your workspace</p>
-                <span class="stepIndicator">Step 4 of 5</span>
-            <% } else { %>
-                <h1>Create Password</h1>
-                <p>Set up a secure password for your account</p>
-                <span class="stepIndicator">Step 4 of 5</span>
-            <% } %>
-        </div>
-        
-        <!-- ========================================== -->
-        <!-- LOCATION BLOCK 2: PROGRESS INDICATOR -->
-        <!-- ========================================== -->
-        <div class="progressSteps">
-            <div class="progressStep completed"></div>
-            <div class="progressStep completed"></div>
-            <div class="progressStep completed"></div>
-            <div class="progressStep active"></div>
-            <div class="progressStep"></div>
-        </div>
-        
-        <!-- ========================================== -->
-        <!-- LOCATION BLOCK 3: MESSAGE DISPLAY -->
-        <!-- ========================================== -->
-        <% if (typeof error !== 'undefined' && error) { %>
-            <div class="messageBox messageError"><%= error %></div>
-        <% } %>
-        
-        <% if (typeof verified !== 'undefined' && verified) { %>
-            <div class="messageBox messageSuccess">
-                Email verified successfully! Please create your password.
-            </div>
-        <% } %>
-        
-        <% if (typeof reader !== 'undefined' && reader && reader.readerName) { %>
-            <div class="readerInfo">
-                Welcome, <strong><%= reader.readerName %></strong>
-            </div>
-        <% } %>
-        
-        <!-- ========================================== -->
-        <!-- LOCATION BLOCK 4: PASSWORD FORM -->
-        <!-- ========================================== -->
-        <form action="/readersAuth/secureLogin" method="POST" id="secureLoginForm" data-is-new-user="<%= (typeof setupCompleted === 'undefined' || !setupCompleted) ? 'true' : 'false' %>">
-            <input type="hidden" name="isNewUser" value="<%= (typeof setupCompleted === 'undefined' || !setupCompleted) ? 'true' : 'false' %>">
-            
-            <div class="formGroup">
-                <label class="formLabel" for="password">
-                    <% if (typeof setupCompleted !== 'undefined' && setupCompleted) { %>
-                        Password
-                    <% } else { %>
-                        Create Password
-                    <% } %>
-                </label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    name="password" 
-                    class="formInput" 
-                    placeholder="Enter your password"
-                    minlength="8"
-                    required
-                    autofocus
-                >
-                
-                <% if (typeof setupCompleted === 'undefined' || !setupCompleted) { %>
-                    <div class="passwordStrength">
-                        <div class="strengthBar">
-                            <div class="strengthFill" id="strengthFill"></div>
-                        </div>
-                        <span class="strengthText" id="strengthText">Password strength</span>
-                    </div>
-                <% } %>
-            </div>
-            
-            <% if (typeof setupCompleted === 'undefined' || !setupCompleted) { %>
-                <div class="formGroup">
-                    <label class="formLabel" for="confirmPassword">Confirm Password</label>
-                    <input 
-                        type="password" 
-                        id="confirmPassword" 
-                        name="confirmPassword" 
-                        class="formInput" 
-                        placeholder="Confirm your password"
-                        minlength="8"
-                        required
-                    >
-                    <p class="formHint" id="matchHint"></p>
-                </div>
-                
-                <div class="passwordRequirements">
-                    <h4>Password Requirements:</h4>
-                    <ul>
-                        <li id="reqLength">At least 8 characters</li>
-                        <li id="reqUpper">One uppercase letter</li>
-                        <li id="reqLower">One lowercase letter</li>
-                        <li id="reqNumber">One number</li>
-                    </ul>
-                </div>
-            <% } %>
-            
-            <button type="submit" class="btnPrimary" id="submitBtn">
-                <% if (typeof setupCompleted !== 'undefined' && setupCompleted) { %>
-                    Sign In
-                <% } else { %>
-                    Create Password & Continue
-                <% } %>
-            </button>
-        </form>
-        
-        <!-- ========================================== -->
-        <!-- LOCATION BLOCK 5: SECURITY BADGE -->
-        <!-- ========================================== -->
-        <div class="securityBadge">
-            <svg viewBox="0 0 24 24">
-                <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z"/>
-            </svg>
-            <span>Password encrypted with bcrypt</span>
-        </div>
-        
-        <p class="footerText">© 2025 QOLAE. All rights reserved.</p>
-    </div>
-    
-    <!-- ========================================== -->
-    <!-- LOCATION BLOCK 6: JAVASCRIPT -->
-    <!-- ========================================== -->
-    <script>
-        const passwordInput = document.getElementById('password');
-        const confirmInput = document.getElementById('confirmPassword');
-        const strengthFill = document.getElementById('strengthFill');
-        const strengthText = document.getElementById('strengthText');
-        const matchHint = document.getElementById('matchHint');
-        const submitBtn = document.getElementById('submitBtn');
-        const secureLoginForm = document.getElementById('secureLoginForm');
-        const isNewUser = secureLoginForm.dataset.isNewUser === 'true';
-        
-        // Password strength checker
-        function checkStrength(password) {
-            let strength = 0;
-            
-            if (password.length >= 8) strength++;
-            if (/[A-Z]/.test(password)) strength++;
-            if (/[a-z]/.test(password)) strength++;
-            if (/[0-9]/.test(password)) strength++;
-            
-            return strength;
-        }
-        
-        // Update requirements
-        function updateRequirements(password) {
-            document.getElementById('reqLength').classList.toggle('valid', password.length >= 8);
-            document.getElementById('reqUpper').classList.toggle('valid', /[A-Z]/.test(password));
-            document.getElementById('reqLower').classList.toggle('valid', /[a-z]/.test(password));
-            document.getElementById('reqNumber').classList.toggle('valid', /[0-9]/.test(password));
-        }
-        
-        if (isNewUser && passwordInput) {
-            passwordInput.addEventListener('input', function() {
-                const strength = checkStrength(this.value);
-                
-                strengthFill.className = 'strengthFill';
-                if (strength <= 1) {
-                    strengthFill.classList.add('weak');
-                    strengthText.textContent = 'Weak password';
-                } else if (strength <= 3) {
-                    strengthFill.classList.add('medium');
-                    strengthText.textContent = 'Medium strength';
-                } else {
-                    strengthFill.classList.add('strong');
-                    strengthText.textContent = 'Strong password';
-                }
-                
-                updateRequirements(this.value);
-                checkMatch();
-            });
-            
-            if (confirmInput) {
-                confirmInput.addEventListener('input', checkMatch);
-            }
-        }
-        
-        function checkMatch() {
-            if (!confirmInput || !matchHint) return;
-            
-            if (confirmInput.value === '') {
-                matchHint.textContent = '';
-                matchHint.style.color = '#6b7280';
-            } else if (passwordInput.value === confirmInput.value) {
-                matchHint.textContent = '✓ Passwords match';
-                matchHint.style.color = '#22c55e';
-            } else {
-                matchHint.textContent = '✗ Passwords do not match';
-                matchHint.style.color = '#ef4444';
-            }
-        }
-        
-        // Form validation
-        document.getElementById('secureLoginForm').addEventListener('submit', function(e) {
-            if (isNewUser) {
-                const password = passwordInput.value;
-                const confirm = confirmInput ? confirmInput.value : '';
-                
-                if (password !== confirm) {
-                    e.preventDefault();
-                    matchHint.textContent = '✗ Passwords must match';
-                    matchHint.style.color = '#ef4444';
-                    return;
-                }
-                
-                if (checkStrength(password) < 4) {
-                    e.preventDefault();
-                    alert('Please ensure your password meets all requirements.');
-                    return;
-                }
-            }
-            
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Processing...';
-        });
-    </script>
-</body>
-</html>
+     <!DOCTYPE html>
+     <html lang="en">
+     <head>
+       <!-- ==============================================
+            LOCATION BLOCK A: META & CONFIGURATION
+            A.1: Document Metadata
+            ============================================== -->
+       
+       <!-- A.1: Document Metadata -->
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>Secure Login - QOLAE Readers Portal</title>
+       
+       <!-- ==============================================
+            LOCATION BLOCK B: STYLES
+            B.1: Reset & Base Styles
+            B.2: Login Container
+            B.3: Logo & Branding
+            B.4: Form Elements
+            B.5: Buttons
+            B.6: Messages & Notices
+            B.7: Error Message
+            ============================================== -->
+       
+       <style>
+         /* ============================================== */
+         /* B.1: RESET & BASE STYLES */
+         /* ============================================== */
+         
+         * {
+           margin: 0;
+           padding: 0;
+           box-sizing: border-box;
+         }
+         
+         body {
+           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+           background: #ffffff;
+           min-height: 100vh;
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           justify-content: center;
+           padding: 40px 20px;
+           margin: 0;
+         }
+         
+         /* ============================================== */
+         /* B.2: LOGIN CONTAINER */
+         /* ============================================== */
+         
+         .login-container {
+           background: white;
+           border-radius: 20px;
+           padding: 40px;
+           width: 100%;
+           max-width: 900px;
+           box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+         }
+         
+         /* ============================================== */
+         /* B.3: LOGO & BRANDING */
+         /* ============================================== */
+         
+         .qolae-logo {
+           margin-bottom: 60px;
+           text-align: center;
+           background: none;
+           border: none;
+           box-shadow: none;
+         }
+         
+         .qolae-logo img {
+           max-width: 1200px;
+           width: 110%;
+           height: auto;
+           display: block;
+           margin: 0 auto;
+         }
+         
+         .qolae-logo p {
+           font-weight: bold;
+         }
+         
+         /* ============================================== */
+         /* B.4: FORM ELEMENTS */
+         /* ============================================== */
+         
+         .form-group {
+           margin-bottom: 25px;
+         }
+         
+         .form-group label {
+           display: block;
+           color: #374151;
+           font-weight: 600;
+           margin-bottom: 8px;
+           font-size: 14px;
+         }
+         
+         .form-group input {
+           width: 100%;
+           padding: 15px;
+           border: 2px solid #e5e7eb;
+           border-radius: 12px;
+           font-size: 16px;
+           transition: all 0.3s ease;
+           background: #f9fafb;
+         }
+         
+         .form-group input:focus {
+           outline: none;
+           border-color: #2c5282;
+           background: white;
+           box-shadow: 0 0 0 3px rgba(44, 82, 130, 0.1);
+         }
+         
+         .pin-hint {
+           font-size: 13px;
+           color: #6b7280;
+           margin-top: 5px;
+         }
+         
+         /* ============================================== */
+         /* B.5: BUTTONS */
+         /* ============================================== */
+         
+         .login-btn {
+           width: 100%;
+           background: linear-gradient(135deg, #1e3a5f, #2c5282);
+           color: white;
+           border: none;
+           padding: 16px;
+           border-radius: 12px;
+           font-size: 16px;
+           font-weight: 600;
+           cursor: pointer;
+           transition: all 0.3s ease;
+           margin-top: 10px;
+         }
+         
+         .login-btn:hover {
+           transform: translateY(-2px);
+           box-shadow: 0 10px 25px rgba(44, 82, 130, 0.3);
+         }
+         
+         .login-btn:disabled {
+           opacity: 0.6;
+           cursor: not-allowed;
+           transform: none;
+         }
+         
+         /* ============================================== */
+         /* B.6: MESSAGES & NOTICES */
+         /* ============================================== */
+         
+         .error-message {
+           background: #fef2f2;
+           border: 1px solid #fecaca;
+           color: #dc2626;
+           border-radius: 8px;
+           padding: 12px;
+           margin-bottom: 20px;
+           font-size: 14px;
+           display: none;
+         }
+         
+         .loading {
+           display: none;
+           text-align: center;
+           color: #6b7280;
+         }
+         
+         .security-notice {
+           background: #f0f9ff;
+           border: 1px solid #bae6fd;
+           border-radius: 12px;
+           padding: 15px;
+           margin-top: 25px;
+           text-align: center;
+         }
+         
+         .security-notice p {
+           color: #0369a1;
+           font-size: 14px;
+           margin: 0;
+         }
+         
+         .verification-info {
+           background: #f0fdf4;
+           border: 1px solid #bbf7d0;
+           border-radius: 8px;
+           padding: 12px;
+           margin-bottom: 20px;
+           text-align: center;
+         }
+         
+         /* ============================================== */
+         /* B.7: ERROR MESSAGE STYLES */
+         /* ============================================== */
+         
+         .error-message {
+           background: #fef2f2;
+           border: 1px solid #fecaca;
+           color: #dc2626;
+           border-radius: 8px;
+           padding: 12px;
+           margin-bottom: 20px;
+           font-size: 14px;
+           display: none;
+         }
+         
+         .loading {
+           display: none;
+           text-align: center;
+           color: #6b7280;
+         }
+         
+         .security-notice {
+           background: #f0f9ff;
+           border: 1px solid #bae6fd;
+           border-radius: 12px;
+           padding: 15px;
+           margin-top: 25px;
+           text-align: center;
+         }
+         
+         .security-notice p {
+           color: #0369a1;
+           font-size: 14px;
+           margin: 0;
+         }
+         
+         .verification-info {
+           background: #f0fdf4;
+           border: 1px solid #bbf7d0;
+           border-radius: 8px;
+           padding: 12px;
+           margin-bottom: 20px;
+           text-align: center;
+         }
+         
+         /* ============================================== */
+         /* B.8: SMART USER DETECTION STYLES */
+         /* ============================================== */
+         
+         .welcome-container {
+           text-align: center;
+           margin-bottom: 25px;
+           padding: 20px;
+           background: #f9fafb;
+           border-radius: 12px;
+           backdrop-filter: blur(10px);
+         }
+
+         .welcome-message {
+           color: #374151;
+           font-size: 24px;
+           font-weight: 600;
+           margin-bottom: 8px;
+         }
+
+         .action-required {
+           color: #6b7280;
+           font-size: 16px;
+           margin: 0;
+         }
+         
+         .progress-container {
+           background: #f9fafb;
+           border-radius: 12px;
+           padding: 20px;
+           margin-bottom: 20px;
+           backdrop-filter: blur(10px);
+           border: 1px solid #e5e7eb;
+         }
+
+         .progress-header {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           margin-bottom: 15px;
+         }
+
+         .progress-label {
+           color: #374151;
+           font-weight: 600;
+           font-size: 16px;
+         }
+
+         .progress-percentage {
+           color: #10b981;
+           font-weight: 700;
+           font-size: 18px;
+         }
+
+         .progress-bar {
+           width: 100%;
+           height: 8px;
+           background: #e5e7eb;
+           border-radius: 4px;
+           overflow: hidden;
+           margin-bottom: 20px;
+         }
+
+         .progress-fill {
+           height: 100%;
+           background: linear-gradient(90deg, #10b981, #059669);
+           border-radius: 4px;
+           transition: width 0.3s ease;
+         }
+
+         .progress-steps {
+           display: grid;
+           grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+           gap: 15px;
+         }
+
+         .progress-step {
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           text-align: center;
+         }
+
+         .step-icon {
+           width: 32px;
+           height: 32px;
+           border-radius: 50%;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           margin-bottom: 8px;
+           font-weight: 600;
+           font-size: 14px;
+         }
+
+         .progress-step:not(.completed) .step-icon {
+           background: #e5e7eb;
+           color: #9ca3af;
+         }
+
+         .progress-step.completed .step-icon {
+           background: #10b981;
+           color: white;
+         }
+
+         .step-label {
+           color: #6b7280;
+           font-size: 12px;
+           font-weight: 500;
+         }
+
+         .progress-step.completed .step-label {
+           color: #374151;
+           font-weight: 600;
+         }
+         
+         .user-status-container {
+           display: flex;
+           justify-content: space-around;
+           background: rgba(255, 255, 255, 0.1);
+           border-radius: 12px;
+           padding: 15px;
+           margin-bottom: 20px;
+           backdrop-filter: blur(10px);
+         }
+         
+         .status-item {
+           display: flex;
+           flex-direction: column;
+           align-items: center;
+           text-align: center;
+         }
+         
+         .status-label {
+           color: rgba(255, 255, 255, 0.6);
+           font-size: 12px;
+           font-weight: 500;
+           margin-bottom: 4px;
+         }
+         
+         .status-value {
+           color: white;
+           font-size: 14px;
+           font-weight: 600;
+           padding: 4px 8px;
+           border-radius: 6px;
+         }
+         
+         .status-value.pending {
+           background: #f59e0b;
+           color: white;
+         }
+         
+         .status-value.active {
+           background: #10b981;
+           color: white;
+         }
+         
+         .status-value.revoked {
+           background: #ef4444;
+           color: white;
+         }
+         
+         .status-value.firstTimeSetup {
+           background: #3b82f6;
+           color: white;
+         }
+         
+         .status-value.returningUser {
+           background: #10b981;
+           color: white;
+         }
+         
+         .status-value.accessRevoked {
+           background: #ef4444;
+           color: white;
+         }
+         
+         .verification-info p {
+           color: #059669;
+           font-size: 14px;
+           margin: 0;
+           font-weight: 500;
+         }
+         
+         /* ============================================== */
+         /* B.8: LOADING & SECURITY NOTICE */
+         /* ============================================== */
+       </style>
+     </head>
+     
+     <body>
+       <!-- ==============================================
+            LOCATION BLOCK C: HTML STRUCTURE
+            C.1: Login Container
+            C.2: Logo & Branding
+            C.3: Verification Message
+            C.4: Error Message
+            C.5: Secure Login Form
+            C.6: Quick Access Section
+            C.7: Loading State
+            C.8: Security Notice
+            ============================================== -->
+       
+      <!-- C.1: Login Container -->
+      <div class="qolae-logo">
+        <img src="<%= process.env.QOLAE_LOGO_URL || 'https://api.qolae.com/centralRepository/public/images/qolaeNewLogo.png' %>" 
+             alt="QOLAE Logo" />
+        <p>Secure Readers Portal Access</p>
+      </div>
+
+       <div class="login-container">
+         <div class="welcome-container">
+             <h2 class="welcome-message"><%= welcomeMessage %></h2>
+             <p class="action-required"><%= actionRequired %></p>
+           </div>
+           
+           <!-- C.2.5.2: Progress Indicator -->
+           <div class="progress-container">
+             <div class="progress-header">
+               <span class="progress-label">Setup Progress</span>
+               <span class="progress-percentage"><%= progressPercentage %>%</span>
+             </div>
+             <div class="progress-bar">
+               <div class="progress-fill" id="progressFill"></div>
+             </div>
+             <div class="progress-steps">
+               <% progressSteps.forEach(function(step, index) { %>
+                 <div class="progress-step <%= step.completed ? 'completed' : '' %>">
+                   <div class="step-icon">
+                     <% if (step.completed) { %>
+                       <span class="checkmark">✓</span>
+                     <% } else { %>
+                       <span class="step-number"><%= index + 1 %></span>
+                     <% } %>
+                   </div>
+                   <span class="step-label"><%= step.label %></span>
+                 </div>
+               <% }); %>
+             </div>
+           </div>
+           
+           <!-- C.2.5.3: User Status Info -->
+           <div class="user-status-container">
+             <div class="status-item">
+               <span class="status-label">Status:</span>
+               <span class="status-value <%= uiState %>"><%= uiState.replace('_', ' ').toUpperCase() %></span>
+             </div>
+             <div class="status-item">
+               <span class="status-label">Token:</span>
+               <span class="status-value <%= tokenStatus %>"><%= tokenStatus.toUpperCase() %></span>
+             </div>
+             <% if (readerName) { %>
+             <div class="status-item">
+               <span class="status-label">Reader:</span>
+               <span class="status-value"><%= readerName %></span>
+             </div>
+             <% } %>
+           </div>
+           
+           <!-- C.3: Verification Message -->
+           <div id="verificationInfo" class="verification-info" style="display: none;">
+             <p>✅ Email verification successful! Please complete secure login.</p>
+           </div>
+           
+           <!-- C.4: Error Message -->
+           <div id="errorMessage" class="error-message"<% if (typeof query !== 'undefined' && query.error) { %> style="display: block;"<% } %>><% if (typeof query !== 'undefined' && query.error) { %><%= decodeURIComponent(query.error) %><% } %></div>
+
+           <!-- ✅ SERVER-SIDE: Multi-device warning -->
+           <% if (typeof query !== 'undefined' && query.newDevice === 'true') { %>
+             <div class="notification warning" style="display: block; margin-bottom: 20px; padding: 15px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; color: #92400e;">
+               <strong>🔐 New Device Detected!</strong><br>
+               Previous login from: <%= query.previousIp || 'unknown' %><br>
+               <small>If this wasn't you, please contact support.</small>
+             </div>
+           <% } %>
+
+          <!-- C.5: Secure Login Form -->
+          <!-- ✅ SERVER-SIDE: Form POST submission -->
+          <form id="secureLoginForm" method="POST" action="/readersAuth/secureLogin">
+            <!-- Hidden fields for server -->
+            <input type="hidden" name="readerPin" value="<%= readerPin %>">
+            <input type="hidden" name="reset" value="<%= state === 'resetPassword' ? 'true' : 'false' %>">
+            <input type="hidden" name="isNewUser" value="<%= state === 'createPassword' ? 'true' : 'false' %>">
+          
+          <!-- ========================================
+               STATE A: CREATE PASSWORD (First-Time Users)
+               ======================================== -->
+           <% if (state === 'createPassword') { %>
+             <div class="form-group">
+               <label for="email">📧 Email Address</label>
+               <input type="email" id="email" name="email" required autocomplete="email" placeholder="your.email@example.com">
+             </div>
+             
+             <div class="form-group">
+               <label for="password">🔒 Create Your Password</label>
+               <input type="password" id="password" name="password" required 
+                      autocomplete="new-password" placeholder="Minimum 8 characters (letters + numbers)">
+               <div class="pin-hint">✅ Must be 8+ characters with letters and numbers</div>
+             </div>
+             
+             <div class="form-group">
+               <label for="passwordConfirm">🔐 Confirm Password</label>
+               <input type="password" id="passwordConfirm" name="passwordConfirm" required 
+                      autocomplete="new-password" placeholder="Confirm your password">
+             </div>
+             
+             <button type="submit" class="login-btn" id="loginBtn">
+               ✅ Create Password & Access Professional Workspace
+             </button>
+           <% } %>
+           
+           <!-- ========================================
+                STATE B: LOGIN PASSWORD (Returning Users)
+                ======================================== -->
+           <% if (state === 'loginPassword') { %>
+             <div class="form-group">
+               <label for="email">📧 Email Address</label>
+               <input type="email" id="email" name="email" required autocomplete="email" 
+                      value="<%= readerEmail %>" readonly>
+               <div class="pin-hint">Logged in as: <%= readerEmail %></div>
+             </div>
+             
+             <div class="form-group">
+               <label for="password">🔒 Your Password</label>
+               <input type="password" id="password" name="password" required 
+                      autocomplete="current-password" placeholder="Enter your password">
+             </div>
+             
+             <button type="submit" class="login-btn" id="loginBtn">
+               🔓 Access My Workspace
+             </button>
+             
+             <div style="text-align: center; margin-top: 15px;">
+               <a href="/secureLogin?readerPin=<%= readerPin %>&reset=true" style="color: #2c5282; text-decoration: none; font-size: 14px; font-weight: 500;">
+                 🔑 Forgot Your Password?
+               </a>
+             </div>
+           <% } %>
+           
+           <!-- ========================================
+                STATE C: FORGOT PASSWORD (Recovery Flow)
+                ======================================== -->
+           <% if (state === 'resetPassword') { %>
+             <div class="form-group">
+               <label for="email">📧 Email Address</label>
+               <input type="email" id="email" name="email" required autocomplete="email" 
+                      value="<%= readerEmail %>" readonly>
+               <div class="pin-hint">Account: <%= readerEmail %></div>
+             </div>
+             
+             <div class="form-group">
+               <label for="password">🔒 New Password</label>
+               <input type="password" id="password" name="password" required 
+                      autocomplete="new-password" placeholder="Minimum 8 characters (letters + numbers)">
+               <div class="pin-hint">✅ Must be 8+ characters with letters and numbers</div>
+             </div>
+             
+             <div class="form-group">
+               <label for="passwordConfirm">🔐 Confirm New Password</label>
+               <input type="password" id="passwordConfirm" name="passwordConfirm" required 
+                      autocomplete="new-password" placeholder="Confirm your new password">
+             </div>
+             
+             <button type="submit" class="login-btn" id="loginBtn">
+               🔑 Reset Password & Access Professional Workspace
+             </button>
+             
+             <div style="text-align: center; margin-top: 15px;">
+               <a href="/readersLogin" style="color: #2c5282; text-decoration: none; font-size: 14px; font-weight: 500;">
+                 ← Back to Login
+               </a>
+             </div>
+           <% } %>
+           
+           </form>
+           
+           <!-- C.7: Loading State -->
+           <div id="loading" class="loading">
+             <p>🔧 Setting up your professional QOLAE workspace...</p>
+           </div>
+           
+           <!-- C.8: Security Notice -->
+           <div class="security-notice">
+             <p>🛡️ Your data is protected with enterprise-grade encryption and GDPR compliance.</p>
+           </div>
+         </div>
+       
+       <!-- ==============================================
+            LOCATION BLOCK D: JAVASCRIPT
+            D.1: Initialization & URL Parameters
+            D.2: Form Submission Handler
+            D.3: Helper Functions
+            D.4: Profile Management Functions
+            ============================================== -->
+       
+       <script>
+         // ==============================================
+         // D.1: INITIALIZATION & URL PARAMETERS
+         // ==============================================
+         
+         document.addEventListener('DOMContentLoaded', function() {
+           // Set progress bar width dynamically
+           const progressFill = document.getElementById('progressFill');
+           if (progressFill) {
+             progressFill.style.width = '<%= progressPercentage %>%';
+           }
+           
+           const urlParams = new URLSearchParams(window.location.search);
+           const fromVerification = urlParams.get('verified');
+           const setupCompleted = urlParams.get('setupCompleted');
+           const readerPinFromUrl = urlParams.get('readerPin');
+           
+           console.log('URL params:', { fromVerification, setupCompleted, readerPinFromUrl });
+           
+           // Show verification message
+           if (fromVerification === 'true') {
+             const verificationDiv = document.getElementById('verificationInfo');
+             if (verificationDiv) {
+               verificationDiv.style.display = 'block';
+             }
+           }
+           
+           // Show setup completed message
+           if (setupCompleted === 'true') {
+             const verificationDiv = document.getElementById('verificationInfo');
+             if (verificationDiv) {
+               verificationDiv.innerHTML = '<p>🔐 Your professional workspace is already set up! Please use your secure login credentials below.</p>';
+               verificationDiv.style.display = 'block';
+               console.log('Setup completed message displayed');
+             } else {
+               console.error('verificationInfo div not found');
+             }
+           }
+         });
+         
+         // Auto-focus first empty field
+         window.addEventListener('load', function() {
+           const emailField = document.getElementById('email');
+           const passwordField = document.getElementById('password');
+           
+           if (emailField && !emailField.value) {
+             emailField.focus();
+           } else if (passwordField && !passwordField.value) {
+             passwordField.focus();
+           }
+         });
+         
+         // ==============================================
+         // ✅ SERVER-SIDE COMPLIANT: Minimal Form Validation
+         // No fetch(), no client-side HTTP calls
+         // ==============================================
+
+         document.getElementById('secureLoginForm').addEventListener('submit', function(e) {
+           // Client-side password match validation (UX enhancement only)
+           const passwordConfirmElement = document.getElementById('passwordConfirm');
+
+           if (passwordConfirmElement) {
+             const password = document.getElementById('password').value;
+             const passwordConfirm = passwordConfirmElement.value;
+
+             if (password !== passwordConfirm) {
+               e.preventDefault();  // Prevent form submission
+               showError('Passwords do not match. Please try again.');
+               return;
+             }
+           }
+
+           // Show loading state before form submits
+           const loginBtn = document.getElementById('loginBtn');
+           if (loginBtn) {
+             loginBtn.disabled = true;
+             loginBtn.textContent = 'Setting up workspace...';
+           }
+
+           const loading = document.getElementById('loading');
+           if (loading) {
+             loading.style.display = 'block';
+           }
+
+           // Form will submit naturally (server-side POST)
+           console.log('✅ Form submitting to server...');
+         });
+         
+         // ==============================================
+         // D.3: HELPER FUNCTIONS
+         // ==============================================
+         
+         function showError(message) {
+           const errorDiv = document.getElementById('errorMessage');
+           errorDiv.textContent = message;
+           errorDiv.style.display = 'block';
+           window.scrollTo(0, 0);
+         }
+       </script>
+     </body>
+     </html>

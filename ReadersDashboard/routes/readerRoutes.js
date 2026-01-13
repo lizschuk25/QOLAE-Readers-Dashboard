@@ -4,14 +4,19 @@
 // Purpose: NDA, Report Viewer, Corrections, Payment Tracking
 // Author: Liz
 // Date: 28th October 2025
+// Architecture: SSOT Pattern (Follows LawyersDashboard)
 // ==============================================
 
 import pg from 'pg';
+import fetch from 'node-fetch';
 import { insertSignaturesIntoNDA, flattenNDA } from '../utils/insertSignaturesIntoReadersNDA.js';
 
 const { Pool } = pg;
 
-// Database connections
+// SSOT Base URL (API-Dashboard)
+const SSOT_BASE_URL = process.env.SSOT_BASE_URL || 'https://api.qolae.com';
+
+// Database connections (Fallback - prefer SSOT API calls)
 const readersDb = new Pool({
   connectionString: process.env.READERS_DATABASE_URL
 });
@@ -19,6 +24,13 @@ const readersDb = new Pool({
 const caseManagersDb = new Pool({
   connectionString: process.env.CASEMANAGERS_DATABASE_URL
 });
+
+// ==============================================
+// NOTE: SSOT Helper Functions in rd_server.js
+// ==============================================
+// Following LawyersDashboard pattern:
+// - fetchModalWorkflowData() → rd_server.js
+// - buildReaderBootstrapData() → rd_server.js
 
 // ==============================================
 // AUTHENTICATION MIDDLEWARE
@@ -44,20 +56,34 @@ export default async function readerRoutes(fastify, options) {
   // ==============================================
   // READERS DASHBOARD (Main Workspace)
   // ==============================================
-  fastify.get('/readersDashboard', {
-    preHandler: authenticateReader
-  }, async (request, reply) => {
-    const { pin, name, type } = request.user;
+  // VIEW: readersDashboard.ejs ✅ EXISTS
+  // ARCHITECTURE: 100% Server-Side Modal Workflow Cards (Matches LawyersDashboard)
+  // SECURITY: PIN in URL is safe (bootstrap identifier + auth required)
+  // Modal pattern: /readersDashboard?pin=KB-123456&modal=nda
+  // SSOT READY: Helper functions prepared, awaiting API-Dashboard endpoints
+  fastify.get('/readersDashboard', async (request, reply) => {
+    reply.header('Cache-Control', 'no-cache, no-store, must-revalidate');
+    reply.header('Pragma', 'no-cache');
+    reply.header('Expires', '0');
+
+    const { readerPin, modal, assignmentId } = request.query;
+    const showModal = modal || null;  // Server-side modal overlay control
+
+    if (!readerPin) {
+      return reply.code(400).send({ error: 'Reader PIN required' });
+    }
 
     try {
-      // Get reader data
+      console.log(`🔍 Readers Dashboard route called with Reader PIN: ${readerPin}, Modal: ${modal || 'none'}`);
+
+      // Get reader data (bootstrap)
       const readerResult = await readersDb.query(
-        `SELECT "readerPin", "readerName", "readerType", email, phone,
-                "ndaSigned", "portalAccessStatus", "totalAssignmentsCompleted",
+        `SELECT "readerPin", "readerName", "readerType", "readerEmail", phone,
+                "ndaSigned", "pinAccessTokenStatus", "totalAssignmentsCompleted",
                 "averageTurnaroundHours", "totalEarnings"
          FROM readers
          WHERE "readerPin" = $1`,
-        [pin]
+        [readerPin]
       );
 
       if (readerResult.rows.length === 0) {
@@ -68,62 +94,120 @@ export default async function readerRoutes(fastify, options) {
 
       // Get active assignments
       const assignmentsResult = await readersDb.query(
-        `SELECT "assignmentId", "assignmentNumber", "reportType",
-                "assignedAt", deadline, "assignmentStatus", "paymentAmount"
+        `SELECT id, "assignmentNumber", "readerPin", "readerType",
+                "reportPdfPath", "reportAssignedAt", deadline, 
+                "correctionsSubmitted", "paymentStatus", "paymentAmount"
          FROM "readerAssignments"
          WHERE "readerPin" = $1
-         AND "assignmentStatus" IN ('pending', 'inProgress')
+         AND "correctionsSubmitted" = false
          ORDER BY deadline ASC`,
-        [pin]
+        [readerPin]
       );
 
-      return reply.view('readersDashboard.ejs', {
-        reader,
-        assignments: assignmentsResult.rows
-      });
-
-    } catch (error) {
-      fastify.log.error('Error loading readers dashboard:', error);
-      return reply.code(500).send({ success: false, error: 'Failed to load dashboard' });
-    }
-  });
-
-  // ==============================================
-  // NDA REVIEW PAGE
-  // ==============================================
-  fastify.get('/ndaReview', {
-    preHandler: authenticateReader
-  }, async (request, reply) => {
-    const { pin, name, type } = request.user;
-
-    try {
-      // Get reader data
-      const readerResult = await readersDb.query(
-        'SELECT "readerPin", "readerName", "ndaSigned" FROM readers WHERE "readerPin" = $1',
-        [pin]
-      );
-
-      if (readerResult.rows.length === 0) {
-        return reply.code(404).send({ success: false, error: 'Reader not found' });
+      // ===== MODAL DATA LOADING (Server-Side) =====
+      // Fetch modal-specific data if modal parameter is present
+      // Modal files will be conditionally included in readersDashboard.ejs
+      
+      let modalData = null;
+      
+      if (showModal === 'nda') {
+        const ndaResult = await readersDb.query(
+          'SELECT "versionNumber", "effectiveDate", "ndaContent" FROM "readerNdaVersions" WHERE "isCurrent" = TRUE'
+        );
+        modalData = {
+          type: 'nda',
+          nda: ndaResult.rows[0],
+          reader: reader
+        };
+      }
+      
+      else if (showModal === 'review' && assignmentId) {
+        const assignmentResult = await readersDb.query(
+          `SELECT "assignmentId", "assignmentNumber", "readerPin", "reportType",
+                  "assignmentStatus", "redactedReportPath", "correctionsContent", deadline
+           FROM "readerAssignments"
+           WHERE "assignmentId" = $1 AND "readerPin" = $2`,
+          [assignmentId, readerPin]
+        );
+        
+        if (assignmentResult.rows.length > 0) {
+          modalData = {
+            type: 'review',
+            assignment: assignmentResult.rows[0],
+            reader: { readerPin, readerName: reader.readerName }
+          };
+        }
+      }
+      
+      else if (showModal === 'payment' && assignmentId) {
+        const paymentQuery = `
+          SELECT 
+            ra.id as "assignmentId",
+            ra."readerPin",
+            ra."paymentStatus",
+            ra."paymentAmount",
+            ra."paymentReference",
+            ra."paymentApprovedAt",
+            ra."paymentProcessedAt",
+            ra."reportAssignedAt" as "assignedAt",
+            ra."correctionsSubmittedAt",
+            r."readerName",
+            r.email as "readerEmail",
+            r."paymentRate",
+            r."readerType"
+          FROM "readerAssignments" ra
+          INNER JOIN readers r ON ra."readerPin" = r."readerPin"
+          WHERE ra.id = $1 AND ra."readerPin" = $2
+        `;
+        const paymentResult = await readersDb.query(paymentQuery, [assignmentId, readerPin]);
+        
+        if (paymentResult.rows.length > 0) {
+          modalData = {
+            type: 'payment',
+            assignmentId: paymentResult.rows[0].assignmentId,
+            readerPin: paymentResult.rows[0].readerPin,
+            readerName: paymentResult.rows[0].readerName,
+            readerEmail: paymentResult.rows[0].readerEmail,
+            readerType: paymentResult.rows[0].readerType === 'firstReader' ? 'first' : 'second',
+            paymentStatus: paymentResult.rows[0].paymentStatus || 'pending',
+            paymentAmount: paymentResult.rows[0].paymentAmount || paymentResult.rows[0].paymentRate,
+            paymentReference: paymentResult.rows[0].paymentReference || 'N/A',
+            assignedAt: paymentResult.rows[0].assignedAt,
+            correctionsSubmittedAt: paymentResult.rows[0].correctionsSubmittedAt,
+            paymentApprovedAt: paymentResult.rows[0].paymentApprovedAt,
+            paymentProcessedAt: paymentResult.rows[0].paymentProcessedAt
+          };
+        }
       }
 
-      const reader = readerResult.rows[0];
+      console.log(`✅ Dashboard loading for ${reader.readerName} (${readerPin})`);
+      if (showModal) {
+        console.log(`[SSR] Modal requested: ${showModal}, Data loaded: ${modalData ? 'Yes' : 'No'}`);
+      }
 
-      // Get current NDA version
-      const ndaResult = await readersDb.query(
-        'SELECT "versionNumber", "effectiveDate", "ndaContent" FROM "readerNdaVersions" WHERE "isCurrent" = TRUE'
-      );
-
-      return reply.view('nda-review.ejs', {
+      // ALWAYS render main dashboard with conditional modal includes
+      return reply.view('readersDashboard.ejs', {
         reader,
-        nda: ndaResult.rows[0]
+        assignments: assignmentsResult.rows,
+        showModal: showModal,      // 'nda', 'review', 'payment', or null
+        modalData: modalData        // Modal-specific data or null
       });
 
     } catch (error) {
-      fastify.log.error('Error loading NDA review:', error);
-      return reply.code(500).send({ success: false, error: 'Failed to load NDA' });
+      console.error('❌ ERROR loading readers dashboard:', error);
+      console.error('❌ Error stack:', error.stack);
+      console.error('❌ Error message:', error.message);
+      fastify.log.error('Error loading readers dashboard:', error);
+      return reply.code(500).send({ success: false, error: 'Failed to load dashboard', details: error.message });
     }
   });
+
+  // ==============================================
+  // NDA WORKFLOW - HANDLED VIA DASHBOARD MODAL
+  // ==============================================
+  // Pattern: /readersDashboard?pin=KB-123456&modal=nda
+  // Modal rendered server-side in readersDashboard.ejs
+  // Follows LawyersDashboard architecture
 
   // ==============================================
   // SIGN NDA (API) - Complete Workflow
@@ -169,7 +253,7 @@ export default async function readerRoutes(fastify, options) {
          SET "ndaSigned" = TRUE,
              "ndaSignedAt" = NOW(),
              "ndaVersionId" = $1,
-             "portalAccessStatus" = 'active'
+             "pinAccessTokenStatus" = 'active'
          WHERE "readerPin" = $2`,
         [nda.id, pin]
       );
@@ -184,7 +268,7 @@ export default async function readerRoutes(fastify, options) {
       return reply.send({
         success: true,
         message: 'NDA signed successfully',
-        redirectTo: '/readers-dashboard',
+        redirectTo: '/readersDashboard',
         ndaPath: flattenResult.outputPath
       });
 
@@ -195,82 +279,18 @@ export default async function readerRoutes(fastify, options) {
   });
 
   // ==============================================
-  // REPORT VIEWER (In-Workspace Only - No Download)
+  // REPORT REVIEW WORKFLOW - HANDLED VIA DASHBOARD MODAL
   // ==============================================
-  fastify.get('/reportViewer/:assignmentId', {
-    preHandler: authenticateReader
-  }, async (request, reply) => {
-    const { pin, name } = request.user;
-    const { assignmentId } = request.params;
-
-    try {
-      // Get assignment details
-      const assignmentResult = await readersDb.query(
-        `SELECT "assignmentId", "assignmentNumber", "readerPin", "reportType",
-                "assignmentStatus", "redactedReportPath", deadline
-         FROM "readerAssignments"
-         WHERE "assignmentId" = $1 AND "readerPin" = $2`,
-        [assignmentId, pin]
-      );
-
-      if (assignmentResult.rows.length === 0) {
-        return reply.code(404).send({ success: false, error: 'Assignment not found' });
-      }
-
-      const assignment = assignmentResult.rows[0];
-
-      // Check if assignment is accessible
-      if (assignment.assignmentStatus === 'completed' || assignment.assignmentStatus === 'cancelled') {
-        return reply.code(403).send({ success: false, error: 'This assignment is no longer accessible' });
-      }
-
-      return reply.view('report-viewer.ejs', {
-        assignment,
-        reader: { pin, name }
-      });
-
-    } catch (error) {
-      fastify.log.error('Error loading report viewer:', error);
-      return reply.code(500).send({ success: false, error: 'Failed to load report' });
-    }
-  });
+  // Pattern: /readersDashboard?pin=KB-123456&modal=review&assignmentId=xxx
+  // Modal rendered server-side in readersDashboard.ejs
+  // Follows LawyersDashboard architecture
 
   // ==============================================
-  // CORRECTIONS EDITOR (In-Workspace Only)
+  // CORRECTIONS WORKFLOW - HANDLED VIA DASHBOARD MODAL
   // ==============================================
-  fastify.get('/correctionsEditor/:assignmentId', {
-    preHandler: authenticateReader
-  }, async (request, reply) => {
-    const { pin, name } = request.user;
-    const { assignmentId } = request.params;
-
-    try {
-      // Get assignment details
-      const assignmentResult = await readersDb.query(
-        `SELECT "assignmentId", "assignmentNumber", "readerPin", "reportType",
-                "assignmentStatus", "redactedReportPath", "correctionsContent",
-                deadline
-         FROM "readerAssignments"
-         WHERE "assignmentId" = $1 AND "readerPin" = $2`,
-        [assignmentId, pin]
-      );
-
-      if (assignmentResult.rows.length === 0) {
-        return reply.code(404).send({ success: false, error: 'Assignment not found' });
-      }
-
-      const assignment = assignmentResult.rows[0];
-
-      return reply.view('corrections-editor.ejs', {
-        assignment,
-        reader: { pin, name }
-      });
-
-    } catch (error) {
-      fastify.log.error('Error loading corrections editor:', error);
-      return reply.code(500).send({ success: false, error: 'Failed to load editor' });
-    }
-  });
+  // Pattern: /readersDashboard?pin=KB-123456&modal=corrections&assignmentId=xxx
+  // Modal rendered server-side in readersDashboard.ejs
+  // Follows LawyersDashboard architecture
 
   // ==============================================
   // SAVE CORRECTIONS (API)
@@ -362,42 +382,11 @@ export default async function readerRoutes(fastify, options) {
   });
 
   // ==============================================
-  // PAYMENT STATUS
+  // PAYMENT WORKFLOW - HANDLED VIA DASHBOARD MODAL
   // ==============================================
-  fastify.get('/paymentStatus', {
-    preHandler: authenticateReader
-  }, async (request, reply) => {
-    const { pin, name } = request.user;
-
-    try {
-      // Get payment history
-      const paymentsResult = await readersDb.query(
-        `SELECT "assignmentId", "assignmentNumber", "paymentAmount",
-                "correctionsSubmittedAt", "correctionsApproved",
-                "paymentApproved", "paymentApprovedAt", "paymentProcessedAt"
-         FROM "readerAssignments"
-         WHERE "readerPin" = $1
-         AND "assignmentStatus" = 'completed'
-         ORDER BY "correctionsSubmittedAt" DESC`,
-        [pin]
-      );
-
-      // Get total earnings
-      const earningsResult = await readersDb.query(
-        'SELECT "totalEarnings" FROM readers WHERE "readerPin" = $1',
-        [pin]
-      );
-
-      return reply.view('payment-status.ejs', {
-        reader: { pin, name, totalEarnings: earningsResult.rows[0].totalEarnings },
-        payments: paymentsResult.rows
-      });
-
-    } catch (error) {
-      fastify.log.error('Error loading payment status:', error);
-      return reply.code(500).send({ success: false, error: 'Failed to load payment status' });
-    }
-  });
+  // Pattern: /readersDashboard?pin=KB-123456&modal=payment&assignmentId=xxx
+  // Modal rendered server-side in readersDashboard.ejs
+  // Follows LawyersDashboard architecture
 
   // ==============================================
   // PAYMENT PROCESSING ROUTES
@@ -409,7 +398,8 @@ export default async function readerRoutes(fastify, options) {
 
   /**
    * ROUTE 1: RENDER PAYMENT PROCESSING MODAL
-   * GET /payment-processing?assignmentId=xxx
+   * GET /paymentProcessing?assignmentId=xxx
+   * VIEW: paymentProcessing.ejs ✅ EXISTS
    */
   fastify.get('/paymentProcessing', {
     preHandler: authenticateReader

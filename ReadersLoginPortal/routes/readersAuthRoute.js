@@ -345,14 +345,14 @@ export default async function readersAuthRoutes(fastify, opts) {
         // ═══════════════════════════════════════════════════════════
         if (!readerData.complianceSubmitted) {
           console.log(`[2FA] Reader ${readerPin} needs compliance - redirecting to HRCompliance`);
-          return reply.code(302).redirect(`${process.env.HRCOMPLIANCE_URL || 'https://hrcompliance.qolae.com'}/readersCompliance`);
+          return reply.code(302).redirect(`${process.env.HRCOMPLIANCE_URL || 'https://hrcompliance.qolae.com'}/readersCompliance?readerPin=${readerPin}`);
         }
 
-        // Redirect based on password setup status
+        // Redirect based on password setup status (matches Lawyers/Clients pattern)
         if (ssotData.passwordSetupCompleted) {
-          return reply.code(302).redirect(`/secureLogin?setupCompleted=true`);
+          return reply.code(302).redirect(`/secureLogin?readerPin=${readerPin}&setupCompleted=true`);
         } else {
-          return reply.code(302).redirect(`/secureLogin?verified=true`);
+          return reply.code(302).redirect(`/secureLogin?readerPin=${readerPin}&verified=true`);
         }
       } else {
         fastify.log.warn({

@@ -18,12 +18,27 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+            background: linear-gradient(135deg, #4a90e2 0%, #7cb3f5 100%);
             min-height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 40px 20px;
+        }
+        
+        /* ===== STANDALONE LOGO (OUTSIDE CONTAINER) ===== */
+        .qolaeLogo {
+            margin-bottom: 60px;
+            text-align: center;
+        }
+        
+        .qolaeLogo img {
+            max-width: 800px;
+            width: 90%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
         }
 
         /* ===== CONTAINER ===== */
@@ -36,16 +51,10 @@
             padding: 40px;
         }
 
-        /* ===== LOGO & BRANDING ===== */
+        /* ===== BRANDING (INSIDE CONTAINER) ===== */
         .logoSection {
             text-align: center;
             margin-bottom: 30px;
-        }
-
-        .logoImage {
-            max-width: 180px;
-            height: auto;
-            margin-bottom: 15px;
         }
 
         .logoSection h1 {
@@ -267,15 +276,33 @@
         .authOption {
             margin-bottom: 20px;
         }
+        
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 768px) {
+            .qolaeLogo img {
+                max-width: 300px;
+                width: 85%;
+            }
+            
+            .verificationContainer {
+                padding: 30px 25px;
+            }
+        }
     </style>
 </head>
 <body>
     <!-- ========================================== -->
-    <!-- LOCATION BLOCK 1: LOGO & HEADER -->
+    <!-- LOCATION BLOCK 1: STANDALONE LOGO (OUTSIDE CONTAINER) -->
+    <!-- ========================================== -->
+    <div class="qolaeLogo">
+        <img src="https://api.qolae.com/centralRepository/public/images/qolaeNewLogo.png" alt="QOLAE Logo">
+    </div>
+    
+    <!-- ========================================== -->
+    <!-- LOCATION BLOCK 2: VERIFICATION CONTAINER -->
     <!-- ========================================== -->
     <div class="verificationContainer">
         <div class="logoSection">
-            <img src="https://api.qolae.com/centralRepository/public/images/qolaeNewLogo.png" alt="QOLAE Logo" class="logoImage">
             <h1>Email Verification</h1>
             <% if (typeof query !== 'undefined' && query.codeSent === 'true') { %>
                 <p>Enter the 6-digit code sent to your email</p>

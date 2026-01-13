@@ -377,14 +377,8 @@ fastify.get('/secureLogin', async (req, reply) => {
     const reader = statusResponse.data.reader;
     console.log(`[SecureLogin] SSOT status retrieved for: ${reader.readerPin}`);
 
-    // ═══════════════════════════════════════════════════════════
-    // HRCOMPLIANCE GATE CHECK
-    // Readers must complete compliance before accessing dashboard
-    // ═══════════════════════════════════════════════════════════
-    if (!reader.complianceSubmitted) {
-      console.log(`[SecureLogin] Reader ${reader.readerPin} needs compliance - redirecting to HRCompliance`);
-      return reply.redirect(`${process.env.HRCOMPLIANCE_URL || 'https://hrcompliance.qolae.com/readersCompliance'}?readerPin=${readerPin}`);
-    }
+    // NOTE: Compliance gate is handled at 2FA stage, not here
+    // If reader reaches secureLogin, they have already passed compliance check
 
     const userStatus = {
       isFirstTime: !reader.passwordSetupCompleted,
