@@ -400,7 +400,7 @@ export default async function readersAuthRoutes(fastify, opts) {
   // ==============================================
 
   fastify.post('/readersAuth/secureLogin', async (request, reply) => {
-    const { password, isNewUser } = request.body;
+    const { password, passwordConfirm, isNewUser, readerPin } = request.body;
     const readerIP = request.ip;
 
     fastify.log.info({
@@ -425,6 +425,17 @@ export default async function readersAuthRoutes(fastify, opts) {
 
     if (!password) {
       return reply.code(302).redirect('/secureLogin?error=' + encodeURIComponent('Password is required'));
+    }
+
+    // Server-side password match validation (for new users and password reset)
+    if (passwordConfirm && password !== passwordConfirm) {
+      fastify.log.warn({
+        event: 'passwordMismatch',
+        readerPin: readerPin,
+        ip: readerIP,
+        gdprCategory: 'authentication'
+      });
+      return reply.code(302).redirect(`/secureLogin?readerPin=${readerPin || ''}&error=${encodeURIComponent('Passwords do not match. Please try again.')}`);
     }
 
     try {

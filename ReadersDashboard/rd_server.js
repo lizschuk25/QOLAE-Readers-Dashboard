@@ -154,7 +154,7 @@ server.get('/readersManagementHub', async (request, reply) => {
 
 async function getReaderById(readerPin) {
   // TODO: Implement database query
-  // Example: SELECT * FROM readers WHERE reader_pin = $1
+  // Example: SELECT * FROM readers WHERE "readerPin" = $1
   return {
     pin: readerPin,
     name: 'Reader Name',
@@ -166,19 +166,19 @@ async function getReaderById(readerPin) {
 
 async function getReaderDocuments(readerPin) {
   // TODO: Implement database query
-  // Example: SELECT * FROM reader_documents WHERE reader_pin = $1
+  // Example: SELECT * FROM "readerDocuments" WHERE "readerPin" = $1
   return [];
 }
 
 async function getReaderReports(readerPin) {
   // TODO: Implement database query
-  // Example: SELECT * FROM reader_assignments WHERE reader_pin = $1
+  // Example: SELECT * FROM "readerAssignments" WHERE "readerPin" = $1
   return [];
 }
 
 async function getReaderPayments(readerPin) {
   // TODO: Implement database query
-  // Example: SELECT * FROM reader_assignments WHERE reader_pin = $1 AND payment_status IS NOT NULL
+  // Example: SELECT * FROM "readerAssignments" WHERE "readerPin" = $1 AND "paymentStatus" IS NOT NULL
   return [];
 }
 

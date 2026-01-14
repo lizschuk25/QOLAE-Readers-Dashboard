@@ -12,35 +12,35 @@
 
 -- Add compliance tracking columns to readers table
 ALTER TABLE readers 
-  ADD COLUMN IF NOT EXISTS compliance_submitted BOOLEAN DEFAULT FALSE,
-  ADD COLUMN IF NOT EXISTS compliance_submitted_at TIMESTAMP;
+  ADD COLUMN IF NOT EXISTS "complianceSubmitted" BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS "complianceSubmittedAt" TIMESTAMP;
 
 -- Create index for quick lookup of readers who haven't submitted compliance
-CREATE INDEX IF NOT EXISTS idx_readers_compliance_submitted 
-  ON readers(compliance_submitted);
+CREATE INDEX IF NOT EXISTS "idxReadersComplianceSubmitted" 
+  ON readers("complianceSubmitted");
 
 -- ==============================================
 -- COMMENTS
 -- ==============================================
 
-COMMENT ON COLUMN readers.compliance_submitted IS 
+COMMENT ON COLUMN readers."complianceSubmitted" IS 
   'TRUE if reader has submitted HR compliance (CV + references). Used as gate to dashboard access.';
 
-COMMENT ON COLUMN readers.compliance_submitted_at IS 
+COMMENT ON COLUMN readers."complianceSubmittedAt" IS 
   'Timestamp when reader submitted their compliance documents.';
 
 -- ==============================================
 -- USAGE
 -- ==============================================
 -- Middleware in Readers Dashboard will check:
--- IF compliance_submitted = FALSE → redirect to /compliance
--- IF compliance_submitted = TRUE → allow access to dashboard
+-- IF "complianceSubmitted" = FALSE → redirect to /compliance
+-- IF "complianceSubmitted" = TRUE → allow access to dashboard
 --
 -- After compliance submission:
 -- UPDATE readers 
--- SET compliance_submitted = TRUE, 
---     compliance_submitted_at = CURRENT_TIMESTAMP
--- WHERE reader_pin = 'RDR-XX123456';
+-- SET "complianceSubmitted" = TRUE, 
+--     "complianceSubmittedAt" = CURRENT_TIMESTAMP
+-- WHERE "readerPin" = 'JS-123456';
 -- ==============================================
 
 -- ==============================================
