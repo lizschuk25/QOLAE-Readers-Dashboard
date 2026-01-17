@@ -237,15 +237,15 @@
         <!-- ========================================== -->
         <!-- LOCATION BLOCK 3: MESSAGE DISPLAY -->
         <!-- ========================================== -->
-        <% if (typeof error !== 'undefined' && error) { %>
+        <% if (error) { %>
             <div class="messageBox messageError"><%= error %></div>
         <% } %>
-        
-        <% if (typeof success !== 'undefined' && success) { %>
+
+        <% if (success) { %>
             <div class="messageBox messageSuccess"><%= success %></div>
         <% } %>
-        
-        <% if (typeof readerPin !== 'undefined' && readerPin) { %>
+
+        <% if (readerPin) { %>
             <div class="messageBox messageInfo">
                 Reader PIN detected. Please enter your email to continue.
             </div>
@@ -254,37 +254,38 @@
         <!-- ========================================== -->
         <!-- LOCATION BLOCK 4: LOGIN FORM -->
         <!-- ========================================== -->
-        <form action="/readersAuth/login" method="POST" id="loginForm">
+        <form action="/readersAuth/login" method="POST">
             <div class="formGroup">
                 <label class="formLabel" for="readerPin">Reader PIN</label>
-                <input 
-                    type="text" 
-                    id="readerPin" 
-                    name="readerPin" 
-                    class="formInput" 
+                <input
+                    type="text"
+                    id="readerPin"
+                    name="readerPin"
+                    class="formInput"
                     placeholder="RDR-XX-000000"
-                    value="<%= typeof readerPin !== 'undefined' ? readerPin : '' %>"
-                    <%= (typeof readerPin !== 'undefined' && readerPin) ? 'readonly' : '' %>
+                    value="<%= readerPin %>"
+                    <% if (readerPin) { %>readonly<% } else { %>autofocus<% } %>
                     required
                 >
                 <p class="formHint">Find this in your invitation email from QOLAE</p>
             </div>
-            
+
             <div class="formGroup">
                 <label class="formLabel" for="email">Email Address</label>
-                <input 
-                    type="email" 
-                    id="email" 
-                    name="email" 
-                    class="formInput" 
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    class="formInput"
                     placeholder="your@email.com"
                     required
-                    autofocus
+                    autocomplete="email"
+                    <% if (readerPin) { %>autofocus<% } %>
                 >
                 <p class="formHint">Use the email address where you received your invitation</p>
             </div>
-            
-            <button type="submit" class="btnPrimary" id="submitBtn">
+
+            <button type="submit" class="btnPrimary">
                 Continue to Verification
             </button>
         </form>
@@ -299,29 +300,8 @@
             <span>Secured with 2FA & GDPR Compliant</span>
         </div>
         
-        <p class="footerText">© 2025 QOLAE. All rights reserved.</p>
+        <p class="footerText">© 2026 QOLAE. All rights reserved.</p>
     </div>
-    
-    <!-- ========================================== -->
-    <!-- LOCATION BLOCK 6: JAVASCRIPT -->
-    <!-- ========================================== -->
-    <script>
-        // Form submission handling
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.textContent = 'Verifying...';
-        });
-        
-        // Auto-focus email if PIN is pre-filled
-        window.addEventListener('DOMContentLoaded', function() {
-            const pinInput = document.getElementById('readerPin');
-            const emailInput = document.getElementById('email');
-            
-            if (pinInput.value && pinInput.hasAttribute('readonly')) {
-                emailInput.focus();
-            }
-        });
-    </script>
+
 </body>
 </html>

@@ -304,7 +304,7 @@
     <div class="verificationContainer">
         <div class="logoSection">
             <h1>Email Verification</h1>
-            <% if (typeof query !== 'undefined' && query.codeSent === 'true') { %>
+            <% if (codeSent) { %>
                 <p>Enter the 6-digit code sent to your email</p>
             <% } else { %>
                 <p>Request a verification code to continue</p>
@@ -326,23 +326,17 @@
         <!-- ========================================== -->
         <!-- LOCATION BLOCK 3: MESSAGE DISPLAY -->
         <!-- ========================================== -->
-        <% if (typeof error !== 'undefined' && error) { %>
+        <% if (error) { %>
             <div class="messageBox messageError"><%= error %></div>
         <% } %>
 
-        <% if (typeof query !== 'undefined' && query.error) { %>
-            <div class="messageBox messageError"><%= decodeURIComponent(query.error) %></div>
+        <% if (success) { %>
+            <div class="messageBox messageSuccess"><%= success %></div>
         <% } %>
 
-        <% if (typeof query !== 'undefined' && query.codeSent === 'true') { %>
-            <div class="messageBox messageSuccess">
-                Verification code sent! Check your email inbox.
-            </div>
-        <% } %>
-
-        <% if (typeof email !== 'undefined' && email) { %>
+        <% if (readerEmail) { %>
             <div class="emailDisplay">
-                Email: <strong><%= email %></strong>
+                Email: <strong><%= readerEmail %></strong>
             </div>
         <% } %>
 
@@ -350,25 +344,23 @@
         <!-- LOCATION BLOCK 4: INITIAL STATE - SEND CODE BUTTON -->
         <!-- (Shown when codeSent is NOT true) -->
         <!-- ========================================== -->
-        <% if (typeof query === 'undefined' || query.codeSent !== 'true') { %>
-            <div class="authOption">
-                <p style="text-align: center; color: #6b7280; margin-bottom: 20px;">
-                    Click below to receive a 6-digit verification code via email.
-                </p>
-                <form action="/readersAuth/requestEmailCode" method="POST" id="sendCodeForm">
-                    <button type="submit" class="btnPrimary" id="sendCodeBtn">
-                        Send Verification Code
-                    </button>
-                </form>
+        <% if (!codeSent) { %>
+            <div style="text-align: center; color: #6b7280; margin-bottom: 20px;">
+                <p>Click below to receive a 6-digit verification code via email.</p>
             </div>
+            <form action="/readersAuth/requestEmailCode" method="POST">
+                <button type="submit" class="btnPrimary">
+                    Send Verification Code
+                </button>
+            </form>
         <% } %>
 
         <!-- ========================================== -->
         <!-- LOCATION BLOCK 5: VERIFICATION FORM -->
-        <!-- (Shown ONLY when codeSent === 'true') -->
+        <!-- (Shown ONLY when codeSent is true) -->
         <!-- ========================================== -->
-        <% if (typeof query !== 'undefined' && query.codeSent === 'true') { %>
-            <form action="/readersAuth/verify2fa" method="POST" id="verifyForm">
+        <% if (codeSent) { %>
+            <form action="/readersAuth/verify2fa" method="POST">
                 <div class="formGroup">
                     <label class="formLabel" for="verificationCode">Verification Code</label>
                     <input
@@ -387,23 +379,20 @@
                     <p class="formHint">Enter the 6-digit code from your email</p>
                 </div>
 
-                <button type="submit" class="btnPrimary" id="verifyBtn">
+                <button type="submit" class="btnPrimary">
                     Verify Code
                 </button>
             </form>
 
-            <!-- ========================================== -->
-            <!-- LOCATION BLOCK 6: RESEND CODE -->
-            <!-- (Only shown after initial code was sent) -->
-            <!-- ========================================== -->
-            <form action="/readersAuth/requestEmailCode" method="POST" id="resendForm">
-                <button type="submit" class="btnSecondary" id="resendBtn">
+            <!-- RESEND CODE -->
+            <form action="/readersAuth/requestEmailCode" method="POST">
+                <button type="submit" class="btnSecondary">
                     Resend Code
                 </button>
             </form>
 
-            <div class="timerDisplay" id="timerDisplay">
-                Code expires in <span id="countdown">10:00</span>
+            <div class="timerNotice">
+                Code expires in 10 minutes
             </div>
         <% } %>
 
@@ -417,89 +406,8 @@
             <span>2-Factor Authentication Active</span>
         </div>
 
-        <p class="footerText">© 2025 QOLAE. All rights reserved.</p>
+        <p class="footerText">© 2026 QOLAE. All rights reserved.</p>
     </div>
 
-    <!-- ========================================== -->
-    <!-- LOCATION BLOCK 8: JAVASCRIPT -->
-    <!-- ✅ SERVER-SIDE COMPLIANT: Minimal JavaScript -->
-    <!-- No axios, no fetch, no client-side HTTP calls -->
-    <!-- ========================================== -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('✅ 2FA Page loaded - Server-side compliant');
-
-            // Auto-hide success/error messages after 5 seconds
-            const messages = document.querySelectorAll('.messageBox');
-            messages.forEach(msg => {
-                setTimeout(() => {
-                    msg.style.opacity = '0';
-                    msg.style.transition = 'opacity 0.3s';
-                    setTimeout(() => msg.remove(), 300);
-                }, 5000);
-            });
-        });
-
-        <% if (typeof query !== 'undefined' && query.codeSent === 'true') { %>
-        // ===== VERIFICATION STATE JAVASCRIPT =====
-        // Only runs when code has been sent
-
-        // Auto-format code input (numbers only)
-        document.getElementById('verificationCode').addEventListener('input', function(e) {
-            this.value = this.value.replace(/[^0-9]/g, '').substring(0, 6);
-
-            // Auto-focus verify button when 6 digits entered
-            if (this.value.length === 6) {
-                document.getElementById('verifyBtn').focus();
-            }
-        });
-
-        // Form submission handling
-        document.getElementById('verifyForm').addEventListener('submit', function(e) {
-            const btn = document.getElementById('verifyBtn');
-            btn.disabled = true;
-            btn.textContent = 'Verifying...';
-        });
-
-        document.getElementById('resendForm').addEventListener('submit', function(e) {
-            const btn = document.getElementById('resendBtn');
-            btn.disabled = true;
-            btn.textContent = 'Sending...';
-        });
-
-        // Countdown timer (10 minutes)
-        let timeLeft = 600;
-        const countdownEl = document.getElementById('countdown');
-        const timerEl = document.getElementById('timerDisplay');
-
-        const timer = setInterval(function() {
-            timeLeft--;
-
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-
-            countdownEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-            if (timeLeft <= 60) {
-                timerEl.classList.add('expiring');
-            }
-
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                countdownEl.textContent = 'EXPIRED';
-                document.getElementById('verifyBtn').disabled = true;
-                document.getElementById('verifyBtn').textContent = 'Code Expired - Request New Code';
-            }
-        }, 1000);
-        <% } else { %>
-        // ===== INITIAL STATE JAVASCRIPT =====
-        // Send Code button handler
-        document.getElementById('sendCodeForm').addEventListener('submit', function(e) {
-            const btn = document.getElementById('sendCodeBtn');
-            btn.disabled = true;
-            btn.textContent = 'Sending...';
-        });
-        <% } %>
-    </script>
 </body>
 </html>

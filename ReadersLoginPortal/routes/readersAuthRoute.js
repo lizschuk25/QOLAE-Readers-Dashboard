@@ -424,7 +424,7 @@ export default async function readersAuthRoutes(fastify, opts) {
     }
 
     if (!password) {
-      return reply.code(302).redirect('/secureLogin?error=' + encodeURIComponent('Password is required'));
+      return reply.code(302).redirect(`/secureLogin?readerPin=${readerPin || ''}&error=` + encodeURIComponent('Password is required'));
     }
 
     // Server-side password match validation (for new users and password reset)
@@ -481,9 +481,9 @@ export default async function readersAuthRoutes(fastify, opts) {
         });
 
         // Redirect to Dashboard
-        const readerPin = ssotData.reader?.readerPin;
-        if (!readerPin) {
-          return reply.code(302).redirect('/secureLogin?error=' + encodeURIComponent('Session data incomplete'));
+        const ssotReaderPin = ssotData.reader?.readerPin;
+        if (!ssotReaderPin) {
+          return reply.code(302).redirect(`/secureLogin?readerPin=${readerPin || ''}&error=` + encodeURIComponent('Session data incomplete'));
         }
         return reply.code(302).redirect(`/readersDashboard?readerPin=${encodeURIComponent(readerPin)}`);
 
@@ -494,7 +494,7 @@ export default async function readersAuthRoutes(fastify, opts) {
           gdprCategory: 'authentication'
         });
 
-        return reply.code(302).redirect('/secureLogin?error=' + encodeURIComponent(ssotData.error || 'Password operation failed'));
+        return reply.code(302).redirect(`/secureLogin?readerPin=${readerPin || ''}&error=` + encodeURIComponent(ssotData.error || 'Password operation failed'));
       }
 
     } catch (err) {
@@ -514,7 +514,7 @@ export default async function readersAuthRoutes(fastify, opts) {
         }
 
         if (status === 409) {
-          return reply.code(302).redirect('/secureLogin?setupCompleted=true&error=' + encodeURIComponent('Password already set up. Please enter your password.'));
+          return reply.code(302).redirect(`/secureLogin?readerPin=${readerPin || ''}&setupCompleted=true&error=` + encodeURIComponent('Password already set up. Please enter your password.'));
         }
       }
 
@@ -525,7 +525,7 @@ export default async function readersAuthRoutes(fastify, opts) {
         gdprCategory: 'authentication'
       });
 
-      return reply.code(302).redirect('/secureLogin?error=' + encodeURIComponent('Authentication service unavailable'));
+      return reply.code(302).redirect(`/secureLogin?readerPin=${readerPin || ''}&error=` + encodeURIComponent('Authentication service unavailable'));
     }
   });
   

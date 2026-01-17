@@ -412,28 +412,28 @@
     </div>
 
     <!-- C.5: SERVER-SIDE Verification Message -->
-    <% if (verified === true || (typeof query !== 'undefined' && query.verified === 'true')) { %>
+    <% if (verified) { %>
       <div class="verification-info">
         <p>✅ Email verification successful! Please complete secure login.</p>
       </div>
-    <% } else if (typeof query !== 'undefined' && query.setupCompleted === 'true') { %>
+    <% } else if (setupCompleted) { %>
       <div class="verification-info">
         <p>🔐 Your professional workspace is already set up! Please use your secure login credentials below.</p>
       </div>
     <% } %>
 
     <!-- C.6: SERVER-SIDE Error Message -->
-    <% if (typeof query !== 'undefined' && query.error) { %>
+    <% if (errorMessage) { %>
       <div class="error-message">
-        <%= decodeURIComponent(query.error) %>
+        <%= errorMessage %>
       </div>
     <% } %>
 
     <!-- C.7: SERVER-SIDE New Device Warning -->
-    <% if (typeof query !== 'undefined' && query.newDevice === 'true') { %>
+    <% if (newDevice) { %>
       <div class="warning-message">
         <strong>🔐 New Device Detected!</strong><br>
-        Previous login from: <%= query.previousIp || 'unknown' %><br>
+        Previous login from: <%= previousIp %><br>
         <small>If this wasn't you, please contact support.</small>
       </div>
     <% } %>

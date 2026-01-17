@@ -77,7 +77,7 @@ fastify.register(formbody);
 
 // B.3.1: Cookie Parser
 fastify.register(cookie, {
-  secret: process.env.COOKIE_SECRET || process.env.JWT_SECRET,
+  secret: process.env.COOKIE_SECRET || process.env.READERS_LOGIN_JWT_SECRET,
   parseOptions: {}
 });
 
@@ -111,7 +111,7 @@ fastify.register(fastifyView, {
 // ==============================================
 
 // C.1: JWT Secret
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.READERS_LOGIN_JWT_SECRET;
 
 // C.2: Middleware to verify JWT token
 const authenticateToken = async (request, reply) => {
@@ -176,8 +176,13 @@ fastify.get('/readersLogin', async (request, reply) => {
   if (!readerPin) {
     return reply.view('readersLogin.ejs', {
       title: 'QOLAE Readers Login',
-      error: request.query.error || null,
-      success: request.query.success || null,
+      readerPin: '',
+      readerEmail: '',
+      readerName: '',
+      isFirstAccess: false,
+      tokenStatus: '',
+      error: request.query.error || '',
+      success: request.query.success || '',
       message: 'Please enter your Reader PIN and email address to log in'
     });
   }
@@ -278,17 +283,24 @@ fastify.get('/login', async (request, reply) => {
 // 1.3: 2FA Authentication Page
 fastify.get('/readers2fa', async (request, reply) => {
   const sessionId = request.cookies.qolaeReaderToken;
+  const codeSent = request.query.codeSent === 'true';
+  const errorMsg = request.query.error ? decodeURIComponent(request.query.error) : '';
+
+  // Default view data - always pass all variables
+  const viewData = {
+    title: '2-Way Authentication - QOLAE Readers Portal',
+    readerPin: '',
+    readerEmail: '',
+    readerName: '',
+    authToken: '',
+    codeSent: codeSent,
+    error: errorMsg,
+    success: codeSent ? 'Verification code sent! Check your email inbox.' : ''
+  };
 
   if (!sessionId) {
-    return reply.view('readers2fa.ejs', {
-      title: '2-Way Authentication - QOLAE Readers Portal',
-      error: 'No active session. Please return to login.',
-      readerPin: null,
-      email: null,
-      readerName: null,
-      authToken: null,
-      query: request.query
-    });
+    viewData.error = 'No active session. Please return to login.';
+    return reply.view('readers2fa.ejs', viewData);
   }
 
   try {
@@ -298,40 +310,23 @@ fastify.get('/readers2fa', async (request, reply) => {
     );
 
     if (!sessionResponse.data.success) {
-      return reply.view('readers2fa.ejs', {
-        title: '2-Way Authentication - QOLAE Readers Portal',
-        error: sessionResponse.data.error || 'Session invalid. Please return to login.',
-        readerPin: null,
-        email: null,
-        readerName: null,
-        authToken: null,
-        query: request.query
-      });
+      viewData.error = sessionResponse.data.error || 'Session invalid. Please return to login.';
+      return reply.view('readers2fa.ejs', viewData);
     }
 
     const reader = sessionResponse.data.reader;
 
-    return reply.view('readers2fa.ejs', {
-      title: '2-Way Authentication - QOLAE Readers Portal',
-      readerPin: reader.readerPin,
-      email: reader.readerEmail,
-      readerName: reader.readerName,
-      authToken: sessionId,
-      query: request.query
-    });
+    viewData.readerPin = reader.readerPin || '';
+    viewData.readerEmail = reader.readerEmail || '';
+    viewData.readerName = reader.readerName || '';
+    viewData.authToken = sessionId;
+
+    return reply.view('readers2fa.ejs', viewData);
 
   } catch (error) {
     fastify.log.error('2FA page error:', error.message);
-
-    return reply.view('readers2fa.ejs', {
-      title: '2-Way Authentication - QOLAE Readers Portal',
-      error: 'An error occurred. Please return to login.',
-      readerPin: null,
-      email: null,
-      readerName: null,
-      authToken: null,
-      query: request.query
-    });
+    viewData.error = 'An error occurred. Please return to login.';
+    return reply.view('readers2fa.ejs', viewData);
   }
 });
 
@@ -440,7 +435,7 @@ fastify.get('/secureLogin', async (req, reply) => {
 
     return reply.view('secureLogin.ejs', {
       title: 'Secure Login - QOLAE Readers Portal',
-      verified: verified || false,
+      verified: verified === 'true' || verified === true,
       readerPin: readerPin,
       state: isPasswordReset ? 'resetPassword' : (userStatus.isFirstTime ? 'createPassword' : 'loginPassword'),
       userStatus: userStatus,
@@ -455,7 +450,10 @@ fastify.get('/secureLogin', async (req, reply) => {
       tokenStatus: userStatus.tokenStatus,
       isFirstTime: userStatus.isFirstTime,
       hasPassword: userStatus.hasPassword,
-      query: req.query
+      setupCompleted: req.query.setupCompleted === 'true',
+      errorMessage: req.query.error ? decodeURIComponent(req.query.error) : '',
+      newDevice: req.query.newDevice === 'true',
+      previousIp: req.query.previousIp || ''
     });
 
   } catch (error) {
