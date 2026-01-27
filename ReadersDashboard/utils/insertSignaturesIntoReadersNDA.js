@@ -50,7 +50,7 @@ async function insertSignaturesIntoNDA(readerPin, signatureData) {
 
     // Load PDF from final-nda folder
     const { finalNdaDir, signedNdaDir, signaturesDir } = getDirectoryPaths();
-    const pdfPath = path.join(finalNdaDir, `NDA_${readerPin}.pdf`);
+    const pdfPath = path.join(finalNdaDir, `readersNda${readerPin}.pdf`);
 
     if (!fs.existsSync(pdfPath)) {
       throw new Error(`NDA file not found at: ${pdfPath}`);
@@ -122,7 +122,7 @@ async function insertSignaturesIntoNDA(readerPin, signatureData) {
     }
 
     // Save the signed NDA
-    const outputFilename = `NDA_${readerPin}_Signed.pdf`;
+    const outputFilename = `signedReadersNda${readerPin}.pdf`;
     const outputPath = path.join(signedNdaDir, outputFilename);
 
     // Ensure output directory exists
@@ -161,7 +161,7 @@ async function flattenNDA(readerPin) {
     console.log(`Reader PIN: ${readerPin}`);
 
     const { signedNdaDir } = getDirectoryPaths();
-    const pdfPath = path.join(signedNdaDir, `NDA_${readerPin}_Signed.pdf`);
+    const pdfPath = path.join(signedNdaDir, `signedReadersNda${readerPin}.pdf`);
 
     if (!fs.existsSync(pdfPath)) {
       throw new Error(`Signed NDA not found at: ${pdfPath}`);

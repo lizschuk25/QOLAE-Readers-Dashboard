@@ -1,0 +1,581 @@
+<%# ========================================== %>
+<%# NDA MODAL PARTIAL - 4-STEP WORKFLOW %>
+<%# Server-Side Controlled - No JavaScript Modal Logic %>
+<%# Parameters: reader, csrfToken, currentStep, showPreview %>
+<%# Pattern: Follows ClientsDashboard consentFormModal.ejs %>
+<%# Author: Claude (following Liz's specification) %>
+<%# Date: 27th January 2026 %>
+<%# ========================================== %>
+
+<!-- QOLAE Logo Header (consistent branding) -->
+<div style="text-align: left; padding: 15px 20px 10px 20px;">
+    <img src="https://api.qolae.com/centralRepository/public/images/qolaeNewLogo.png" alt="QOLAE" style="height: 120px; width: auto;">
+</div>
+
+<div class="modal-header">
+    <div class="modal-title">Non-Disclosure Agreement - Reader Agreement</div>
+</div>
+
+<!-- READER INFO HEADER -->
+<div style="background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 100%); padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #667eea;">
+    <p style="margin: 5px 0; color: #2d3748;"><strong>Reader Name:</strong> <%= reader.readerName %></p>
+    <p style="margin: 5px 0; color: #2d3748;"><strong>Reader PIN:</strong> <%= reader.readerPin %></p>
+    <p style="margin: 5px 0; color: #2d3748;"><strong>Reader Type:</strong> <%= reader.readerType === 'secondReader' ? 'Second Reader (Clinical)' : 'First Reader' %></p>
+    <p style="margin: 5px 0; color: #2d3748;"><strong>Date:</strong> <%= new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
+</div>
+
+<!-- PROGRESS INDICATOR -->
+<div style="display: flex; justify-content: space-between; margin-bottom: 25px; padding: 0 10px;">
+    <div style="flex: 1; text-align: center;">
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: <%= currentStep >= 1 ? '#10b981' : '#e2e8f0' %>; color: <%= currentStep >= 1 ? 'white' : '#64748b' %>; display: inline-flex; align-items: center; justify-content: center; font-weight: bold;">1</div>
+        <div style="font-size: 0.75rem; color: <%= currentStep >= 1 ? '#10b981' : '#64748b' %>; margin-top: 5px;">Review</div>
+    </div>
+    <div style="flex: 1; text-align: center;">
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: <%= currentStep >= 2 ? '#10b981' : '#e2e8f0' %>; color: <%= currentStep >= 2 ? 'white' : '#64748b' %>; display: inline-flex; align-items: center; justify-content: center; font-weight: bold;">2</div>
+        <div style="font-size: 0.75rem; color: <%= currentStep >= 2 ? '#10b981' : '#64748b' %>; margin-top: 5px;">Sign</div>
+    </div>
+    <div style="flex: 1; text-align: center;">
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: <%= currentStep >= 3 ? '#10b981' : '#e2e8f0' %>; color: <%= currentStep >= 3 ? 'white' : '#64748b' %>; display: inline-flex; align-items: center; justify-content: center; font-weight: bold;">3</div>
+        <div style="font-size: 0.75rem; color: <%= currentStep >= 3 ? '#10b981' : '#64748b' %>; margin-top: 5px;">Preview</div>
+    </div>
+    <div style="flex: 1; text-align: center;">
+        <div style="width: 36px; height: 36px; border-radius: 50%; background: <%= currentStep >= 4 ? '#10b981' : '#e2e8f0' %>; color: <%= currentStep >= 4 ? 'white' : '#64748b' %>; display: inline-flex; align-items: center; justify-content: center; font-weight: bold;">4</div>
+        <div style="font-size: 0.75rem; color: <%= currentStep >= 4 ? '#10b981' : '#64748b' %>; margin-top: 5px;">Complete</div>
+    </div>
+</div>
+
+<%# ========================================== %>
+<%# STEP 1: REVIEW NDA CONTENT %>
+<%# ========================================== %>
+<% if (currentStep === 1) { %>
+<div id="step1Review">
+    <div style="background: linear-gradient(135deg, #667eea, #764ba2); padding: 15px 20px; border-radius: 10px; margin-bottom: 15px; color: white;">
+        <h3 style="margin: 0 0 5px 0; font-size: 1.1rem;">Step 1: Review Your NDA</h3>
+        <p style="margin: 0; opacity: 0.9; font-size: 0.9rem;">Please read through the Non-Disclosure Agreement carefully before proceeding to sign.</p>
+    </div>
+
+    <div style="max-height: 55vh; overflow-y: auto; padding: 15px; background: #fafafa; border-radius: 10px; border: 1px solid #e2e8f0;">
+
+        <%# INTRODUCTION %>
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #667eea;">
+            <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 1rem;">Introduction</h4>
+            <p style="color: #475569; line-height: 1.6; text-align: justify;">
+                This Non-Disclosure Agreement ("Agreement") is entered into as of the date set forth below between QOLAE (Quality of Life & Excellence) ("QOLAE" or "Disclosing Party") and <strong><%= reader.readerName %></strong> ("Reader" or "Receiving Party"). This Agreement governs the disclosure of confidential and proprietary information in connection with the Reader's engagement to review Immediate Needs Assessment (INA) reports and related documentation.
+            </p>
+        </div>
+
+        <%# SECTION 1: Definition of Confidential Information %>
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #8b5cf6;">
+            <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 1rem;">
+                Section 1: Definition of Confidential Information
+            </h4>
+            <p style="color: #475569; line-height: 1.6; margin-bottom: 10px;">
+                "Confidential Information" means all information, whether written, oral, electronic, or visual, disclosed by QOLAE to the Reader, including but not limited to:
+            </p>
+            <ul style="color: #475569; line-height: 1.8; margin-left: 20px;">
+                <li>Client personal information, medical records, clinical assessments, and rehabilitation reports</li>
+                <li>Case management strategies, clinical methodologies, and assessment templates</li>
+                <li>Business information including client relationships, pricing structures, and operational procedures</li>
+                <li>Proprietary systems, workflows, databases, and intellectual property belonging to QOLAE</li>
+                <li>Any information marked as "Confidential," "Proprietary," or similar designation</li>
+                <li>Any information that a reasonable person would consider confidential given the nature of the information and circumstances of disclosure</li>
+            </ul>
+        </div>
+
+        <%# SECTION 2: Non-Disclosure Obligations %>
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #10b981;">
+            <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 1rem;">
+                Section 2: Non-Disclosure Obligations
+            </h4>
+            <p style="color: #475569; line-height: 1.6; margin-bottom: 10px;">
+                <strong><%= reader.readerName %></strong> agrees to:
+            </p>
+            <ul style="color: #475569; line-height: 1.8; margin-left: 20px;">
+                <li>Hold all Confidential Information in strict confidence</li>
+                <li>Not disclose, publish, or disseminate Confidential Information to any third party without prior written consent from QOLAE</li>
+                <li>Use Confidential Information solely for the purpose of reviewing and providing feedback on INA reports assigned by QOLAE</li>
+                <li>Take all reasonable precautions to prevent unauthorized disclosure or use of Confidential Information</li>
+                <li>Limit access to Confidential Information to only those persons who have a legitimate need to know</li>
+                <li>Notify QOLAE immediately upon discovery of any unauthorized disclosure or use of Confidential Information</li>
+            </ul>
+        </div>
+
+        <%# SECTION 3: Professional Standards (secondReader only) %>
+        <% if (reader.readerType === 'secondReader') { %>
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+            <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 1rem;">
+                Section 3: Professional Standards and Registration
+            </h4>
+            <p style="color: #475569; line-height: 1.6; margin-bottom: 10px;">
+                <strong><%= reader.readerName %></strong> agrees to maintain the following professional standards throughout the duration of engagement with QOLAE:
+            </p>
+            <ul style="color: #475569; line-height: 1.8; margin-left: 20px;">
+                <li>Maintain valid and unrestricted registration with the relevant professional body (NMC, GMC, HCPC, or equivalent)</li>
+                <li>Immediately notify QOLAE of any changes to registration status, including restrictions, suspensions, or investigations</li>
+                <li>Adhere to all professional codes of conduct applicable to their registration</li>
+                <li>Maintain appropriate professional indemnity insurance throughout the engagement</li>
+                <li>Complete any mandatory training or continuing professional development as required by QOLAE</li>
+                <li>Provide evidence of current registration and DBS clearance upon request</li>
+            </ul>
+        </div>
+        <% } %>
+
+        <%# SECTION: Exceptions (Section 3 for firstReader, Section 4 for secondReader) %>
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #3b82f6;">
+            <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 1rem;">
+                Section <%= reader.readerType === 'secondReader' ? '4' : '3' %>: Exceptions
+            </h4>
+            <p style="color: #475569; line-height: 1.6; margin-bottom: 10px;">
+                The obligations set forth in Section 2 shall not apply to information that:
+            </p>
+            <ul style="color: #475569; line-height: 1.8; margin-left: 20px;">
+                <li>Is or becomes publicly available through no breach of this Agreement by the Reader</li>
+                <li>Was rightfully in the Reader's possession prior to disclosure by QOLAE, as evidenced by written records</li>
+                <li>Is independently developed by the Reader without use of or reference to QOLAE's Confidential Information</li>
+                <li>Is rightfully received by the Reader from a third party without breach of any confidentiality obligation</li>
+                <li>Is required to be disclosed by law, regulation, or court order, provided that the Reader gives QOLAE prompt notice</li>
+            </ul>
+        </div>
+
+        <%# SECTION: Return of Materials %>
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ec4899;">
+            <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 1rem;">
+                Section <%= reader.readerType === 'secondReader' ? '5' : '4' %>: Return of Materials
+            </h4>
+            <p style="color: #475569; line-height: 1.6; margin-bottom: 10px;">
+                Upon completion of review services or upon request by QOLAE, <strong><%= reader.readerName %></strong> agrees to:
+            </p>
+            <ul style="color: #475569; line-height: 1.8; margin-left: 20px;">
+                <li>Promptly return all documents, files, data, and materials containing or reflecting Confidential Information</li>
+                <li>Permanently delete all electronic copies of Confidential Information from computers, devices, and storage systems</li>
+                <li>Destroy all notes, summaries, or other materials created by the Reader that contain Confidential Information</li>
+                <li>Provide written certification to QOLAE confirming compliance with this Section within 7 days of request</li>
+            </ul>
+        </div>
+
+        <%# SECTION: Data Protection %>
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #14b8a6;">
+            <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 1rem;">
+                Section <%= reader.readerType === 'secondReader' ? '6' : '5' %>: Data Protection and GDPR Compliance
+            </h4>
+            <p style="color: #475569; line-height: 1.6; margin-bottom: 10px;">
+                The Reader acknowledges and agrees that:
+            </p>
+            <ul style="color: #475569; line-height: 1.8; margin-left: 20px;">
+                <li>All personal data disclosed under this Agreement shall be processed in accordance with the General Data Protection Regulation (GDPR) and the Data Protection Act 2018</li>
+                <li>The Reader shall implement appropriate technical and organisational measures to protect personal data</li>
+                <li>The Reader shall not transfer personal data outside the United Kingdom or European Economic Area without prior written consent from QOLAE</li>
+                <li>Any breach of data protection obligations shall be reported to QOLAE within 24 hours of discovery</li>
+            </ul>
+        </div>
+
+        <%# SECTION: Intellectual Property %>
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #6366f1;">
+            <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 1rem;">
+                Section <%= reader.readerType === 'secondReader' ? '7' : '6' %>: Intellectual Property
+            </h4>
+            <p style="color: #475569; line-height: 1.6; text-align: justify;">
+                All Confidential Information, including but not limited to assessment templates, methodologies, clinical frameworks, and business processes, remains the exclusive property of QOLAE. This Agreement does not grant the Reader any license, right, title, or interest in such intellectual property except as necessary to perform the Reader's review services.
+            </p>
+        </div>
+
+        <%# SECTION: Term and Duration %>
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #f97316;">
+            <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 1rem;">
+                Section <%= reader.readerType === 'secondReader' ? '8' : '7' %>: Term and Duration
+            </h4>
+            <p style="color: #475569; line-height: 1.6; text-align: justify;">
+                This Agreement shall remain in effect for the duration of the Reader's engagement with QOLAE and shall continue for a period of five (5) years following termination of such engagement. The obligations of confidentiality set forth herein shall survive any termination of the Reader's engagement with QOLAE.
+            </p>
+        </div>
+
+        <%# SECTION: Remedies %>
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ef4444;">
+            <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 1rem;">
+                Section <%= reader.readerType === 'secondReader' ? '9' : '8' %>: Remedies
+            </h4>
+            <p style="color: #475569; line-height: 1.6; margin-bottom: 10px;">
+                The Reader acknowledges that:
+            </p>
+            <ul style="color: #475569; line-height: 1.8; margin-left: 20px;">
+                <li>Any breach of this Agreement may cause irreparable harm to QOLAE for which monetary damages would be inadequate</li>
+                <li>QOLAE shall be entitled to seek equitable relief, including injunction and specific performance</li>
+                <li>The Reader may be liable for any damages, losses, or costs incurred by QOLAE as a result of breach</li>
+                <li>Breach of this Agreement may result in immediate termination and disqualification from future work</li>
+            </ul>
+        </div>
+
+        <%# SECTION: Governing Law %>
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #84cc16;">
+            <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 1rem;">
+                Section <%= reader.readerType === 'secondReader' ? '10' : '9' %>: Governing Law and Jurisdiction
+            </h4>
+            <p style="color: #475569; line-height: 1.6; text-align: justify;">
+                This Agreement shall be governed by and construed in accordance with the laws of England and Wales. The parties submit to the exclusive jurisdiction of the courts of England and Wales for any disputes arising out of or in connection with this Agreement.
+            </p>
+        </div>
+
+        <%# SECTION: Entire Agreement %>
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #a855f7;">
+            <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 1rem;">
+                Section <%= reader.readerType === 'secondReader' ? '11' : '10' %>: Entire Agreement
+            </h4>
+            <p style="color: #475569; line-height: 1.6; text-align: justify;">
+                This Agreement constitutes the entire agreement between the parties concerning the subject matter hereof and supersedes all prior agreements, understandings, and communications, whether written or oral. This Agreement may only be amended by written instrument signed by both parties.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- STEP 1 ACTIONS -->
+    <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <form method="POST" action="/api/nda/continueToSign" style="flex: 1;">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="readerPin" value="<%= reader.readerPin %>">
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+                    <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
+                </svg>
+                Continue to Sign
+            </button>
+        </form>
+        <a href="/readersDashboard?readerPin=<%= reader.readerPin %>" class="btn btn-secondary">
+            Cancel
+        </a>
+    </div>
+</div>
+<% } %>
+
+<%# ========================================== %>
+<%# STEP 2: ACKNOWLEDGE AND SIGN %>
+<%# ========================================== %>
+<% if (currentStep === 2) { %>
+<div id="step2Sign">
+    <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 15px 20px; border-radius: 10px; margin-bottom: 15px; color: white;">
+        <h3 style="margin: 0 0 5px 0; font-size: 1.1rem;">Step 2: Acknowledge and Sign</h3>
+        <p style="margin: 0; opacity: 0.9; font-size: 0.9rem;">Please confirm your acknowledgment and provide your signature below.</p>
+    </div>
+
+    <form method="POST" action="/api/nda/preview" id="ndaSignForm" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input type="hidden" name="readerPin" value="<%= reader.readerPin %>">
+
+        <%# ACKNOWLEDGMENT SECTION %>
+        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)); padding: 25px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #10b981;">
+            <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 1rem;">
+                Acknowledgment
+            </h4>
+            <p style="color: #475569; line-height: 1.6; margin-bottom: 20px;">
+                I, <strong><%= reader.readerName %></strong>, acknowledge that I have read, understood, and agree to be bound by the terms and conditions of this Non-Disclosure Agreement. I understand that my engagement as a Reader with QOLAE is contingent upon my compliance with this Agreement.
+            </p>
+
+            <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer; padding: 15px; background: white; border-radius: 8px; border: 2px solid #e2e8f0;">
+                <input type="checkbox" name="acknowledgmentConfirmed" required style="width: 20px; height: 20px; margin-top: 2px; accent-color: #10b981;">
+                <span style="color: #1e293b; line-height: 1.5;">
+                    I have read and understood the above Non-Disclosure Agreement and agree to be bound by its terms. I confirm that I will comply with all confidentiality obligations outlined in this document.
+                </span>
+            </label>
+        </div>
+
+        <%# SIGNATURE SECTION %>
+        <div style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); padding: 25px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #667eea;">
+            <h4 style="color: #1e293b; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; font-size: 1rem;">
+                Your Signature
+            </h4>
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 15px;">
+                Draw your signature below or upload a signature image.
+            </p>
+
+            <%# Signature Type Selector %>
+            <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="radio" name="signatureType" value="draw" checked onchange="toggleSignatureType('draw')">
+                    <span style="color: #475569;">Draw my signature</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="radio" name="signatureType" value="upload" onchange="toggleSignatureType('upload')">
+                    <span style="color: #475569;">Upload signature image</span>
+                </label>
+            </div>
+
+            <%# Draw Signature Canvas %>
+            <div id="drawSignatureSection">
+                <div style="background: white; border: 2px dashed #667eea; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                    <canvas id="signatureCanvas" width="560" height="150" style="width: 100%; border-radius: 4px; background: #fafafa; cursor: crosshair;"></canvas>
+                    <input type="hidden" name="signatureData" id="signatureDataInput" value="">
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="clearSignature()" style="margin-bottom: 15px;">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style="margin-right: 5px;">
+                        <path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"/>
+                    </svg>
+                    Clear Signature
+                </button>
+            </div>
+
+            <%# Upload Signature %>
+            <div id="uploadSignatureSection" style="display: none;">
+                <div style="background: white; border: 2px dashed #667eea; border-radius: 8px; padding: 20px; text-align: center;">
+                    <input type="file" name="signatureUpload" id="signatureUpload" accept="image/*" style="display: none;">
+                    <label for="signatureUpload" style="cursor: pointer; color: #667eea;">
+                        <svg width="48" height="48" fill="currentColor" viewBox="0 0 24 24" style="margin-bottom: 10px;">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M12,12L8,16H10.5V19H13.5V16H16L12,12Z"/>
+                        </svg>
+                        <p style="margin: 0;">Click to upload signature image</p>
+                        <p style="margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8;">PNG, JPG or GIF</p>
+                    </label>
+                    <div id="uploadPreview" style="margin-top: 15px; display: none;">
+                        <img id="uploadedSignatureImg" src="" alt="Uploaded signature" style="max-width: 200px; max-height: 100px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%# STEP 2 ACTIONS %>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;" onclick="prepareSignatureData()">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+                    <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/>
+                </svg>
+                Preview Signed NDA
+            </button>
+            <a href="/readersDashboard?readerPin=<%= reader.readerPin %>&showModal=nda&step=1" class="btn btn-secondary">
+                Back
+            </a>
+        </div>
+    </form>
+</div>
+
+<%# Signature Canvas Script (Minimal JS - Canvas drawing only) %>
+<script>
+(function() {
+    const canvas = document.getElementById('signatureCanvas');
+    const ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+
+    // Set up canvas
+    ctx.strokeStyle = '#1e293b';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    // Get correct coordinates
+    function getCoords(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+
+        if (e.touches) {
+            return {
+                x: (e.touches[0].clientX - rect.left) * scaleX,
+                y: (e.touches[0].clientY - rect.top) * scaleY
+            };
+        }
+        return {
+            x: (e.clientX - rect.left) * scaleX,
+            y: (e.clientY - rect.top) * scaleY
+        };
+    }
+
+    function startDrawing(e) {
+        isDrawing = true;
+        const coords = getCoords(e);
+        lastX = coords.x;
+        lastY = coords.y;
+    }
+
+    function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+
+        const coords = getCoords(e);
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(coords.x, coords.y);
+        ctx.stroke();
+
+        lastX = coords.x;
+        lastY = coords.y;
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+    }
+
+    // Mouse events
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+
+    // Touch events
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', stopDrawing);
+
+    // Clear signature
+    window.clearSignature = function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        document.getElementById('signatureDataInput').value = '';
+    };
+
+    // Prepare signature data before submit
+    window.prepareSignatureData = function() {
+        const signatureType = document.querySelector('input[name="signatureType"]:checked').value;
+        if (signatureType === 'draw') {
+            document.getElementById('signatureDataInput').value = canvas.toDataURL('image/png');
+        }
+    };
+
+    // Toggle signature type
+    window.toggleSignatureType = function(type) {
+        document.getElementById('drawSignatureSection').style.display = type === 'draw' ? 'block' : 'none';
+        document.getElementById('uploadSignatureSection').style.display = type === 'upload' ? 'block' : 'none';
+    };
+
+    // Handle file upload preview
+    document.getElementById('signatureUpload').addEventListener('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                document.getElementById('uploadedSignatureImg').src = ev.target.result;
+                document.getElementById('uploadPreview').style.display = 'block';
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+})();
+</script>
+<% } %>
+
+<%# ========================================== %>
+<%# STEP 3: PREVIEW SIGNED NDA %>
+<%# ========================================== %>
+<% if (currentStep === 3) { %>
+<div id="step3Preview">
+    <div style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); padding: 15px 20px; border-radius: 10px; margin-bottom: 15px; color: white;">
+        <h3 style="margin: 0 0 5px 0; font-size: 1.1rem;">Step 3: Preview Your Signed NDA</h3>
+        <p style="margin: 0; opacity: 0.9; font-size: 0.9rem;">Review the document below. If everything looks correct, click "Confirm & Submit".</p>
+    </div>
+
+    <div style="background: #f1f5f9; border-radius: 10px; padding: 10px; margin-bottom: 15px; min-height: 500px;">
+        <iframe
+            src="/api/nda/previewPdf?readerPin=<%= reader.readerPin %>"
+            style="width: 100%; height: 500px; border: none; border-radius: 8px; background: white;"
+            title="NDA Preview">
+        </iframe>
+    </div>
+
+    <div style="display: flex; gap: 15px; justify-content: center;">
+        <a href="/readersDashboard?readerPin=<%= reader.readerPin %>&showModal=nda&step=2&redoSignature=true" class="btn btn-secondary" style="padding: 12px 30px;">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+                <path d="M12.5,8C9.85,8 7.45,9.16 5.78,10.97L3,8.19V15.5H10.31L7.53,12.72C8.77,11.39 10.54,10.5 12.5,10.5C15.89,10.5 18.72,12.89 19.38,16H21.92C21.22,11.5 17.27,8 12.5,8Z"/>
+            </svg>
+            Re-do Signature
+        </a>
+        <form method="POST" action="/api/nda/sign" style="display: inline;">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <input type="hidden" name="readerPin" value="<%= reader.readerPin %>">
+            <input type="hidden" name="confirmFromPreview" value="true">
+            <button type="submit" class="btn btn-primary" style="padding: 12px 30px;">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+                    <path d="M9,16.2L4.8,12L3.4,13.4L9,19L21,7L19.6,5.6L9,16.2Z"/>
+                </svg>
+                Confirm & Submit
+            </button>
+        </form>
+    </div>
+</div>
+<% } %>
+
+<%# ========================================== %>
+<%# STEP 4: COMPLETE %>
+<%# ========================================== %>
+<% if (currentStep === 4) { %>
+<div id="step4Complete">
+    <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 30px; border-radius: 15px; margin-bottom: 20px; color: white; text-align: center;">
+        <svg width="64" height="64" fill="currentColor" viewBox="0 0 24 24" style="margin-bottom: 15px;">
+            <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,16.5L6.5,12L7.91,10.59L11,13.67L16.59,8.09L18,9.5L11,16.5Z"/>
+        </svg>
+        <h2 style="margin: 0 0 10px 0; font-size: 1.5rem;">NDA Signed Successfully!</h2>
+        <p style="margin: 0; opacity: 0.9;">Your Non-Disclosure Agreement has been submitted and recorded.</p>
+    </div>
+
+    <%# Completion Summary %>
+    <div style="background: white; padding: 25px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
+        <h4 style="color: #1e293b; margin-bottom: 20px; font-size: 1rem;">Completion Summary</h4>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px; color: #10b981;">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9,16.2L4.8,12L3.4,13.4L9,19L21,7L19.6,5.6L9,16.2Z"/>
+                </svg>
+                <span>Step 1: NDA Reviewed</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; color: #10b981;">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9,16.2L4.8,12L3.4,13.4L9,19L21,7L19.6,5.6L9,16.2Z"/>
+                </svg>
+                <span>Step 2: Acknowledgment Confirmed & Signed</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; color: #10b981;">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9,16.2L4.8,12L3.4,13.4L9,19L21,7L19.6,5.6L9,16.2Z"/>
+                </svg>
+                <span>Step 3: Preview Approved</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; color: #10b981;">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9,16.2L4.8,12L3.4,13.4L9,19L21,7L19.6,5.6L9,16.2Z"/>
+                </svg>
+                <span>Step 4: NDA Submitted Successfully</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 0.9rem;">
+            <p style="margin: 5px 0;"><strong>Document Reference:</strong> signedReadersNda<%= reader.readerPin %>.pdf</p>
+            <p style="margin: 5px 0;"><strong>Signed:</strong> <%= new Date().toLocaleString('en-GB', { dateStyle: 'full', timeStyle: 'short' }) %></p>
+            <p style="margin: 5px 0;"><strong>Stored:</strong> Readers Documents Library + QOLAE Central Repository</p>
+        </div>
+    </div>
+
+    <%# View/Download Section %>
+    <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+        <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 1rem;">Your Signed NDA</h4>
+
+        <div id="viewContainer" style="display: none; margin-bottom: 15px;">
+            <iframe
+                src="/api/nda/view?readerPin=<%= reader.readerPin %>"
+                style="width: 100%; height: 400px; border: 1px solid #e2e8f0; border-radius: 8px; background: white;"
+                title="Signed NDA">
+            </iframe>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('viewContainer').style.display = document.getElementById('viewContainer').style.display === 'none' ? 'block' : 'none'">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+                    <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/>
+                </svg>
+                View Signed NDA
+            </button>
+            <a href="/api/nda/download?readerPin=<%= reader.readerPin %>" download="signedReadersNda<%= reader.readerPin %>.pdf" class="btn btn-primary">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+                    <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                </svg>
+                Download Signed NDA
+            </a>
+        </div>
+    </div>
+
+    <%# Return to Dashboard %>
+    <div style="text-align: center;">
+        <a href="/readersDashboard?readerPin=<%= reader.readerPin %>" class="btn btn-primary" style="padding: 15px 40px; font-size: 1rem;">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
+                <path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"/>
+            </svg>
+            Return to Dashboard
+        </a>
+    </div>
+</div>
+<% } %>

@@ -66,8 +66,9 @@ export default async function readerRoutes(fastify, options) {
     reply.header('Pragma', 'no-cache');
     reply.header('Expires', '0');
 
-    const { readerPin, modal, assignmentId } = request.query;
-    const showModal = modal || null;  // Server-side modal overlay control
+    const { readerPin, modal, showModal: showModalParam, assignmentId, step } = request.query;
+    const showModal = modal || showModalParam || null;  // Server-side modal overlay control
+    const currentStep = parseInt(step) || 1;  // Default to step 1 for NDA workflow
 
     if (!readerPin) {
       return reply.code(400).send({ error: 'Reader PIN required' });
@@ -111,14 +112,13 @@ export default async function readerRoutes(fastify, options) {
       let modalData = null;
       
       if (showModal === 'nda') {
-        const ndaResult = await readersDb.query(
-          'SELECT "versionNumber", "effectiveDate", "ndaContent" FROM "readerNdaVersions" WHERE "isCurrent" = TRUE'
-        );
+        // NDA 4-step workflow modal
         modalData = {
           type: 'nda',
-          nda: ndaResult.rows[0],
-          reader: reader
+          reader: reader,
+          currentStep: currentStep
         };
+        console.log(`[NDA Modal] Loading step ${currentStep} for ${readerPin}`);
       }
       
       else if (showModal === 'review' && assignmentId) {
@@ -186,11 +186,20 @@ export default async function readerRoutes(fastify, options) {
       }
 
       // ALWAYS render main dashboard with conditional modal includes
+      // Generate CSRF token for forms
+      const csrfToken = fastify.jwt.sign({
+        csrf: true,
+        readerPin: readerPin,
+        timestamp: Date.now()
+      });
+
       return reply.view('readersDashboard.ejs', {
         reader,
         assignments: assignmentsResult.rows,
         showModal: showModal,      // 'nda', 'review', 'payment', or null
-        modalData: modalData        // Modal-specific data or null
+        modalData: modalData,      // Modal-specific data or null
+        csrfToken: csrfToken,      // CSRF token for forms
+        currentStep: currentStep   // NDA workflow step (1-4)
       });
 
     } catch (error) {

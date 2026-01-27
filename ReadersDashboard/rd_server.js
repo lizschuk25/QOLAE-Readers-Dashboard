@@ -110,6 +110,9 @@ await server.register(fastifyView, {
 // Reader Routes (NDA, Reports, Corrections)
 await server.register(import('./routes/readerRoutes.js'));
 
+// NDA Workflow Routes (4-step process)
+await server.register(import('./routes/ndaRoutes.js'));
+
 // ==============================================
 // ROOT ROUTE
 // ==============================================

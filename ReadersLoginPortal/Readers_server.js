@@ -393,6 +393,7 @@ fastify.get('/secureLogin', async (req, reply) => {
     let actionRequired = '';
 
     const isPasswordReset = req.query.reset === 'true' || req.query.forgot === 'true';
+    const readerDisplayName = reader.readerName || 'Reader';
 
     if (isPasswordReset) {
       uiState = 'forgotPassword';
@@ -400,15 +401,15 @@ fastify.get('/secureLogin', async (req, reply) => {
       actionRequired = 'Enter your email to receive a password reset link';
     } else if (userStatus.isFirstTime && !userStatus.hasPassword) {
       uiState = 'firstTimeSetup';
-      welcomeMessage = `Welcome ${reader.readerName}! Let's set up your secure workspace.`;
+      welcomeMessage = `Welcome ${readerDisplayName}! Let's set up your secure workspace.`;
       actionRequired = 'Create your password to activate access';
     } else if (userStatus.hasPassword && userStatus.tokenStatus === 'pending') {
       uiState = 'passwordRequired';
-      welcomeMessage = `Welcome back ${reader.readerName}! Complete your setup.`;
+      welcomeMessage = `Welcome back ${readerDisplayName}! Complete your setup.`;
       actionRequired = 'Create your password to activate access';
     } else if (userStatus.hasPassword && userStatus.tokenStatus === 'active') {
       uiState = 'returningUser';
-      welcomeMessage = `Welcome back ${reader.readerName}!`;
+      welcomeMessage = `Welcome back ${readerDisplayName}!`;
       actionRequired = 'Enter your password to access your workspace';
     } else if (userStatus.tokenStatus === 'revoked') {
       uiState = 'accessRevoked';

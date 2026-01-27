@@ -669,13 +669,13 @@
             <h3 class="progress-title">Your Review Progress</h3>
             <div class="progress-steps">
                 <div class="progress-line">
-                    <div class="progress-fill" id="progressFill"></div>
+                    <div class="progress-fill" id="progressFill" style="width: <%= reader.ndaSigned ? '33%' : '0%' %>;"></div>
                 </div>
-                <div class="step active">
-                    <div class="step-circle">1</div>
+                <div class="step <%= reader.ndaSigned ? 'completed' : 'active' %>">
+                    <div class="step-circle"><%= reader.ndaSigned ? '✓' : '1' %></div>
                     <div class="step-label">NDA Signing</div>
                 </div>
-                <div class="step pending">
+                <div class="step <%= reader.ndaSigned ? 'active' : 'pending' %>">
                     <div class="step-circle">2</div>
                     <div class="step-label">Document Review</div>
                 </div>
@@ -693,11 +693,24 @@
         <div class="workflow-cards">
             <!-- Card 1: NDA (Workflow Step 1) -->
             <div class="dashboard-card nda-card">
+                <% if (reader.ndaSigned) { %>
+                <div class="status-indicator status-completed">✅ Signed</div>
+                <% } else { %>
                 <div class="status-indicator status-pending">⏳ Pending</div>
+                <% } %>
                 <div class="card-header">
                     <div class="card-icon primary-icon">📋</div>
                     <div class="card-title">Non-Disclosure Agreement</div>
                 </div>
+                <% if (reader.ndaSigned) { %>
+                <p class="card-description">
+                    Your NDA has been signed and is on file. You can view or download your signed copy at any time.
+                </p>
+                <div class="card-actions">
+                    <a href="/api/nda/view?readerPin=<%= reader.readerPin %>" target="_blank" class="btn btn-primary">📄 View Signed NDA</a>
+                    <a href="/api/nda/download?readerPin=<%= reader.readerPin %>" class="btn btn-secondary">⬇️ Download NDA</a>
+                </div>
+                <% } else { %>
                 <p class="card-description">
                     Review and digitally sign the NDA to access confidential report materials. Once signed, you'll be able to proceed to document review.
                 </p>
@@ -705,23 +718,39 @@
                     <button class="btn btn-primary" onclick="viewNDA()">✍️ Review & Sign NDA</button>
                     <button class="btn btn-secondary" onclick="viewNDA()">📄 View NDA</button>
                 </div>
+                <% } %>
             </div>
 
             <!-- Card 2: INA Report Review (Workflow Step 2) -->
-            <div class="dashboard-card review-card">
+            <div class="dashboard-card review-card <%= !reader.ndaSigned ? 'locked' : '' %>">
+                <% if (!reader.ndaSigned) { %>
                 <div class="status-indicator status-pending">🔒 Locked</div>
+                <% } else if (assignments && assignments.length > 0) { %>
+                <div class="status-indicator status-pending">📋 <%= assignments.length %> Assignment<%= assignments.length > 1 ? 's' : '' %></div>
+                <% } else { %>
+                <div class="status-indicator status-pending">⏳ Awaiting Assignment</div>
+                <% } %>
                 <div class="card-header">
                     <div class="card-icon info-icon">📖</div>
                     <div class="card-title">INA Report Review</div>
                 </div>
+                <% if (!reader.ndaSigned) { %>
+                <p class="card-description">
+                    Complete and sign your NDA above to unlock document review capabilities.
+                </p>
+                <div class="card-actions">
+                    <button class="btn btn-primary" disabled>🔒 Sign NDA First</button>
+                </div>
+                <% } else { %>
                 <p class="card-description">
                     Review the Immediate Needs Assessment (INA) report and provide feedback. Confidential details are blacked out for security. Submit corrections to proceed to payment.
                 </p>
                 <div class="card-actions">
-                    <button class="btn btn-primary" onclick="startReview()" disabled>📖 Start Review</button>
+                    <button class="btn btn-primary" onclick="startReview()" <%= assignments && assignments.length > 0 ? '' : 'disabled' %>>📖 Start Review</button>
                     <button class="btn btn-secondary" onclick="previewDocument()">👁️ Preview Document</button>
                     <button class="btn btn-secondary" onclick="viewInstructions()">💬 View Instructions</button>
                 </div>
+                <% } %>
             </div>
 
             <!-- Card 3: Payment Processing (Workflow Step 3) -->
@@ -964,14 +993,15 @@
      SERVER-SIDE MODAL OVERLAYS (Following LawyersDashboard Pattern)
      ============================================== -->
 
-<!-- NDA Modal Overlay -->
+<!-- NDA Modal Overlay (4-Step Workflow) -->
 <% if (showModal === 'nda' && modalData) { %>
   <div class="server-modal-overlay">
-    <div class="server-modal-container">
+    <div class="server-modal-container" style="max-width: 900px; width: 95%;">
       <a href="/readersDashboard?readerPin=<%= reader.readerPin %>" class="server-modal-close" title="Close">✕</a>
-      <%- include('nda', {
+      <%- include('partials/ndaModal', {
         reader: modalData.reader,
-        nda: modalData.nda
+        csrfToken: csrfToken,
+        currentStep: modalData.currentStep || 1
       }) %>
     </div>
   </div>
