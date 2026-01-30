@@ -57,10 +57,10 @@ export default async function readerRoutes(fastify, options) {
   // READERS DASHBOARD (Main Workspace)
   // ==============================================
   // VIEW: readersDashboard.ejs ✅ EXISTS
-  // ARCHITECTURE: 100% Server-Side Modal Workflow Cards (Matches LawyersDashboard)
+  // ARCHITECTURE: 100% Server-Side, SSOT Bootstrap Pattern (Matches LawyersDashboard)
   // SECURITY: PIN in URL is safe (bootstrap identifier + auth required)
-  // Modal pattern: /readersDashboard?pin=KB-123456&modal=nda
-  // SSOT READY: Helper functions prepared, awaiting API-Dashboard endpoints
+  // Modal pattern: /readersDashboard?readerPin=KB-123456&modal=nda
+  // SSOT: Uses buildReaderBootstrapData() for all reader/assignment data
   fastify.get('/readersDashboard', async (request, reply) => {
     reply.header('Cache-Control', 'no-cache, no-store, must-revalidate');
     reply.header('Pragma', 'no-cache');
@@ -77,40 +77,66 @@ export default async function readerRoutes(fastify, options) {
     try {
       console.log(`🔍 Readers Dashboard route called with Reader PIN: ${readerPin}, Modal: ${modal || 'none'}`);
 
-      // Get reader data (bootstrap)
-      const readerResult = await readersDb.query(
-        `SELECT "readerPin", "readerName", "readerType", "readerEmail", phone,
-                "ndaSigned", "pinAccessTokenStatus", "totalAssignmentsCompleted",
-                "averageTurnaroundHours", "totalEarnings"
-         FROM readers
-         WHERE "readerPin" = $1`,
-        [readerPin]
-      );
+      // ==============================================
+      // SINGLE SOURCE OF TRUTH - SSOT Bootstrap only
+      // ==============================================
+      // Step 1: Get stored JWT from SSOT
+      const tokenResponse = await fetch(`${SSOT_BASE_URL}/auth/readers/getStoredToken?readerPin=${readerPin}`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
 
-      if (readerResult.rows.length === 0) {
-        return reply.code(404).send({ success: false, error: 'Reader not found' });
+      if (!tokenResponse.ok) {
+        console.error(`❌ No valid JWT token found for readerPin: ${readerPin}`);
+        return reply.code(401).send({ error: 'Invalid session - please login again' });
       }
 
-      const reader = readerResult.rows[0];
+      const tokenData = await tokenResponse.json();
+      const { accessToken } = tokenData;
 
-      // Get active assignments
-      const assignmentsResult = await readersDb.query(
-        `SELECT id, "assignmentNumber", "readerPin", "readerType",
-                "reportPdfPath", "reportAssignedAt", deadline, 
-                "correctionsSubmitted", "paymentStatus", "paymentAmount"
-         FROM "readerAssignments"
-         WHERE "readerPin" = $1
-         AND "correctionsSubmitted" = false
-         ORDER BY deadline ASC`,
-        [readerPin]
-      );
+      // Step 2: Call SSOT bootstrap endpoint
+      const bootstrapResponse = await fetch(`${SSOT_BASE_URL}/readers/workspace/bootstrap`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!bootstrapResponse.ok) {
+        console.error(`❌ SSOT bootstrap failed for readerPin: ${readerPin}`);
+        return reply.code(401).send({ error: 'Invalid session - please login again' });
+      }
+
+      const bootstrapData = await bootstrapResponse.json();
+
+      if (!bootstrapData || !bootstrapData.valid) {
+        console.error(`❌ Invalid bootstrap for readerPin: ${readerPin}`);
+        return reply.code(401).send({ error: 'Invalid session - please login again' });
+      }
+
+      // Extract data from bootstrap response
+      const reader = {
+        readerPin: bootstrapData.user.readerPin,
+        readerName: bootstrapData.user.readerName,
+        readerType: bootstrapData.user.readerType,
+        readerEmail: bootstrapData.user.readerEmail,
+        phone: bootstrapData.user.phone,
+        ndaSigned: bootstrapData.gates.nda.completed,
+        lastLogin: bootstrapData.user.lastLogin,
+        totalAssignmentsCompleted: bootstrapData.stats.completedAssignments,
+        averageTurnaroundHours: bootstrapData.stats.averageTurnaroundHours,
+        totalEarnings: bootstrapData.stats.totalEarnings
+      };
+
+      const assignments = bootstrapData.assignments || [];
+
+      console.log(`✅ Dashboard loading for ${reader.readerName} (${readerPin}) via SSOT Bootstrap`);
 
       // ===== MODAL DATA LOADING (Server-Side) =====
-      // Fetch modal-specific data if modal parameter is present
-      // Modal files will be conditionally included in readersDashboard.ejs
-      
+      // Modal-specific data still requires direct queries for assignment details
       let modalData = null;
-      
+
       if (showModal === 'nda') {
         // NDA 4-step workflow modal
         modalData = {
@@ -120,8 +146,9 @@ export default async function readerRoutes(fastify, options) {
         };
         console.log(`[NDA Modal] Loading step ${currentStep} for ${readerPin}`);
       }
-      
+
       else if (showModal === 'review' && assignmentId) {
+        // Review modal requires assignment-specific data
         const assignmentResult = await readersDb.query(
           `SELECT "assignmentId", "assignmentNumber", "readerPin", "reportType",
                   "assignmentStatus", "redactedReportPath", "correctionsContent", deadline
@@ -129,7 +156,7 @@ export default async function readerRoutes(fastify, options) {
            WHERE "assignmentId" = $1 AND "readerPin" = $2`,
           [assignmentId, readerPin]
         );
-        
+
         if (assignmentResult.rows.length > 0) {
           modalData = {
             type: 'review',
@@ -138,11 +165,12 @@ export default async function readerRoutes(fastify, options) {
           };
         }
       }
-      
+
       else if (showModal === 'payment' && assignmentId) {
+        // Payment modal requires assignment + reader payment details
         const paymentQuery = `
-          SELECT 
-            ra.id as "assignmentId",
+          SELECT
+            ra."assignmentId",
             ra."readerPin",
             ra."paymentStatus",
             ra."paymentAmount",
@@ -152,15 +180,15 @@ export default async function readerRoutes(fastify, options) {
             ra."reportAssignedAt" as "assignedAt",
             ra."correctionsSubmittedAt",
             r."readerName",
-            r.email as "readerEmail",
+            r."readerEmail",
             r."paymentRate",
             r."readerType"
           FROM "readerAssignments" ra
           INNER JOIN readers r ON ra."readerPin" = r."readerPin"
-          WHERE ra.id = $1 AND ra."readerPin" = $2
+          WHERE ra."assignmentId" = $1 AND ra."readerPin" = $2
         `;
         const paymentResult = await readersDb.query(paymentQuery, [assignmentId, readerPin]);
-        
+
         if (paymentResult.rows.length > 0) {
           modalData = {
             type: 'payment',
@@ -180,12 +208,10 @@ export default async function readerRoutes(fastify, options) {
         }
       }
 
-      console.log(`✅ Dashboard loading for ${reader.readerName} (${readerPin})`);
       if (showModal) {
         console.log(`[SSR] Modal requested: ${showModal}, Data loaded: ${modalData ? 'Yes' : 'No'}`);
       }
 
-      // ALWAYS render main dashboard with conditional modal includes
       // Generate CSRF token for forms
       const csrfToken = fastify.jwt.sign({
         csrf: true,
@@ -193,9 +219,13 @@ export default async function readerRoutes(fastify, options) {
         timestamp: Date.now()
       });
 
+      // Pass bootstrap data to EJS template
       return reply.view('readersDashboard.ejs', {
         reader,
-        assignments: assignmentsResult.rows,
+        assignments,
+        gates: bootstrapData.gates,
+        features: bootstrapData.features,
+        stats: bootstrapData.stats,
         showModal: showModal,      // 'nda', 'review', 'payment', or null
         modalData: modalData,      // Modal-specific data or null
         csrfToken: csrfToken,      // CSRF token for forms

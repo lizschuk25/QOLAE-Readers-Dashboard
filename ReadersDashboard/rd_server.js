@@ -248,6 +248,7 @@ async function fetchModalWorkflowData(modal, readerPin, assignmentId = null) {
 
 /**
  * Build reader bootstrap data from SSOT API
+ * Follows LawyersDashboard buildLawyerBootstrapData() pattern
  * @param {string} readerPin - Reader PIN
  * @returns {object|null} Bootstrap data or null
  */
@@ -255,39 +256,37 @@ async function buildReaderBootstrapData(readerPin) {
   try {
     console.log(`📊 [SSR] Building bootstrap data for Reader PIN: ${readerPin}`);
 
-    // TODO: Get stored JWT token from SSOT (when implemented)
-    // For now, use direct database query as fallback
-    const tokenResponse = await fetch(`${server.ssotBaseUrl}/auth/getStoredToken?readerPin=${readerPin}`, {
+    // Step 1: Get stored JWT token from SSOT (readers-namespaced endpoint)
+    const tokenResponse = await fetch(`${SSOT_BASE_URL}/auth/readers/getStoredToken?readerPin=${readerPin}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
-    }).catch(() => null);
+    });
 
-    let accessToken = null;
-    if (tokenResponse && tokenResponse.ok) {
-      const tokenData = await tokenResponse.json();
-      accessToken = tokenData.accessToken;
+    if (!tokenResponse.ok) {
+      console.warn(`⚠️ [SSR] No valid JWT token found for readerPin: ${readerPin}`);
+      return null;
     }
 
-    // TODO: Call SSOT bootstrap endpoint (when implemented)
-    // For now, return null to trigger fallback database query
-    if (accessToken) {
-      const bootstrapResponse = await fetch(`${server.ssotBaseUrl}/readers/workspace/bootstrap`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        }
-      });
+    const tokenData = await tokenResponse.json();
+    const { accessToken } = tokenData;
 
-      if (bootstrapResponse.ok) {
-        const bootstrapData = await bootstrapResponse.json();
-        console.log(`✅ [SSR] Bootstrap data fetched successfully for ${readerPin}`);
-        return bootstrapData;
+    // Step 2: Call SSOT bootstrap endpoint with stored JWT token (readers-namespaced)
+    const bootstrapResponse = await fetch(`${SSOT_BASE_URL}/readers/workspace/bootstrap`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
       }
-    }
+    });
 
-    console.log(`⚠️ [SSR] SSOT bootstrap not available yet, using database fallback`);
-    return null;
+    if (bootstrapResponse.ok) {
+      const bootstrapData = await bootstrapResponse.json();
+      console.log(`✅ [SSR] Bootstrap data fetched successfully for ${readerPin}`);
+      return bootstrapData;
+    } else {
+      console.error(`❌ [SSR] SSOT bootstrap failed:`, bootstrapResponse.status);
+      return null;
+    }
 
   } catch (error) {
     console.error(`❌ [SSR] Bootstrap error for ${readerPin}:`, error.message);
