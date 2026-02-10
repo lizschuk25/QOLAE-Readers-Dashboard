@@ -119,6 +119,7 @@ export default async function readerRoutes(fastify, options) {
       const reader = {
         readerPin: bootstrapData.user.readerPin,
         readerName: bootstrapData.user.readerName,
+        firstName: bootstrapData.user.firstName || '',
         readerType: bootstrapData.user.readerType,
         readerEmail: bootstrapData.user.readerEmail,
         phone: bootstrapData.user.phone,

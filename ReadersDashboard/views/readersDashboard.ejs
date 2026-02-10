@@ -651,7 +651,7 @@
 
             
             <div class="welcome-section">
-                <h2 class="welcome-title">Welcome <span id="welcomeName"><%= reader.readerName || 'Reader' %></span></h2>
+                <h2 class="welcome-title">Welcome, <span id="welcomeName"><%= reader.firstName || reader.readerName || 'Reader' %></span></h2>
                 <p class="welcome-text">Access your secure professional review workspace. All data is encrypted and requires NDA compliance.</p>
                 <div class="session-info">
                     <span><strong>Last login:</strong> <span id="lastLogin"><%= reader.lastLogin || 'First Login' %></span></span>
