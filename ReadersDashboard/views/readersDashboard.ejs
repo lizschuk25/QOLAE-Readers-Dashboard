@@ -707,8 +707,7 @@
                     Your NDA has been signed and is on file. You can view or download your signed copy at any time.
                 </p>
                 <div class="card-actions">
-                    <a href="/api/nda/view?readerPin=<%= reader.readerPin %>" target="_blank" class="btn btn-primary">📄 View Signed NDA</a>
-                    <a href="/api/nda/download?readerPin=<%= reader.readerPin %>" class="btn btn-secondary">⬇️ Download NDA</a>
+                    <a href="/readersDashboard?readerPin=<%= reader.readerPin %>&showModal=nda&step=4" class="btn btn-primary">📄 View Signed NDA</a>
                 </div>
                 <% } else { %>
                 <p class="card-description">
@@ -716,7 +715,6 @@
                 </p>
                 <div class="card-actions">
                     <button class="btn btn-primary" onclick="viewNDA()">✍️ Review & Sign NDA</button>
-                    <button class="btn btn-secondary" onclick="viewNDA()">📄 View NDA</button>
                 </div>
                 <% } %>
             </div>
@@ -838,8 +836,8 @@
         // ===== API ENDPOINT CONFIGURATION =====
         // TODO: Replace with actual API endpoints
         const API_ENDPOINTS = {
-            viewNDA: '/api/nda/view',
-            downloadNDA: '/api/nda/download',
+            viewNDA: '/readersDashboard',
+            downloadNDA: '/nda/download',
             startReview: '/api/review/start',
             previewDocument: '/api/review/preview',
             viewInstructions: '/api/review/instructions',

@@ -229,9 +229,9 @@
 
     <!-- STEP 1 ACTIONS -->
     <div style="display: flex; gap: 10px; margin-top: 20px;">
-        <form method="POST" action="/api/nda/continueToSign" style="flex: 1;">
+        <form method="POST" action="/nda/continueToSign" style="flex: 1;">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <input type="hidden" name="readerPin" value="<%= reader.readerPin %>">
+
             <button type="submit" class="btn btn-primary" style="width: 100%;">
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
                     <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
@@ -256,9 +256,9 @@
         <p style="margin: 0; opacity: 0.9; font-size: 0.9rem;">Please confirm your acknowledgment and provide your signature below.</p>
     </div>
 
-    <form method="POST" action="/api/nda/preview" id="ndaSignForm" enctype="multipart/form-data">
+    <form method="POST" action="/nda/preview" id="ndaSignForm">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <input type="hidden" name="readerPin" value="<%= reader.readerPin %>">
+
 
         <%# ACKNOWLEDGMENT SECTION %>
         <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1)); padding: 25px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #10b981;">
@@ -461,7 +461,7 @@
 
     <div style="background: #f1f5f9; border-radius: 10px; padding: 10px; margin-bottom: 15px; min-height: 500px;">
         <iframe
-            src="/api/nda/previewPdf?readerPin=<%= reader.readerPin %>"
+            src="/nda/previewPdf?readerPin=<%= reader.readerPin %>"
             style="width: 100%; height: 500px; border: none; border-radius: 8px; background: white;"
             title="NDA Preview">
         </iframe>
@@ -474,9 +474,9 @@
             </svg>
             Re-do Signature
         </a>
-        <form method="POST" action="/api/nda/sign" style="display: inline;">
+        <form method="POST" action="/nda/sign" style="display: inline;">
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <input type="hidden" name="readerPin" value="<%= reader.readerPin %>">
+
             <input type="hidden" name="confirmFromPreview" value="true">
             <button type="submit" class="btn btn-primary" style="padding: 12px 30px;">
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
@@ -543,23 +543,9 @@
     <%# View/Download Section %>
     <div style="background: #f8fafc; padding: 20px; border-radius: 12px; margin-bottom: 20px;">
         <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 1rem;">Your Signed NDA</h4>
-
-        <div id="viewContainer" style="display: none; margin-bottom: 15px;">
-            <iframe
-                src="/api/nda/view?readerPin=<%= reader.readerPin %>"
-                style="width: 100%; height: 400px; border: 1px solid #e2e8f0; border-radius: 8px; background: white;"
-                title="Signed NDA">
-            </iframe>
-        </div>
-
-        <div style="display: flex; gap: 10px;">
-            <button type="button" class="btn btn-secondary" onclick="document.getElementById('viewContainer').style.display = document.getElementById('viewContainer').style.display === 'none' ? 'block' : 'none'">
-                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
-                    <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/>
-                </svg>
-                View Signed NDA
-            </button>
-            <a href="/api/nda/download?readerPin=<%= reader.readerPin %>" download="signedReadersNda<%= reader.readerPin %>.pdf" class="btn btn-primary">
+        <iframe src="/nda/view?readerPin=<%= reader.readerPin %>" style="width: 100%; height: 600px; border: 1px solid #e2e8f0; border-radius: 8px; background: white; margin-bottom: 15px;" title="Signed NDA"></iframe>
+        <div style="display: flex; justify-content: center;">
+            <a href="/nda/download?readerPin=<%= reader.readerPin %>" download="signedReadersNda<%= reader.readerPin %>.pdf" class="btn btn-primary">
                 <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24" style="margin-right: 8px;">
                     <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
                 </svg>

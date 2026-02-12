@@ -70,7 +70,7 @@ await server.register(fastifyCors, {
 
 // 2. JWT Authentication
 await server.register(fastifyJwt, {
-  secret: process.env.JWT_SECRET || 'readers-secret-key-2025',
+  secret: process.env.READERS_LOGIN_JWT_SECRET,
   cookie: {
     cookieName: 'qolaeReaderToken',
     signed: false,
@@ -98,6 +98,23 @@ await server.register(fastifyView, {
   options: {
     filename: path.join(__dirname, 'views'),
   },
+});
+
+// ==============================================
+// AUTHENTICATION DECORATOR
+// ==============================================
+// JWT verification decorator (used by NDA proxy routes and other plugins)
+// Matches authenticateReader pattern in readerRoutes.js
+// @fastify/jwt is registered above — request.jwtVerify() is available
+server.decorate('authenticate', async (request, reply) => {
+  try {
+    await request.jwtVerify();
+    if (request.user.role !== 'reader') {
+      throw new Error('Unauthorized role');
+    }
+  } catch (error) {
+    reply.code(401).send({ success: false, error: 'Authentication required' });
+  }
 });
 
 // ==============================================

@@ -400,12 +400,13 @@ export default async function readersAuthRoutes(fastify, opts) {
   // ==============================================
 
   fastify.post('/readersAuth/secureLogin', async (request, reply) => {
-    const { password, passwordConfirm, isNewUser, readerPin } = request.body;
+    const { password, passwordConfirm, isNewUser, reset, readerPin } = request.body;
     const readerIP = request.ip;
 
     fastify.log.info({
       event: 'secureLoginAttempt',
       isNewUser: isNewUser,
+      reset: reset,
       ip: readerIP,
       timestamp: new Date().toISOString(),
       gdprCategory: 'authentication'
@@ -438,25 +439,31 @@ export default async function readersAuthRoutes(fastify, opts) {
       return reply.code(302).redirect(`/secureLogin?readerPin=${readerPin || ''}&error=${encodeURIComponent('Passwords do not match. Please try again.')}`);
     }
 
+    const isReset = reset === 'true' || reset === true;
+
     try {
-      const endpoint = isNewUser === 'true' || isNewUser === true
-        ? '/auth/readers/passwordSetup'
-        : '/auth/readers/passwordVerify';
+      const endpoint = isReset
+        ? '/auth/readers/passwordReset'
+        : (isNewUser === 'true' || isNewUser === true)
+          ? '/auth/readers/passwordSetup'
+          : '/auth/readers/passwordVerify';
 
       console.log(`🔐 Calling SSOT ${endpoint}`);
 
+      // passwordReset takes PIN in body (no JWT auth header needed)
+      // passwordSetup and passwordVerify use JWT auth header
+      const requestBody = isReset
+        ? { readerPin: readerPin, password: password, ipAddress: readerIP, userAgent: request.headers['user-agent'] }
+        : { password: password, ipAddress: readerIP, userAgent: request.headers['user-agent'] };
+
+      const requestConfig = isReset
+        ? {}
+        : { headers: { 'Authorization': `Bearer ${jwtToken}` } };
+
       const ssotResponse = await axios.post(
         `${process.env.API_BASE_URL || 'https://api.qolae.com'}${endpoint}`,
-        {
-          password: password,
-          ipAddress: readerIP,
-          userAgent: request.headers['user-agent']
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${jwtToken}`
-          }
-        }
+        requestBody,
+        requestConfig
       );
 
       const ssotData = ssotResponse.data;
@@ -471,11 +478,13 @@ export default async function readersAuthRoutes(fastify, opts) {
             maxAge: 60 * 60 * 24
           });
 
-          console.log(`🔑 Updated JWT cookie after password ${isNewUser ? 'setup' : 'verify'}`);
+          const opType = isReset ? 'reset' : (isNewUser ? 'setup' : 'verify');
+          console.log(`🔑 Updated JWT cookie after password ${opType}`);
         }
 
+        const eventName = isReset ? 'passwordResetSuccess' : (isNewUser ? 'passwordSetupSuccess' : 'passwordVerifySuccess');
         fastify.log.info({
-          event: isNewUser ? 'passwordSetupSuccess' : 'passwordVerifySuccess',
+          event: eventName,
           readerPin: ssotData.reader?.readerPin,
           gdprCategory: 'authentication'
         });
@@ -503,13 +512,20 @@ export default async function readersAuthRoutes(fastify, opts) {
         const errorData = err.response.data;
 
         if (status === 401) {
+          const apiError = errorData.error || '';
+          const isInvalidPassword = apiError.toLowerCase().includes('invalid password');
+
           fastify.log.warn({
-            event: 'secureLoginInvalidSession',
-            error: errorData.error,
+            event: isInvalidPassword ? 'secureLoginInvalidPassword' : 'secureLoginInvalidSession',
+            error: apiError,
             ip: readerIP,
             gdprCategory: 'authentication'
           });
 
+          if (isInvalidPassword) {
+            const resetParam = isReset ? '&reset=true' : '';
+            return reply.code(302).redirect('/secureLogin?readerPin=' + encodeURIComponent(readerPin || '') + resetParam + '&error=' + encodeURIComponent('Invalid password. Please try again.'));
+          }
           return reply.code(302).redirect('/readersLogin?error=' + encodeURIComponent('Session expired. Please click your PIN link again.'));
         }
 
