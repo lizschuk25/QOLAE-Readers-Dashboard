@@ -778,8 +778,8 @@
                     Schedule your Independent Needs Assessment (INA) review sessions. View assigned cases and manage your availability for upcoming reviews.
                 </p>
                 <div class="card-actions">
-                    <button class="btn btn-primary" onclick="viewSchedule()">📅 View Schedule</button>
-                    <button class="btn btn-secondary" onclick="setAvailability()">⚙️ Set Availability</button>
+                    <a href="/readersDashboard?readerPin=<%= reader.readerPin %>&showModal=calendar&view=twoColumn" class="btn btn-primary">View Schedule</a>
+                    <a href="/readersDashboard?readerPin=<%= reader.readerPin %>&showModal=calendar&view=tabbed&tab=availability" class="btn btn-secondary">Set Availability</a>
                 </div>
             </div>
 
@@ -912,21 +912,6 @@
             return 'PLACEHOLDER_ASSIGNMENT_ID';
         }
 
-        // ===== PROFESSIONAL READERS CALENDAR HANDLERS (ENDPOINT READY) =====
-        function viewSchedule() {
-            console.log('Calling API: View Professional Readers Schedule');
-            // TODO: Implement API call
-            // Example: window.location.href = '/readers/schedule';
-            alert('View Professional Readers Schedule - Ready for endpoint integration');
-        }
-
-        function setAvailability() {
-            console.log('Calling API: Set Availability');
-            // TODO: Implement API call
-            // Example: openModal with availability calendar
-            alert('Set Availability - Ready for endpoint integration');
-        }
-
         // ===== DOCUMENT MANAGEMENT HANDLERS (ENDPOINT READY) =====
         function openDocument(documentId) {
             console.log('Opening document:', documentId, 'via', API_ENDPOINTS.openDocument);
@@ -1036,6 +1021,23 @@
         correctionsSubmittedAt: modalData.correctionsSubmittedAt,
         paymentApprovedAt: modalData.paymentApprovedAt,
         paymentProcessedAt: modalData.paymentProcessedAt
+      }) %>
+    </div>
+  </div>
+<% } %>
+
+<!-- Calendar Modal Overlay (Gold Standard — Session 125) -->
+<% if (showModal === 'calendar' && modalData) { %>
+  <div class="server-modal-overlay">
+    <div class="server-modal-container" style="max-width: 1300px; width: 98%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 16px;">
+      <a href="/readersDashboard?readerPin=<%= reader.readerPin %>" class="server-modal-close" title="Close">&#10005;</a>
+      <%- include('partials/readersCalendarModal', {
+        calendar: modalData.calendar,
+        overrides: modalData.overrides,
+        assignments: modalData.assignments,
+        view: modalData.view,
+        activeTab: modalData.activeTab,
+        readerPin: reader.readerPin
       }) %>
     </div>
   </div>

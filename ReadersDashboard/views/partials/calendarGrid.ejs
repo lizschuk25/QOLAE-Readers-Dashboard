@@ -1,0 +1,50 @@
+<%# ┌────────────────────────────────────────────┐ %>
+<%# │ calendarGrid.ejs — Shared month grid     │ %>
+<%# │ Used by: readersCalendar.ejs (all views) │ %>
+<%# │ Data: calendar (from parent)             │ %>
+<%# │ Author: Liz | Session 124                │ %>
+<%# └────────────────────────────────────────────┘ %>
+
+<div class="cg">
+  <%# Day headers (Mon-Sun) %>
+  <% calendar.dayLabels.forEach(function(label) { %>
+  <div class="ch"><%= label %></div>
+  <% }); %>
+
+  <%# Day cells %>
+  <% calendar.weeks.forEach(function(week) { %>
+    <% week.forEach(function(day) { %>
+      <% if (day.isEmpty) { %>
+        <div class="cd e"></div>
+      <% } else { %>
+        <%
+          let cellClass = 'cd';
+          if (day.isToday) cellClass += ' t';
+          else if (day.status === 'available') cellClass += ' av';
+          else if (day.status === 'assigned') cellClass += ' as';
+          else if (day.status === 'blocked') cellClass += ' bl';
+          else if (day.status === 'off') cellClass += ' of';
+          if (day.isPast && !day.isToday) cellClass += ' pa';
+        %>
+        <div class="<%= cellClass %>">
+          <%= day.dayNumber %>
+          <% if (day.status === 'available' || day.status === 'assigned' || day.status === 'blocked') { %>
+            <div class="ci"></div>
+          <% } %>
+          <% if (day.isToday) { %>
+            <div class="ci" style="background:#667eea;"></div>
+          <% } %>
+        </div>
+      <% } %>
+    <% }); %>
+  <% }); %>
+</div>
+
+<%# Legend %>
+<div class="cl">
+  <div class="li"><div class="ls l-td"></div>Today</div>
+  <div class="li"><div class="ls l-av"></div>Available</div>
+  <div class="li"><div class="ls l-as"></div>Assigned</div>
+  <div class="li"><div class="ls l-bl"></div>Blocked</div>
+  <div class="li"><div class="ls l-of"></div>Off</div>
+</div>

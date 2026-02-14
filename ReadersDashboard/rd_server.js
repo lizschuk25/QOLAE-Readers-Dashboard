@@ -103,8 +103,7 @@ await server.register(fastifyView, {
 // ==============================================
 // AUTHENTICATION DECORATOR
 // ==============================================
-// JWT verification decorator (used by NDA proxy routes and other plugins)
-// Matches authenticateReader pattern in readerRoutes.js
+// JWT verification decorator — single source of auth for all route plugins
 // @fastify/jwt is registered above — request.jwtVerify() is available
 server.decorate('authenticate', async (request, reply) => {
   try {
@@ -124,11 +123,14 @@ server.decorate('authenticate', async (request, reply) => {
 // Authentication is handled by ReadersLoginPortal (port 3015)
 // This server (port 3008) handles the authenticated workspace only
 
-// Reader Routes (NDA, Reports, Corrections)
+// Reader Routes — workflow journey (dashboard, corrections, payment)
 await server.register(import('./routes/readerRoutes.js'));
 
-// NDA Workflow Routes (4-step process)
+// NDA Workflow Routes (4-step thin proxy)
 await server.register(import('./routes/ndaRoutes.js'));
+
+// Management Hub Routes — operational home (hub, future calendar)
+await server.register(import('./routes/readersManagementHubRoutes.js'));
 
 // ==============================================
 // ROOT ROUTE
@@ -138,178 +140,6 @@ server.get('/', async (request, reply) => {
   // Redirect to ReadersLoginPortal (port 3015)
   return reply.redirect('https://readers.qolae.com/readersLogin');
 });
-
-// ==============================================
-// READERS MANAGEMENT HUB
-// ==============================================
-
-server.get('/readersManagementHub', async (request, reply) => {
-  try {
-    // Get reader from session (or JWT)
-    await request.jwtVerify();
-    const { pin } = request.user;
-
-    // Fetch data from database
-    const reader = await getReaderById(pin);
-    const documents = await getReaderDocuments(pin);
-    const reports = await getReaderReports(pin);
-    const payments = await getReaderPayments(pin);
-
-    return reply.view('readersManagementHub.ejs', {
-      reader,
-      documents,
-      reports,
-      payments
-    });
-
-  } catch (error) {
-    server.log.error('Error loading Readers Management Hub:', error);
-    return reply.redirect('https://readers.qolae.com/readersLogin');
-  }
-});
-
-// ==============================================
-// DATABASE HELPER FUNCTIONS (TODO: Move to separate file)
-// ==============================================
-
-async function getReaderById(readerPin) {
-  // TODO: Implement database query
-  // Example: SELECT * FROM readers WHERE "readerPin" = $1
-  return {
-    pin: readerPin,
-    name: 'Reader Name',
-    email: 'reader@example.com',
-    type: 'firstReader',
-    totalEarnings: 0
-  };
-}
-
-async function getReaderDocuments(readerPin) {
-  // TODO: Implement database query
-  // Example: SELECT * FROM "readerDocuments" WHERE "readerPin" = $1
-  return [];
-}
-
-async function getReaderReports(readerPin) {
-  // TODO: Implement database query
-  // Example: SELECT * FROM "readerAssignments" WHERE "readerPin" = $1
-  return [];
-}
-
-async function getReaderPayments(readerPin) {
-  // TODO: Implement database query
-  // Example: SELECT * FROM "readerAssignments" WHERE "readerPin" = $1 AND "paymentStatus" IS NOT NULL
-  return [];
-}
-
-// ==============================================
-// SSOT HELPER FUNCTIONS (Following LawyersDashboard Pattern)
-// ==============================================
-
-/**
- * Fetch modal workflow data from SSOT API
- * @param {string} modal - Modal type (nda, review, payment)
- * @param {string} readerPin - Reader PIN
- * @param {string} assignmentId - Assignment ID (for review/payment modals)
- * @returns {object|null} Modal workflow data or null
- */
-async function fetchModalWorkflowData(modal, readerPin, assignmentId = null) {
-  if (!modal || !readerPin) return null;
-
-  const endpointMap = {
-    'nda': '/api/readers/nda/workflow',
-    'review': '/api/readers/review/workflow',
-    'payment': '/api/readers/payment/workflow'
-  };
-
-  const endpoint = endpointMap[modal];
-  if (!endpoint) {
-    console.log(`[SSR] Unknown modal type: ${modal}`);
-    return null;
-  }
-
-  try {
-    console.log(`[SSR] Fetching ${modal} workflow data from SSOT API for Reader PIN: ${readerPin}`);
-
-    // Build URL with required parameters
-    let url = `${server.ssotBaseUrl}${endpoint}?readerPin=${encodeURIComponent(readerPin)}`;
-    if (assignmentId) {
-      url += `&assignmentId=${encodeURIComponent(assignmentId)}`;
-    }
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
-    });
-
-    if (!response.ok) {
-      console.error(`[SSR] SSOT API error for ${modal}:`, response.status);
-      return null;
-    }
-
-    const data = await response.json();
-
-    if (!data.success) {
-      console.error(`[SSR] SSOT API returned error for ${modal}:`, data.error);
-      return null;
-    }
-
-    console.log(`[SSR] ✓ ${modal} workflow data fetched successfully`);
-    return data;
-
-  } catch (error) {
-    console.error(`[SSR] Error fetching ${modal} workflow data:`, error.message);
-    return null;
-  }
-}
-
-/**
- * Build reader bootstrap data from SSOT API
- * Follows LawyersDashboard buildLawyerBootstrapData() pattern
- * @param {string} readerPin - Reader PIN
- * @returns {object|null} Bootstrap data or null
- */
-async function buildReaderBootstrapData(readerPin) {
-  try {
-    console.log(`📊 [SSR] Building bootstrap data for Reader PIN: ${readerPin}`);
-
-    // Step 1: Get stored JWT token from SSOT (readers-namespaced endpoint)
-    const tokenResponse = await fetch(`${SSOT_BASE_URL}/auth/readers/getStoredToken?readerPin=${readerPin}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
-    });
-
-    if (!tokenResponse.ok) {
-      console.warn(`⚠️ [SSR] No valid JWT token found for readerPin: ${readerPin}`);
-      return null;
-    }
-
-    const tokenData = await tokenResponse.json();
-    const { accessToken } = tokenData;
-
-    // Step 2: Call SSOT bootstrap endpoint with stored JWT token (readers-namespaced)
-    const bootstrapResponse = await fetch(`${SSOT_BASE_URL}/readers/workspace/bootstrap`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (bootstrapResponse.ok) {
-      const bootstrapData = await bootstrapResponse.json();
-      console.log(`✅ [SSR] Bootstrap data fetched successfully for ${readerPin}`);
-      return bootstrapData;
-    } else {
-      console.error(`❌ [SSR] SSOT bootstrap failed:`, bootstrapResponse.status);
-      return null;
-    }
-
-  } catch (error) {
-    console.error(`❌ [SSR] Bootstrap error for ${readerPin}:`, error.message);
-    return null;
-  }
-}
 
 // ==============================================
 // HEALTH CHECK
@@ -364,11 +194,13 @@ const start = async () => {
     console.log('  🔐 Login: https://readers.qolae.com/readersLogin (ReadersLoginPortal - port 3015)');
     console.log('  🏠 Dashboard: /readersDashboard');
     console.log('  📚 Management Hub: /readersManagementHub');
-    console.log('  📝 NDA Workflow: /ndaReview');
-    console.log('  📄 Report Viewer: /reportViewer');
-    console.log('  ✏️ Corrections Editor: /correctionsEditor');
-    console.log('  💰 Payment Tracking: /paymentStatus');
-    console.log('  💳 Payment Processing: /paymentProcessing');
+    console.log('  📅 Calendar: GET /calendar | POST /calendar/setPattern | POST /calendar/addOverride | POST /calendar/removeOverride');
+    console.log('  📝 NDA Workflow: /nda/*');
+    console.log('  ✏️ Save Corrections: POST /api/readers/saveCorrections');
+    console.log('  📤 Submit Corrections: POST /api/readers/submitCorrections');
+    console.log('  💳 Payment Processing: GET /paymentProcessing');
+    console.log('  💰 Payment Status: GET /api/readers/payment/status/:assignmentId');
+    console.log('  📊 Payment History: GET /readers/paymentHistory');
     console.log('  ❤️ Health Check: /health');
     console.log('');
     console.log('Ready for readers to access their workspace! 🚀');

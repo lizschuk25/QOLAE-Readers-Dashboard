@@ -1,0 +1,528 @@
+<%# ┌────────────────────────────────────────────┐ %>
+<%# │ QOLAE readersCalendar.ejs                │ %>
+<%# │ Author: Liz                              │ %>
+<%# │ Date: 12th February 2026                 │ %>
+<%# │ Session: 124 — Readers Calendar Phase 1  │ %>
+<%# │ Description: Professional Readers        │ %>
+<%# │   Calendar with 4 view layouts.          │ %>
+<%# │   100% server-side: CSS-only toggles,    │ %>
+<%# │   <form> POSTs, <a href> navigation.     │ %>
+<%# │ Views: twoColumn, tabbed, streamlined,   │ %>
+<%# │   compact                                │ %>
+<%# │ Data: calendar, reader, overrides,       │ %>
+<%# │   assignments, view, activeTab,          │ %>
+<%# │   readerPin                              │ %>
+<%# └────────────────────────────────────────────┘ %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QOLAE — Professional Readers Calendar</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
+  <style>
+    /* ===== RESET & BASE ===== */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 28px 20px;
+    }
+    .page-container { max-width: 1240px; margin: 0 auto; }
+
+    /* ===== PAGE HEADER ===== */
+    .pg-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .pg-header-left { display: flex; align-items: center; gap: 14px; }
+    .pg-icon { width: 50px; height: 50px; background: rgba(255,255,255,0.15); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; backdrop-filter: blur(10px); }
+    .pg-header h1 { font-size: 24px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+    .pg-header h1 span { display: block; font-size: 13px; font-weight: 400; color: rgba(255,255,255,0.7); margin-top: 2px; letter-spacing: 0; }
+    /* ===== VIEW SWITCHER ===== */
+    .view-switcher-bar { background: rgba(255,255,255,0.97); border-radius: 14px; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+    .view-label { font-size: 14px; font-weight: 600; color: #475569; display: flex; align-items: center; gap: 8px; }
+    .view-label-icon { font-size: 16px; }
+    .view-options { display: flex; gap: 3px; background: #f1f5f9; border-radius: 10px; padding: 3px; }
+    .view-opt { padding: 8px 16px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; background: transparent; color: #64748b; transition: all 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+    .view-opt.active { background: white; color: #667eea; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .view-opt:hover:not(.active) { color: #334155; background: rgba(255,255,255,0.5); }
+    .view-opt-icon { font-size: 14px; }
+
+    /* ===== SHARED: CARD ===== */
+    .card { background: rgba(255,255,255,0.97); border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); backdrop-filter: blur(10px); }
+    .cp { padding: 28px 32px; }
+    .cp-lg { padding: 34px 38px; }
+    .st { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .st-icon { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+    .st h2 { font-size: 17px; font-weight: 700; color: #1e293b; }
+    .st h2 span { display: block; font-size: 12px; font-weight: 500; color: #94a3b8; margin-top: 1px; }
+    .pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #dcfce7; color: #166534; }
+    .pill-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .divider { height: 1px; background: #f1f5f9; margin: 22px 0; }
+
+    /* ===== WEEKLY TOGGLES (horizontal) ===== */
+    .wk { display: grid; grid-template-columns: repeat(7,1fr); gap: 8px; }
+    .dc { text-align: center; }
+    .dl { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .dl.td { color: #667eea; }
+    .tw { display: flex; justify-content: center; margin-bottom: 6px; }
+    .tcb { display: none; }
+    .tsw { width: 44px; height: 24px; background: #e2e8f0; border-radius: 12px; position: relative; cursor: pointer; transition: all 0.3s; display: block; }
+    .tsw::after { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: all 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+    .tcb:checked + .tsw { background: #22c55e; }
+    .tcb:checked + .tsw::after { left: 23px; }
+    /* ===== WEEKLY TOGGLES (vertical — compact sidebar) ===== */
+    .wk-v { display: flex; flex-direction: column; gap: 6px; }
+    .dr { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-radius: 8px; background: white; border: 1px solid #e2e8f0; }
+    .dr .dn { font-size: 13px; font-weight: 600; color: #334155; width: 40px; }
+    .dr .dn.td { color: #667eea; }
+    .ct { width: 38px; height: 20px; background: #e2e8f0; border-radius: 10px; position: relative; cursor: pointer; transition: all 0.3s; display: block; }
+    .ct::after { content: ''; position: absolute; width: 14px; height: 14px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: all 0.3s; box-shadow: 0 1px 2px rgba(0,0,0,0.15); }
+    .tcb:checked + .ct { background: #22c55e; }
+    .tcb:checked + .ct::after { left: 21px; }
+    /* ===== MONTH GRID ===== */
+    .mn { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .mn h3 { font-size: 16px; font-weight: 700; color: #1e293b; }
+    .mb { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: #f1f5f9; color: #475569; text-decoration: none; font-size: 15px; font-weight: 600; transition: all 0.2s; }
+    .mb:hover { background: #667eea; color: white; }
+    .cg { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+    .ch { padding: 8px 2px; text-align: center; font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+    .cd { aspect-ratio: 1; border-radius: 8px; border: 2px solid transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 14px; font-weight: 500; color: #334155; background: #f8fafc; }
+    .cd.e { background: transparent; border: none; }
+    .cd.t { border-color: #667eea; background: #eef2ff; font-weight: 700; }
+    .cd.av { background: #dcfce7; border-color: #86efac; color: #166534; }
+    .cd.as { background: #dbeafe; border-color: #93c5fd; color: #1e40af; }
+    .cd.bl { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+    .cd.of { background: #f8fafc; color: #cbd5e1; }
+    .cd.pa { color: #cbd5e1; background: transparent; }
+    .ci { width: 5px; height: 5px; border-radius: 50%; margin-top: 3px; }
+    .cd.av .ci { background: #22c55e; }
+    .cd.as .ci { background: #3b82f6; }
+    .cd.bl .ci { background: #ef4444; }
+    .cl { display: flex; gap: 16px; margin-top: 14px; padding-top: 14px; border-top: 1px solid #f1f5f9; flex-wrap: wrap; }
+    .li { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; }
+    .ls { width: 12px; height: 12px; border-radius: 3px; }
+    .l-av { background: #dcfce7; border: 1px solid #86efac; }
+    .l-as { background: #dbeafe; border: 1px solid #93c5fd; }
+    .l-bl { background: #fef2f2; border: 1px solid #fecaca; }
+    .l-of { background: #f8fafc; border: 1px solid #e2e8f0; }
+    .l-td { background: #eef2ff; border: 2px solid #667eea; }
+
+    /* ===== OVERRIDES ===== */
+    .oi { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 6px; }
+    .oi.bk { background: #fef2f2; border: 1px solid #fecaca; }
+    .oi.ok { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .ol { display: flex; align-items: center; gap: 8px; color: #1e293b; font-weight: 500; }
+    .or { display: flex; align-items: center; gap: 10px; }
+    .ore { font-size: 11px; color: #64748b; font-style: italic; }
+    .rb { background: none; border: 1px solid #e2e8f0; border-radius: 5px; padding: 3px 8px; font-size: 11px; color: #94a3b8; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .rb:hover { border-color: #ef4444; color: #ef4444; }
+    .af { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-top: 10px; }
+    .fg { display: flex; flex-direction: column; gap: 3px; }
+    .fg label { font-size: 11px; font-weight: 600; color: #64748b; }
+    .fg input, .fg select { padding: 7px 10px; border: 1px solid #e2e8f0; border-radius: 7px; font-size: 13px; font-family: inherit; color: #334155; }
+    .fg input:focus, .fg select:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
+    .bs { padding: 7px 14px; background: #667eea; color: white; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; white-space: nowrap; }
+    .bs:hover { background: #5a6fd6; }
+    .bsv { padding: 9px 20px; background: #667eea; color: white; border: none; border-radius: 9px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .bsv:hover { background: #5a6fd6; box-shadow: 0 4px 12px rgba(102,126,234,0.35); }
+    .pattern-hint { font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 4px; }
+
+    /* ===== ASSIGNMENTS ===== */
+    .ai { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0; margin-bottom: 8px; transition: all 0.2s; }
+    .ai:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .ab { width: 46px; height: 46px; border-radius: 9px; background: #667eea; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+    .ab .ad { font-size: 16px; font-weight: 700; line-height: 1; }
+    .ab .am { font-size: 9px; font-weight: 600; text-transform: uppercase; opacity: 0.85; }
+    .ao { flex: 1; }
+    .ao h4 { font-size: 14px; font-weight: 600; color: #1e293b; margin-bottom: 2px; }
+    .ao p { font-size: 12px; color: #64748b; }
+    .ax { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; flex-shrink: 0; }
+    .ax.nw { background: #fef3c7; color: #92400e; }
+    .ax.du { background: #fee2e2; color: #991b1b; }
+
+    /* ===== LAYOUT: TWO-COLUMN ===== */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-bottom: 22px; }
+    .two-col .card { height: fit-content; }
+
+    /* ===== LAYOUT: COMPACT SIDEBAR ===== */
+    .cpt { display: grid; grid-template-columns: 270px 1fr; gap: 0; margin-bottom: 22px; overflow: hidden; }
+    .cpt-side { padding: 22px; background: #f8fafc; border-right: 1px solid #f1f5f9; border-radius: 16px 0 0 16px; }
+    .cpt-main { padding: 24px 28px; border-radius: 0 16px 16px 0; }
+    .cpt-lbl { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+    .cpt-div { height: 1px; background: #e2e8f0; margin: 14px 0; }
+    .oi-sm { display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; border-radius: 6px; font-size: 12px; margin-bottom: 4px; }
+    .oi-sm.bk { background: #fef2f2; border: 1px solid #fecaca; }
+    .oi-sm.ok { background: #f0fdf4; border: 1px solid #bbf7d0; }
+    .oi-sm .ol { gap: 5px; font-size: 12px; }
+
+    /* ===== INNER TABS (tabbed view) ===== */
+    .it { display: flex; gap: 2px; background: #f1f5f9; border-radius: 10px; padding: 3px; margin-bottom: 24px; }
+    .itb { flex: 1; padding: 10px 16px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; text-align: center; text-decoration: none; background: transparent; color: #64748b; transition: all 0.2s; display: block; }
+    .itb.active { background: white; color: #667eea; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+      .cpt { grid-template-columns: 1fr; }
+      .cpt-side { border-radius: 16px 16px 0 0; border-right: none; border-bottom: 1px solid #f1f5f9; }
+      .cpt-main { border-radius: 0 0 16px 16px; }
+      .pg-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+      .view-switcher-bar { flex-direction: column; gap: 10px; align-items: flex-start; }
+    }
+    @media (max-width: 768px) {
+      .wk { gap: 5px; }
+      .dl { font-size: 11px; }
+      .af { flex-direction: column; align-items: stretch; }
+      .view-options { flex-wrap: wrap; }
+      .ai { flex-direction: column; align-items: flex-start; gap: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+
+    <%# ===== PAGE HEADER ===== %>
+    <div class="pg-header">
+      <div class="pg-header-left">
+        <div class="pg-icon">&#128197;</div>
+        <h1>
+          Professional Readers Calendar
+          <span>Manage your availability and view case assignments</span>
+        </h1>
+      </div>
+    </div>
+
+    <%# ===== VIEW SWITCHER BAR — <a href> links (Gatekeeper Flag #3) ===== %>
+    <div class="view-switcher-bar">
+      <div class="view-label">
+        <span class="view-label-icon">&#128065;</span>
+        Calendar View
+      </div>
+      <div class="view-options">
+        <a href="/calendar?view=twoColumn&month=<%= calendar.month %>&year=<%= calendar.year %>" class="view-opt <%= view === 'twoColumn' ? 'active' : '' %>"><span class="view-opt-icon">&#9707;</span> Two-Column</a>
+        <a href="/calendar?view=tabbed&month=<%= calendar.month %>&year=<%= calendar.year %>" class="view-opt <%= view === 'tabbed' ? 'active' : '' %>"><span class="view-opt-icon">&#9776;</span> Tabbed</a>
+        <a href="/calendar?view=streamlined&month=<%= calendar.month %>&year=<%= calendar.year %>" class="view-opt <%= view === 'streamlined' ? 'active' : '' %>"><span class="view-opt-icon">&#9636;</span> Streamlined</a>
+        <a href="/calendar?view=compact&month=<%= calendar.month %>&year=<%= calendar.year %>" class="view-opt <%= view === 'compact' ? 'active' : '' %>"><span class="view-opt-icon">&#9704;</span> Compact</a>
+      </div>
+    </div>
+
+    <% /* Helper: today's day name for toggle highlight */ %>
+    <% const todayDayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday']; %>
+    <% const todayDayName = todayDayNames[new Date().getDay()]; %>
+    <% const categoryLabels = { annualLeave: 'Annual Leave', medical: 'Medical', family: 'Family', personal: 'Personal', training: 'Training', religious: 'Religious', emergency: 'Emergency', other: 'Other' }; %>
+
+    <%# ================================================================= %>
+    <%# VIEW: TWO-COLUMN                                                   %>
+    <%# ================================================================= %>
+    <% if (view === 'twoColumn') { %>
+    <div class="two-col">
+      <div class="card cp">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+          <div class="st" style="margin-bottom:0;">
+            <div class="st-icon" style="background:rgba(34,197,94,0.1);">&#128197;</div>
+            <h2>Set Availability <span>Weekly pattern &amp; overrides</span></h2>
+          </div>
+          <div class="pill"><div class="pill-dot"></div> Available</div>
+        </div>
+        <form method="POST" action="/calendar/setPattern">
+          <input type="hidden" name="month" value="<%= calendar.month %>">
+          <input type="hidden" name="year" value="<%= calendar.year %>">
+          <input type="hidden" name="view" value="<%= view %>">
+          <div class="wk" style="margin-bottom:16px;">
+            <% ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].forEach(function(day, i) { %>
+            <% const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']; %>
+            <div class="dc">
+              <div class="dl <%= todayDayName === day ? 'td' : '' %>"><%= labels[i] %></div>
+              <div class="tw">
+                <input type="checkbox" name="<%= day %>" id="tc-<%= day %>" class="tcb" <%= calendar.weeklyPattern[day] ? 'checked' : '' %>>
+                <label for="tc-<%= day %>" class="tsw"></label>
+
+              </div>
+            </div>
+            <% }); %>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span class="pattern-hint">&#128161; Applies to all future weeks</span>
+            <button type="submit" class="bsv">&#128190; Save Pattern</button>
+          </div>
+        </form>
+        <div class="divider"></div>
+        <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px;">Date Overrides</div>
+        <% overrides.forEach(function(o) { %>
+        <div class="oi <%= o.overrideType === 'blocked' ? 'bk' : 'ok' %>">
+          <div class="ol">
+            <span><%= o.overrideType === 'blocked' ? '🚫' : '✅' %></span>
+            <span><%= o.displayDate %></span>
+            <% if (o.overrideCategory) { %><span style="font-size:11px;color:#64748b;background:#f1f5f9;padding:2px 8px;border-radius:4px;"><%= categoryLabels[o.overrideCategory] || o.overrideCategory %></span><% } %>
+          </div>
+          <div class="or">
+            <% if (o.overrideReason) { %><span class="ore"><%= o.overrideReason %></span><% } %>
+            <form method="POST" action="/calendar/removeOverride" style="display:inline;">
+              <input type="hidden" name="date" value="<%= o.overrideDate %>">
+              <input type="hidden" name="month" value="<%= calendar.month %>">
+              <input type="hidden" name="year" value="<%= calendar.year %>">
+              <input type="hidden" name="view" value="<%= view %>">
+              <button type="submit" class="rb">&#10005;</button>
+            </form>
+          </div>
+        </div>
+        <% }); %>
+        <form method="POST" action="/calendar/addOverride" class="af">
+          <input type="hidden" name="month" value="<%= calendar.month %>">
+          <input type="hidden" name="year" value="<%= calendar.year %>">
+          <input type="hidden" name="view" value="<%= view %>">
+          <div class="fg"><label>Date</label><input type="date" name="date" required></div>
+          <div class="fg"><label>Type</label><select name="type"><option value="blocked">🚫 Block</option><option value="available">✅ Available</option></select></div>
+          <div class="fg"><label>Category</label><select name="category"><option value="">— Select —</option><option value="annualLeave">Annual Leave</option><option value="medical">Medical</option><option value="family">Family</option><option value="personal">Personal</option><option value="training">Training</option><option value="religious">Religious</option><option value="emergency">Emergency</option><option value="other">Other</option></select></div>
+          <div class="fg"><label>Notes</label><input type="text" name="reason" placeholder="e.g. Doctor's appointment"></div>
+          <button type="submit" class="bs">+ Add</button>
+        </form>
+      </div>
+      <div class="card cp">
+        <div class="mn">
+          <a href="/calendar?month=<%= calendar.prevMonth.month %>&year=<%= calendar.prevMonth.year %>&view=<%= view %>" class="mb">&lsaquo;</a>
+          <h3><%= calendar.monthName %> <%= calendar.year %></h3>
+          <a href="/calendar?month=<%= calendar.nextMonth.month %>&year=<%= calendar.nextMonth.year %>&view=<%= view %>" class="mb">&rsaquo;</a>
+        </div>
+        <%- include('partials/calendarGrid') %>
+        <div style="margin-top:18px;padding-top:14px;border-top:1px solid #f1f5f9;">
+          <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px;">&#128203; Assignments</div>
+          <%- include('partials/calendarAssignments') %>
+        </div>
+      </div>
+    </div>
+    <% } %>
+
+    <%# ================================================================= %>
+    <%# VIEW: TABBED                                                       %>
+    <%# ================================================================= %>
+    <% if (view === 'tabbed') { %>
+    <div class="card cp" style="margin-bottom:22px;">
+      <div class="it">
+        <a href="/calendar?view=tabbed&tab=availability&month=<%= calendar.month %>&year=<%= calendar.year %>" class="itb <%= activeTab === 'availability' ? 'active' : '' %>">&#128197; Set Availability</a>
+        <a href="/calendar?view=tabbed&tab=schedule&month=<%= calendar.month %>&year=<%= calendar.year %>" class="itb <%= activeTab === 'schedule' ? 'active' : '' %>">&#128197; My Schedule</a>
+        <a href="/calendar?view=tabbed&tab=assignments&month=<%= calendar.month %>&year=<%= calendar.year %>" class="itb <%= activeTab === 'assignments' ? 'active' : '' %>">&#128203; Assignments</a>
+      </div>
+
+      <% if (activeTab === 'availability') { %>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <div class="st" style="margin-bottom:0;"><h2>Weekly Base Pattern <span>Toggle days you're typically available</span></h2></div>
+        <div class="pill"><div class="pill-dot"></div> Available</div>
+      </div>
+      <form method="POST" action="/calendar/setPattern">
+        <input type="hidden" name="month" value="<%= calendar.month %>">
+        <input type="hidden" name="year" value="<%= calendar.year %>">
+        <input type="hidden" name="view" value="<%= view %>">
+        <div class="wk" style="margin-bottom:20px;">
+          <% ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].forEach(function(day, i) { %>
+          <% const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']; %>
+          <div class="dc">
+            <div class="dl <%= todayDayName === day ? 'td' : '' %>"><%= labels[i] %></div>
+            <div class="tw">
+              <input type="checkbox" name="<%= day %>" id="tb-<%= day %>" class="tcb" <%= calendar.weeklyPattern[day] ? 'checked' : '' %>>
+              <label for="tb-<%= day %>" class="tsw"></label>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+        <button type="submit" class="bsv">&#128190; Save Weekly Pattern</button>
+      </form>
+      <div class="divider"></div>
+      <div class="st"><h2>Date Overrides <span>Adjust specific dates based on your schedule</span></h2></div>
+      <% overrides.forEach(function(o) { %>
+      <div class="oi <%= o.overrideType === 'blocked' ? 'bk' : 'ok' %>">
+        <div class="ol">
+          <span><%= o.overrideType === 'blocked' ? '🚫' : '✅' %></span>
+          <span><%= o.displayDateLong %></span>
+          <% if (o.overrideCategory) { %><span style="font-size:11px;color:#64748b;background:#f1f5f9;padding:2px 8px;border-radius:4px;"><%= categoryLabels[o.overrideCategory] || o.overrideCategory %></span><% } %>
+        </div>
+        <div class="or">
+          <% if (o.overrideReason) { %><span class="ore"><%= o.overrideReason %></span><% } %>
+          <form method="POST" action="/calendar/removeOverride" style="display:inline;">
+            <input type="hidden" name="date" value="<%= o.overrideDate %>">
+            <input type="hidden" name="month" value="<%= calendar.month %>">
+            <input type="hidden" name="year" value="<%= calendar.year %>">
+            <input type="hidden" name="view" value="<%= view %>">
+            <button type="submit" class="rb">&#10005; Remove</button>
+          </form>
+        </div>
+      </div>
+      <% }); %>
+      <form method="POST" action="/calendar/addOverride" class="af" style="margin-top:12px;">
+        <input type="hidden" name="month" value="<%= calendar.month %>">
+        <input type="hidden" name="year" value="<%= calendar.year %>">
+        <input type="hidden" name="view" value="<%= view %>">
+        <div class="fg"><label>Date</label><input type="date" name="date" required></div>
+        <div class="fg"><label>Type</label><select name="type"><option value="blocked">🚫 Block this day</option><option value="available">✅ Make available</option></select></div>
+        <div class="fg"><label>Category</label><select name="category"><option value="">— Select —</option><option value="annualLeave">Annual Leave</option><option value="medical">Medical</option><option value="family">Family</option><option value="personal">Personal</option><option value="training">Training</option><option value="religious">Religious</option><option value="emergency">Emergency</option><option value="other">Other</option></select></div>
+        <div class="fg"><label>Notes (optional)</label><input type="text" name="reason" placeholder="e.g. Doctor's appointment"></div>
+        <button type="submit" class="bs">+ Add Override</button>
+      </form>
+      <% } %>
+
+      <% if (activeTab === 'schedule') { %>
+      <div class="mn">
+        <a href="/calendar?month=<%= calendar.prevMonth.month %>&year=<%= calendar.prevMonth.year %>&view=tabbed&tab=schedule" class="mb">&lsaquo;</a>
+        <h3><%= calendar.monthName %> <%= calendar.year %></h3>
+        <a href="/calendar?month=<%= calendar.nextMonth.month %>&year=<%= calendar.nextMonth.year %>&view=tabbed&tab=schedule" class="mb">&rsaquo;</a>
+      </div>
+      <%- include('partials/calendarGrid') %>
+      <% } %>
+
+      <% if (activeTab === 'assignments') { %>
+      <div class="st"><h2>Active Assignments <span>Your current case assignments and deadlines</span></h2></div>
+      <%- include('partials/calendarAssignments') %>
+      <% } %>
+    </div>
+    <% } %>
+
+    <%# ================================================================= %>
+    <%# VIEW: STREAMLINED                                                  %>
+    <%# ================================================================= %>
+    <% if (view === 'streamlined') { %>
+    <div class="card cp-lg" style="margin-bottom:26px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;">
+        <div class="st" style="margin-bottom:0;"><div class="st-icon" style="background:rgba(34,197,94,0.1);">&#128197;</div><h2>Set Availability <span>Your recurring weekly pattern</span></h2></div>
+        <div class="pill"><div class="pill-dot"></div> Available</div>
+      </div>
+      <form method="POST" action="/calendar/setPattern">
+        <input type="hidden" name="month" value="<%= calendar.month %>">
+        <input type="hidden" name="year" value="<%= calendar.year %>">
+        <input type="hidden" name="view" value="<%= view %>">
+        <div class="wk" style="margin-bottom:24px;gap:14px;">
+          <% ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].forEach(function(day, i) { %>
+          <% const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']; %>
+          <div class="dc">
+            <div class="dl <%= todayDayName === day ? 'td' : '' %>"><%= labels[i] %></div>
+            <div class="tw">
+              <input type="checkbox" name="<%= day %>" id="sl-<%= day %>" class="tcb" <%= calendar.weeklyPattern[day] ? 'checked' : '' %>>
+              <label for="sl-<%= day %>" class="tsw"></label>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span class="pattern-hint">&#128161; Applies to all future weeks until changed</span>
+          <button type="submit" class="bsv">&#128190; Save Weekly Pattern</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card cp-lg" style="margin-bottom:26px;">
+      <div class="st" style="margin-bottom:24px;"><div class="st-icon" style="background:rgba(239,68,68,0.08);">&#128204;</div><h2>Date Overrides <span>Block or unblock specific dates</span></h2></div>
+      <% overrides.forEach(function(o) { %>
+      <div class="oi <%= o.overrideType === 'blocked' ? 'bk' : 'ok' %>" style="margin-bottom:8px;">
+        <div class="ol">
+          <span><%= o.overrideType === 'blocked' ? '🚫' : '✅' %></span>
+          <span><%= o.displayDateLong %></span>
+          <% if (o.overrideCategory) { %><span style="font-size:11px;color:#64748b;background:#f1f5f9;padding:2px 8px;border-radius:4px;"><%= categoryLabels[o.overrideCategory] || o.overrideCategory %></span><% } %>
+        </div>
+        <div class="or">
+          <% if (o.overrideReason) { %><span class="ore"><%= o.overrideReason %></span><% } %>
+          <form method="POST" action="/calendar/removeOverride" style="display:inline;">
+            <input type="hidden" name="date" value="<%= o.overrideDate %>">
+            <input type="hidden" name="month" value="<%= calendar.month %>">
+            <input type="hidden" name="year" value="<%= calendar.year %>">
+            <input type="hidden" name="view" value="<%= view %>">
+            <button type="submit" class="rb">&#10005; Remove</button>
+          </form>
+        </div>
+      </div>
+      <% }); %>
+      <form method="POST" action="/calendar/addOverride" class="af" style="margin-top:16px;">
+        <input type="hidden" name="month" value="<%= calendar.month %>">
+        <input type="hidden" name="year" value="<%= calendar.year %>">
+        <input type="hidden" name="view" value="<%= view %>">
+        <div class="fg"><label>Date</label><input type="date" name="date" required></div>
+        <div class="fg"><label>Type</label><select name="type"><option value="blocked">🚫 Block this day</option><option value="available">✅ Make available</option></select></div>
+        <div class="fg"><label>Category</label><select name="category"><option value="">— Select —</option><option value="annualLeave">Annual Leave</option><option value="medical">Medical</option><option value="family">Family</option><option value="personal">Personal</option><option value="training">Training</option><option value="religious">Religious</option><option value="emergency">Emergency</option><option value="other">Other</option></select></div>
+        <div class="fg"><label>Notes (optional)</label><input type="text" name="reason" placeholder="e.g. Doctor's appointment"></div>
+        <button type="submit" class="bs">+ Add Override</button>
+      </form>
+    </div>
+
+    <div class="card cp-lg" style="margin-bottom:26px;">
+      <div class="mn" style="margin-bottom:22px;">
+        <a href="/calendar?month=<%= calendar.prevMonth.month %>&year=<%= calendar.prevMonth.year %>&view=<%= view %>" class="mb">&lsaquo;</a>
+        <h3><%= calendar.monthName %> <%= calendar.year %></h3>
+        <a href="/calendar?month=<%= calendar.nextMonth.month %>&year=<%= calendar.nextMonth.year %>&view=<%= view %>" class="mb">&rsaquo;</a>
+      </div>
+      <%- include('partials/calendarGrid') %>
+    </div>
+
+    <div class="card cp-lg" style="margin-bottom:26px;">
+      <div class="st" style="margin-bottom:20px;"><div class="st-icon" style="background:rgba(59,130,246,0.1);">&#128203;</div><h2>My Assignments <span>Active case assignments and deadlines</span></h2></div>
+      <%- include('partials/calendarAssignments') %>
+    </div>
+    <% } %>
+
+    <%# ================================================================= %>
+    <%# VIEW: COMPACT                                                      %>
+    <%# ================================================================= %>
+    <% if (view === 'compact') { %>
+    <div class="card cpt" style="margin-bottom:22px;">
+      <div class="cpt-side">
+        <div class="cpt-lbl">Weekly Pattern</div>
+        <form method="POST" action="/calendar/setPattern">
+          <input type="hidden" name="month" value="<%= calendar.month %>">
+          <input type="hidden" name="year" value="<%= calendar.year %>">
+          <input type="hidden" name="view" value="<%= view %>">
+          <div class="wk-v">
+            <% ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'].forEach(function(day, i) { %>
+            <% const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']; %>
+            <div class="dr">
+              <span class="dn <%= todayDayName === day ? 'td' : '' %>"><%= labels[i] %></span>
+              <input type="checkbox" name="<%= day %>" id="cp-<%= day %>" class="tcb" <%= calendar.weeklyPattern[day] ? 'checked' : '' %>>
+              <label for="cp-<%= day %>" class="ct"></label>
+            </div>
+            <% }); %>
+          </div>
+          <button type="submit" class="bsv" style="width:100%;margin-top:10px;font-size:13px;padding:8px 16px;">&#128190; Save Pattern</button>
+        </form>
+        <div class="cpt-div"></div>
+        <div class="cpt-lbl">Overrides</div>
+        <% overrides.forEach(function(o) { %>
+        <div class="oi-sm <%= o.overrideType === 'blocked' ? 'bk' : 'ok' %>">
+          <div class="ol">
+            <span><%= o.overrideType === 'blocked' ? '🚫' : '✅' %></span>
+            <span><%= o.displayDate %></span>
+            <% if (o.overrideCategory) { %><span style="font-size:10px;color:#64748b;"><%= categoryLabels[o.overrideCategory] || o.overrideCategory %></span><% } %>
+          </div>
+          <form method="POST" action="/calendar/removeOverride" style="display:inline;">
+            <input type="hidden" name="date" value="<%= o.overrideDate %>">
+            <input type="hidden" name="month" value="<%= calendar.month %>">
+            <input type="hidden" name="year" value="<%= calendar.year %>">
+            <input type="hidden" name="view" value="<%= view %>">
+            <button type="submit" class="rb" style="font-size:10px;padding:2px 6px;">&#10005;</button>
+          </form>
+        </div>
+        <% }); %>
+        <form method="POST" action="/calendar/addOverride" style="margin-top:10px;">
+          <input type="hidden" name="month" value="<%= calendar.month %>">
+          <input type="hidden" name="year" value="<%= calendar.year %>">
+          <input type="hidden" name="view" value="<%= view %>">
+          <div class="fg" style="margin-bottom:6px;"><label>Date</label><input type="date" name="date" required style="font-size:12px;padding:6px 8px;width:100%;"></div>
+          <div class="fg" style="margin-bottom:6px;"><label>Type</label><select name="type" style="font-size:12px;padding:6px 8px;width:100%;"><option value="blocked">🚫 Block</option><option value="available">✅ Available</option></select></div>
+          <div class="fg" style="margin-bottom:6px;"><label>Category</label><select name="category" style="font-size:12px;padding:6px 8px;width:100%;"><option value="">— Select —</option><option value="annualLeave">Annual Leave</option><option value="medical">Medical</option><option value="family">Family</option><option value="personal">Personal</option><option value="training">Training</option><option value="religious">Religious</option><option value="emergency">Emergency</option><option value="other">Other</option></select></div>
+          <div class="fg" style="margin-bottom:6px;"><label>Notes</label><input type="text" name="reason" placeholder="e.g. Doctor's appt" style="font-size:12px;padding:6px 8px;width:100%;"></div>
+          <button type="submit" class="bs" style="width:100%;font-size:12px;padding:6px 12px;">+ Add Override</button>
+        </form>
+      </div>
+      <div class="cpt-main">
+        <div class="mn" style="margin-bottom:18px;">
+          <a href="/calendar?month=<%= calendar.prevMonth.month %>&year=<%= calendar.prevMonth.year %>&view=<%= view %>" class="mb">&lsaquo;</a>
+          <h3><%= calendar.monthName %> <%= calendar.year %></h3>
+          <a href="/calendar?month=<%= calendar.nextMonth.month %>&year=<%= calendar.nextMonth.year %>&view=<%= view %>" class="mb">&rsaquo;</a>
+        </div>
+        <%- include('partials/calendarGrid') %>
+        <div style="margin-top:18px;padding-top:14px;border-top:1px solid #f1f5f9;">
+          <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:10px;">&#128203; Assignments</div>
+          <%- include('partials/calendarAssignments') %>
+        </div>
+      </div>
+    </div>
+    <% } %>
+
+  </div>
+</body>
+</html>

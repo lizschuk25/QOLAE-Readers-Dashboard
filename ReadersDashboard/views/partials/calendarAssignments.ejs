@@ -1,0 +1,35 @@
+<%# ┌────────────────────────────────────────────┐ %>
+<%# │ calendarAssignments.ejs — Assignment list│ %>
+<%# │ Used by: readersCalendar.ejs (all views) │ %>
+<%# │ Data: assignments (from parent)          │ %>
+<%# │ Author: Liz | Session 124                │ %>
+<%# └────────────────────────────────────────────┘ %>
+<%# INTEGRATION NOTE: readerType values are set by CaseManagersDashboard %>
+<%#   when creating assignments. Expected values:                        %>
+<%#   'firstReader'  → default purple badge (#667eea)                    %>
+<%#   'secondReader' → alternate purple badge (#8b5cf6)                  %>
+<%#   These must match exactly or badge styling breaks silently.         %>
+
+<% if (assignments.length === 0) { %>
+  <div style="padding:20px;text-align:center;color:#94a3b8;font-size:13px;">
+    No assignments this month
+  </div>
+<% } else { %>
+  <% assignments.forEach(function(a) { %>
+  <div class="ai">
+    <div class="ab" style="<%= a.readerType === 'secondReader' ? 'background:#8b5cf6;' : '' %>">
+      <span class="ad"><%= a.deadlineDay %></span>
+      <span class="am"><%= a.deadlineMonth %></span>
+    </div>
+    <div class="ao">
+      <h4>INA Report &mdash; <%= a.assignmentNumber %></h4>
+      <p><%= a.readerType === 'secondReader' ? '2nd Reader' : '1st Reader' %> &middot; Due: <%= a.deadlineDisplay %></p>
+    </div>
+    <% if (a.isNew) { %>
+      <span class="ax nw">New</span>
+    <% } else if (a.isDueSoon) { %>
+      <span class="ax du">Due Soon</span>
+    <% } %>
+  </div>
+  <% }); %>
+<% } %>
