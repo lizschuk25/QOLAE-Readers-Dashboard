@@ -485,31 +485,8 @@ fastify.post('/logout', async (request, reply) => {
 
 // ==============================================
 // LOCATION BLOCK 2: HELPER FUNCTIONS
+// (checkReaderInSystem removed — Session 127, dead code, auth uses SSOT endpoints directly)
 // ==============================================
-
-const checkReaderInSystem = async (readerPin) => {
-  try {
-    const response = await axios.get(`/api/reader/validate/${readerPin}`);
-    const result = response.data;
-
-    if (result.success && result.reader) {
-      fastify.log.info(`✅ Reader found via API: ${result.reader.readerName} (${result.reader.readerPin})`);
-      return {
-        readerPin: result.reader.readerPin,
-        email: result.reader.readerEmail,
-        readerName: result.reader.readerName
-      };
-    } else {
-      fastify.log.warn(`❌ Reader not found via API: ${readerPin}`);
-      return null;
-    }
-  } catch (error) {
-    fastify.log.error('Error checking reader via API:', error);
-    return null;
-  }
-};
-
-fastify.decorate('checkReaderInSystem', checkReaderInSystem);
 
 // ==============================================
 // LOCATION BLOCK 3: EXTERNAL ROUTE MODULES
