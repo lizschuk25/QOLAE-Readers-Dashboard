@@ -117,6 +117,29 @@ server.decorate('authenticate', async (request, reply) => {
 });
 
 // ==============================================
+// PT-9: GLOBAL SESSION VALIDATION — preHandler
+// ==============================================
+// Protects ALL routes except /public/ static assets
+// Uses request.jwtVerify() directly with redirect on failure
+// Does NOT call fastify.authenticate (wrong failure behaviour for browsers)
+server.addHook('preHandler', async (request, reply) => {
+  const urlPath = request.url.split('?')[0];
+
+  if (urlPath.startsWith('/public/')) {
+    return;
+  }
+
+  try {
+    await request.jwtVerify();
+    if (request.user.role !== 'reader') {
+      return reply.redirect('https://readers.qolae.com/readersLogin');
+    }
+  } catch (err) {
+    return reply.redirect('https://readers.qolae.com/readersLogin');
+  }
+});
+
+// ==============================================
 // ROUTES REGISTRATION
 // ==============================================
 
@@ -131,6 +154,23 @@ await server.register(import('./routes/ndaRoutes.js'));
 
 // Management Hub Routes — operational home (hub, future calendar)
 await server.register(import('./routes/readersManagementHubRoutes.js'));
+
+// ==============================================
+// LOGOUT ROUTE
+// ==============================================
+server.get('/logout', async (request, reply) => {
+  try {
+    reply.clearCookie('qolaeReaderToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'Strict'
+    });
+    return reply.redirect('https://readers.qolae.com/readersLogin');
+  } catch (error) {
+    server.log.error('Logout error:', error);
+    return reply.redirect('https://readers.qolae.com/readersLogin');
+  }
+});
 
 // ==============================================
 // ROOT ROUTE
