@@ -27,9 +27,8 @@ const __dirname = path.dirname(__filename);
 // ==============================================
 // SSOT CONFIGURATION
 // ==============================================
-// Configure base URL for server-to-server calls to SSOT (API-Dashboard)
-// Follows LawyersDashboard architecture pattern
-const SSOT_BASE_URL = process.env.SSOT_BASE_URL || 'https://api.qolae.com';
+// SSOT_BASE_URL now centralised in utils/ssotFetch.js
+// All route files import ssotFetch directly
 
 // ==============================================
 // FASTIFY SERVER INITIALIZATION
@@ -47,9 +46,6 @@ const server = Fastify({
     },
   },
 });
-
-// Make SSOT_BASE_URL available to routes
-server.decorate('ssotBaseUrl', SSOT_BASE_URL);
 
 // ==============================================
 // MIDDLEWARE REGISTRATION
@@ -71,6 +67,8 @@ await server.register(fastifyCors, {
 // 2. JWT Authentication
 await server.register(fastifyJwt, {
   secret: process.env.READERS_LOGIN_JWT_SECRET,
+  sign: { algorithm: 'HS256' },
+  verify: { algorithms: ['HS256'] },
   cookie: {
     cookieName: 'qolaeReaderToken',
     signed: false,

@@ -9,9 +9,7 @@
 // ==============================================
 
 import ReadersController from '../controllers/ReadersController.js';
-
-// SSOT Base URL (API-Dashboard) — used by dashboard bootstrap
-const SSOT_BASE_URL = process.env.SSOT_BASE_URL || 'https://api.qolae.com';
+import ssotFetch from '../utils/ssotFetch.js';
 
 export default async function readerRoutes(fastify, options) {
 
@@ -44,7 +42,7 @@ export default async function readerRoutes(fastify, options) {
       // SINGLE SOURCE OF TRUTH - SSOT Bootstrap only
       // ==============================================
       // Step 1: Get stored JWT from SSOT
-      const tokenResponse = await fetch(`${SSOT_BASE_URL}/auth/readers/getStoredToken?readerPin=${readerPin}`, {
+      const tokenResponse = await ssotFetch(`/auth/readers/getStoredToken?readerPin=${readerPin}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -58,7 +56,7 @@ export default async function readerRoutes(fastify, options) {
       const { accessToken } = tokenData;
 
       // Step 2: Call SSOT bootstrap endpoint
-      const bootstrapResponse = await fetch(`${SSOT_BASE_URL}/readers/workspace/bootstrap`, {
+      const bootstrapResponse = await ssotFetch(`/readers/workspace/bootstrap`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${accessToken}`,

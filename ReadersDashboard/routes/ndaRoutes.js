@@ -13,9 +13,9 @@
 // NO direct DB queries, NO PDF manipulation, NO blockchain hashing, NO crypto imports
 // ==============================================
 
-async function ndaRoutes(fastify, options) {
+import ssotFetch from '../utils/ssotFetch.js';
 
-  const SSOT_BASE_URL = fastify.ssotBaseUrl || process.env.SSOT_BASE_URL || 'https://api.qolae.com';
+async function ndaRoutes(fastify, options) {
 
   // ==============================================
   // POST /nda/continueToSign
@@ -27,8 +27,8 @@ async function ndaRoutes(fastify, options) {
     const readerPin = request.user.readerPin;
 
     try {
-      const apiResponse = await fetch(
-        SSOT_BASE_URL + '/api/readers/nda/continueToSign',
+      const apiResponse = await ssotFetch(
+        '/api/readers/nda/continueToSign',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -62,8 +62,8 @@ async function ndaRoutes(fastify, options) {
     const { signatureData, acknowledgmentConfirmed } = request.body;
 
     try {
-      const apiResponse = await fetch(
-        SSOT_BASE_URL + '/api/readers/nda/preview',
+      const apiResponse = await ssotFetch(
+        '/api/readers/nda/preview',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -100,8 +100,8 @@ async function ndaRoutes(fastify, options) {
     const readerPin = request.user.readerPin;
 
     try {
-      const apiResponse = await fetch(
-        SSOT_BASE_URL + '/api/readers/nda/previewPdf/' + readerPin
+      const apiResponse = await ssotFetch(
+        '/api/readers/nda/previewPdf/' + readerPin
       );
 
       if (!apiResponse.ok) {
@@ -135,8 +135,8 @@ async function ndaRoutes(fastify, options) {
     }
 
     try {
-      const apiResponse = await fetch(
-        SSOT_BASE_URL + '/api/readers/nda/sign',
+      const apiResponse = await ssotFetch(
+        '/api/readers/nda/sign',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -169,8 +169,8 @@ async function ndaRoutes(fastify, options) {
     const readerPin = request.user.readerPin;
 
     try {
-      const apiResponse = await fetch(
-        SSOT_BASE_URL + '/api/readers/nda/view/' + readerPin
+      const apiResponse = await ssotFetch(
+        '/api/readers/nda/view/' + readerPin
       );
 
       if (!apiResponse.ok) {
@@ -199,8 +199,8 @@ async function ndaRoutes(fastify, options) {
     const readerPin = request.user.readerPin;
 
     try {
-      const apiResponse = await fetch(
-        SSOT_BASE_URL + '/api/readers/nda/download/' + readerPin
+      const apiResponse = await ssotFetch(
+        '/api/readers/nda/download/' + readerPin
       );
 
       if (!apiResponse.ok) {

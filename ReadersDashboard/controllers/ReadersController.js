@@ -20,8 +20,8 @@
 // │ 13. getReaderCalendarModalData             │
 // └────────────────────────────────────────────┘
 
-// SSOT Base URL (API-Dashboard)
-const SSOT_BASE_URL = process.env.SSOT_BASE_URL || 'https://api.qolae.com';
+// SSOT API Fetch Utility
+import ssotFetch from '../utils/ssotFetch.js';
 
 // ==============================================
 // EXPORTED CONTROLLER METHODS
@@ -39,7 +39,7 @@ export default {
     const { assignmentId, corrections } = req.body;
 
     try {
-      const apiResponse = await fetch(`${SSOT_BASE_URL}/api/readers/corrections/save`, {
+      const apiResponse = await ssotFetch(`/api/readers/corrections/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -76,7 +76,7 @@ export default {
     const { assignmentId } = req.body;
 
     try {
-      const apiResponse = await fetch(`${SSOT_BASE_URL}/api/readers/corrections/submit`, {
+      const apiResponse = await ssotFetch(`/api/readers/corrections/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -113,8 +113,8 @@ export default {
     const { assignmentId } = req.query;
 
     try {
-      const apiResponse = await fetch(
-        `${SSOT_BASE_URL}/api/readers/payment/processing?readerPin=${encodeURIComponent(pin)}&assignmentId=${encodeURIComponent(assignmentId)}`
+      const apiResponse = await ssotFetch(
+        `/api/readers/payment/processing?readerPin=${encodeURIComponent(pin)}&assignmentId=${encodeURIComponent(assignmentId)}`
       );
 
       const apiData = await apiResponse.json();
@@ -170,8 +170,8 @@ export default {
     const { assignmentId } = req.params;
 
     try {
-      const apiResponse = await fetch(
-        `${SSOT_BASE_URL}/api/readers/payment/status/${encodeURIComponent(assignmentId)}?readerPin=${encodeURIComponent(pin)}`
+      const apiResponse = await ssotFetch(
+        `/api/readers/payment/status/${encodeURIComponent(assignmentId)}?readerPin=${encodeURIComponent(pin)}`
       );
 
       const apiData = await apiResponse.json();
@@ -200,8 +200,8 @@ export default {
     const { pin } = req.user;
 
     try {
-      const apiResponse = await fetch(
-        `${SSOT_BASE_URL}/api/readers/payment/history?readerPin=${encodeURIComponent(pin)}`
+      const apiResponse = await ssotFetch(
+        `/api/readers/payment/history?readerPin=${encodeURIComponent(pin)}`
       );
 
       const apiData = await apiResponse.json();
@@ -231,8 +231,8 @@ export default {
     const { pin } = req.user;
 
     try {
-      const apiResponse = await fetch(
-        `${SSOT_BASE_URL}/api/readers/managementHub/bootstrap?readerPin=${encodeURIComponent(pin)}`
+      const apiResponse = await ssotFetch(
+        `/api/readers/managementHub/bootstrap?readerPin=${encodeURIComponent(pin)}`
       );
 
       const apiData = await apiResponse.json();
@@ -265,8 +265,8 @@ export default {
   // ──────────────────────────────────────────────
   getReaderReviewModalData: async (readerPin, assignmentId) => {
     try {
-      const apiResponse = await fetch(
-        `${SSOT_BASE_URL}/api/readers/payment/processing?readerPin=${encodeURIComponent(readerPin)}&assignmentId=${encodeURIComponent(assignmentId)}`
+      const apiResponse = await ssotFetch(
+        `/api/readers/payment/processing?readerPin=${encodeURIComponent(readerPin)}&assignmentId=${encodeURIComponent(assignmentId)}`
       );
 
       const apiData = await apiResponse.json();
@@ -307,8 +307,8 @@ export default {
   // ──────────────────────────────────────────────
   getReaderPaymentModalData: async (readerPin, assignmentId) => {
     try {
-      const apiResponse = await fetch(
-        `${SSOT_BASE_URL}/api/readers/payment/processing?readerPin=${encodeURIComponent(readerPin)}&assignmentId=${encodeURIComponent(assignmentId)}`
+      const apiResponse = await ssotFetch(
+        `/api/readers/payment/processing?readerPin=${encodeURIComponent(readerPin)}&assignmentId=${encodeURIComponent(assignmentId)}`
       );
 
       const apiData = await apiResponse.json();
@@ -356,8 +356,8 @@ export default {
       if (month) params.append('month', month);
       if (year) params.append('year', year);
 
-      const apiResponse = await fetch(
-        `${SSOT_BASE_URL}/api/readers/calendar/resolved?${params.toString()}`
+      const apiResponse = await ssotFetch(
+        `/api/readers/calendar/resolved?${params.toString()}`
       );
 
       const apiData = await apiResponse.json();
@@ -394,7 +394,7 @@ export default {
     const { monday, tuesday, wednesday, thursday, friday, saturday, sunday, month, year, view, returnTo } = req.body;
 
     try {
-      const apiResponse = await fetch(`${SSOT_BASE_URL}/api/readers/calendar/setPattern`, {
+      const apiResponse = await ssotFetch(`/api/readers/calendar/setPattern`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -446,7 +446,7 @@ export default {
     const { date, type, category, reason, month, year, view, returnTo } = req.body;
 
     try {
-      const apiResponse = await fetch(`${SSOT_BASE_URL}/api/readers/calendar/addOverride`, {
+      const apiResponse = await ssotFetch(`/api/readers/calendar/addOverride`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -495,7 +495,7 @@ export default {
     const { date, month, year, view, returnTo } = req.body;
 
     try {
-      const apiResponse = await fetch(`${SSOT_BASE_URL}/api/readers/calendar/removeOverride`, {
+      const apiResponse = await ssotFetch(`/api/readers/calendar/removeOverride`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -547,8 +547,8 @@ export default {
       if (month) params.append('month', month);
       if (year) params.append('year', year);
 
-      const apiResponse = await fetch(
-        `${SSOT_BASE_URL}/api/readers/calendar/resolved?${params.toString()}`
+      const apiResponse = await ssotFetch(
+        `/api/readers/calendar/resolved?${params.toString()}`
       );
 
       const apiData = await apiResponse.json();
