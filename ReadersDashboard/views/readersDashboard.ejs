@@ -861,7 +861,6 @@
         }
 
         function downloadNDA() {
-            console.log('Calling API:', API_ENDPOINTS.downloadNDA);
             // TODO: Implement API call
             // Example: fetch(API_ENDPOINTS.downloadNDA).then(response => response.blob()).then(downloadFile);
             alert('Download NDA - Ready for endpoint integration');
@@ -878,14 +877,12 @@
         }
 
         function previewDocument() {
-            console.log('Calling API:', API_ENDPOINTS.previewDocument);
             // TODO: Implement API call
             // Example: fetch(API_ENDPOINTS.previewDocument).then(response => response.blob()).then(openPDFViewer);
             alert('Preview Document - Ready for endpoint integration');
         }
 
         function viewInstructions() {
-            console.log('Calling API:', API_ENDPOINTS.viewInstructions);
             // TODO: Implement API call
             // Example: openModal with instructions content
             alert('View Instructions - Ready for endpoint integration');
@@ -914,14 +911,12 @@
 
         // ===== DOCUMENT MANAGEMENT HANDLERS (ENDPOINT READY) =====
         function openDocument(documentId) {
-            console.log('Opening document:', documentId, 'via', API_ENDPOINTS.openDocument);
             // TODO: Implement API call
             // Example: fetch(`${API_ENDPOINTS.openDocument}/${documentId}`).then(openReviewInterface);
             alert(`Open Document ${documentId} - Ready for endpoint integration`);
         }
 
         function viewDocument(documentId) {
-            console.log('Viewing document:', documentId, 'via', API_ENDPOINTS.viewDocument);
             // TODO: Implement API call
             // Example: fetch(`${API_ENDPOINTS.viewDocument}/${documentId}`).then(response => response.blob()).then(openViewer);
             alert(`View Document ${documentId} - Ready for endpoint integration`);
@@ -929,7 +924,6 @@
 
         function deleteDocument(documentId) {
             if (confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
-                console.log('Deleting document:', documentId, 'via', API_ENDPOINTS.deleteDocument);
                 // TODO: Implement API call
                 // Example: fetch(`${API_ENDPOINTS.deleteDocument}/${documentId}`, { method: 'DELETE' }).then(refreshDocumentList);
                 alert(`Delete Document ${documentId} - Ready for endpoint integration`);
@@ -938,7 +932,6 @@
 
         // ===== READERS MANAGEMENT HUB =====
         function openReadersHub() {
-            console.log('Opening Readers Management Hub...');
             // TODO: Backend integration - Open RMH modal/page
             // This will be implemented later based on the CMH wizard workflow pattern
             alert('Readers Management Hub\n\nThis will open your document management workspace.\n\nTo be implemented based on CMH wizard pattern.');
@@ -968,8 +961,6 @@
         // Initialize with step 2 (Document Review)
         updateProgress(2);
 
-        // Log ready status
-        console.log('QOLAE Dashboard initialized - All handlers ready for endpoint integration');
     </script>
 
 <!-- ==============================================

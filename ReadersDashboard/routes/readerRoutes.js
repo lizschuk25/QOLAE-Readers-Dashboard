@@ -36,8 +36,6 @@ export default async function readerRoutes(fastify, options) {
     }
 
     try {
-      console.log(`🔍 Readers Dashboard route called with Reader PIN: ${readerPin}, Modal: ${modal || 'none'}`);
-
       // ==============================================
       // SINGLE SOURCE OF TRUTH - SSOT Bootstrap only
       // ==============================================
@@ -93,8 +91,6 @@ export default async function readerRoutes(fastify, options) {
 
       const assignments = bootstrapData.assignments || [];
 
-      console.log(`✅ Dashboard loading for ${reader.readerName} (${readerPin}) via SSOT Bootstrap`);
-
       // ===== MODAL DATA LOADING (via ReadersController → SSOT) =====
       let modalData = null;
 
@@ -104,7 +100,6 @@ export default async function readerRoutes(fastify, options) {
           reader: reader,
           currentStep: currentStep
         };
-        console.log(`[NDA Modal] Loading step ${currentStep} for ${readerPin}`);
       }
 
       else if (showModal === 'review' && assignmentId) {
@@ -119,15 +114,11 @@ export default async function readerRoutes(fastify, options) {
         modalData = await ReadersController.getReaderCalendarModalData(readerPin, request.query);
       }
 
-      if (showModal) {
-        console.log(`[SSR] Modal requested: ${showModal}, Data loaded: ${modalData ? 'Yes' : 'No'}`);
-      }
-
       // Generate CSRF token for forms
       const csrfToken = fastify.jwt.sign({
         csrf: true,
         readerPin: readerPin,
-        timestamp: Date.now()
+        timestamp: new Date().toISOString()
       });
 
       // Pass bootstrap data to EJS template

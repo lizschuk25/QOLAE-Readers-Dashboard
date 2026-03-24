@@ -219,30 +219,7 @@ const start = async () => {
 
     await server.listen({ port, host });
 
-    console.log('');
-    console.log('╔══════════════════════════════════════════════════╗');
-    console.log('║   📖 QOLAE READERS DASHBOARD STARTED           ║');
-    console.log('╚══════════════════════════════════════════════════╝');
-    console.log('');
-    console.log(`📍 Server running at: http://${host}:${port}`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`📊 Database: qolae_readers`);
-    console.log('');
-    console.log('Available Routes:');
-    console.log('  🔐 Login: https://readers.qolae.com/readersLogin (ReadersLoginPortal - port 3015)');
-    console.log('  🏠 Dashboard: /readersDashboard');
-    console.log('  📚 Management Hub: /readersManagementHub');
-    console.log('  📅 Calendar: GET /calendar | POST /calendar/setPattern | POST /calendar/addOverride | POST /calendar/removeOverride');
-    console.log('  📝 NDA Workflow: /nda/*');
-    console.log('  ✏️ Save Corrections: POST /api/readers/saveCorrections');
-    console.log('  📤 Submit Corrections: POST /api/readers/submitCorrections');
-    console.log('  💳 Payment Processing: GET /paymentProcessing');
-    console.log('  💰 Payment Status: GET /api/readers/payment/status/:assignmentId');
-    console.log('  📊 Payment History: GET /readers/paymentHistory');
-    console.log('  ❤️ Health Check: /health');
-    console.log('');
-    console.log('Ready for readers to access their workspace! 🚀');
-    console.log('');
+    server.log.info(`ReadersDashboard running on port ${port}`);
 
   } catch (err) {
     server.log.error(err);

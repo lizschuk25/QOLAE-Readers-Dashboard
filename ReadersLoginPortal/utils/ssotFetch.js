@@ -10,7 +10,7 @@ const SSOT_BASE_URL = process.env.SSOT_BASE_URL || 'https://api.qolae.com';
 
 /**
  * ssotFetch — authenticated fetch to SSOT API
- * @param {string} path — API path (e.g. '/api/readers/corrections/save')
+ * @param {string} path — API path (e.g. '/auth/session/validate')
  * @param {object} options — standard fetch options (method, headers, body, etc.)
  * @returns {Promise<Response>} — standard fetch Response
  */

@@ -2,7 +2,7 @@
 // ==============================================
 // readersAuthRoute.js - Readers Authentication Routes
 // THE BRIDGE: Readers-specific authentication routes
-// Author: Liz 👑
+// Author: Liz
 // GDPR CRITICAL: All auth attempts must be logged
 // ==============================================
 
@@ -10,37 +10,18 @@
 // LOCATION BLOCK A: IMPORTS & CONFIGURATION
 // ==============================================
 
-import axios from 'axios';
+import ssotFetch from '../utils/ssotFetch.js';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 
-// Configure axios to call the SSOT API
-axios.defaults.baseURL = 'https://api.qolae.com';
-
-// Axios response interceptor for consistent status validation
-axios.interceptors.response.use(
-  (response) => {
-    if (response.status >= 200 && response.status < 300 && response.data === undefined) {
-      console.warn('[SSOT] Response missing data payload');
-    }
-    return response;
-  },
-  (error) => {
-    console.error('[SSOT] API Error:', {
-      status: error.response?.status,
-      message: error.response?.data?.error || error.message,
-      url: error.config?.url
-    });
-    return Promise.reject(error);
-  }
-);
+// ssotFetch handles SSOT base URL and x-internal-secret automatically
 
 // ReadersDashboard baseURL for redirects
 const READERS_DASHBOARD_BASE_URL = 'https://readers.qolae.com';
 
 // JWT Secret - fail fast if not configured
 const JWT_SECRET = process.env.READERS_LOGIN_JWT_SECRET || (() => {
-  console.error('❌ READERS_LOGIN_JWT_SECRET not found in environment variables!');
+  console.error('READERS_LOGIN_JWT_SECRET not found in environment variables!');
   throw new Error('READERS_LOGIN_JWT_SECRET environment variable is required');
 })();
 
@@ -54,11 +35,19 @@ export default async function readersAuthRoutes(fastify, opts) {
   // B.1: READERS LOGIN WITH PIN (FROM EMAIL CLICK)
   // ==============================================
   
-  fastify.post('/readersAuth/login', async (request, reply) => {
+  fastify.post('/readersAuth/login', {
+    config: {
+      rateLimit: {
+        max: 3,
+        timeWindow: '15 minutes',
+        keyGenerator: (request) => request.ip
+      }
+    }
+  }, async (request, reply) => {
     const { email, readerPin } = request.body;
     const readerIP = request.ip;
-    
-    // 📝 GDPR Audit Log
+
+    // GDPR Audit Log
     fastify.log.info({
       event: 'readerLoginAttempt',
       readerPin: readerPin,
@@ -67,42 +56,52 @@ export default async function readersAuthRoutes(fastify, opts) {
       timestamp: new Date().toISOString(),
       gdprCategory: 'authentication'
     });
-    
+
     if (!email || !readerPin) {
       return reply.code(302).redirect(`/readersLogin?readerPin=${readerPin || ''}&error=${encodeURIComponent('Email and Reader PIN are required')}`);
     }
-    
+
     try {
       // Validate Reader PIN format first
-      const pinValidation = await axios.post('/api/pin/validate', {
-        pin: readerPin,
-        userType: 'reader'
+      const pinValidationRes = await ssotFetch('/api/pin/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: readerPin, userType: 'reader' })
       });
-      
-      if (!pinValidation.data.validation.isValid) {
+      const pinValidation = await pinValidationRes.json();
+
+      if (!pinValidationRes.ok || !pinValidation.validation?.isValid) {
         fastify.log.warn({
           event: 'invalidPinFormat',
           readerPin: readerPin,
-          errors: pinValidation.data.validation.errors
+          errors: pinValidation.validation?.errors
         });
 
         return reply.code(302).redirect(`/readersLogin?readerPin=${readerPin}&error=${encodeURIComponent('Invalid Reader PIN format')}`);
       }
-      
-      // Call SSOT API for authentication
-      const apiResponse = await axios.post('/auth/readers/requestToken', {
-        readerEmail: email,
-        readerPin,
-        source: 'readers-portal',
-        ip: readerIP
-      });
 
-      if (apiResponse.data.success) {
-        fastify.log.info({
-          event: 'readerLoginSuccess',
+      // Call SSOT API for authentication
+      const apiRes = await ssotFetch('/auth/readers/requestToken', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ readerEmail: email, readerPin, source: 'readers-portal', ip: readerIP })
+      });
+      const apiResponse = await apiRes.json();
+
+      if (!apiRes.ok || !apiResponse.success) {
+        fastify.log.warn({
+          event: 'readerLoginFailed',
           readerPin: readerPin,
-          complianceSubmitted: apiResponse.data.reader.complianceSubmitted
+          error: apiResponse.error
         });
+        return reply.code(302).redirect(`/readersLogin?readerPin=${readerPin}&error=${encodeURIComponent(apiResponse.error || 'Authentication failed')}`);
+      }
+
+      fastify.log.info({
+        event: 'readerLoginSuccess',
+        readerPin: readerPin,
+        complianceSubmitted: apiResponse.reader.complianceSubmitted
+      });
 
         try {
           const jwtToken = request.cookies?.qolaeReaderToken;
@@ -117,23 +116,25 @@ export default async function readersAuthRoutes(fastify, opts) {
           }
 
           // Validate JWT token via SSOT
-          const validationResponse = await axios.post(
-            `${process.env.API_BASE_URL || 'https://api.qolae.com'}/auth/readers/session/validate`,
-            { token: jwtToken }
-          );
+          const valRes = await ssotFetch('/auth/readers/session/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: jwtToken })
+          });
+          const validationResponse = await valRes.json();
 
-          if (!validationResponse.data.success || !validationResponse.data.valid) {
+          if (!valRes.ok || !validationResponse.success || !validationResponse.valid) {
             fastify.log.warn({
               event: 'loginInvalidJWT',
               readerPin: readerPin,
-              error: validationResponse.data.error || 'Invalid token',
+              error: validationResponse.error || 'Invalid token',
               gdprCategory: 'authentication'
             });
             return reply.code(302).redirect(`/readersLogin?readerPin=${readerPin}&error=${encodeURIComponent('Session expired. Please click your PIN link again.')}`);
           }
 
           // Verify PIN matches JWT payload
-          const readerData = validationResponse.data.reader;
+          const readerData = validationResponse.reader;
           if (readerData.readerPin !== readerPin) {
             fastify.log.info({
               event: 'loginPinMismatch',
@@ -152,7 +153,7 @@ export default async function readersAuthRoutes(fastify, opts) {
           fastify.log.info({
             event: 'jwtValidated',
             readerPin: readerPin,
-            expiresAt: validationResponse.data.expiresAt,
+            expiresAt: validationResponse.expiresAt,
             gdprCategory: 'authentication'
           });
 
@@ -169,15 +170,6 @@ export default async function readersAuthRoutes(fastify, opts) {
 
           return reply.code(302).redirect(`/readersLogin?readerPin=${readerPin}&error=${encodeURIComponent('Failed to create session. Please try again.')}`);
         }
-      } else {
-        fastify.log.warn({
-          event: 'readerLoginFailed',
-          readerPin: readerPin,
-          error: apiResponse.data.error
-        });
-
-        return reply.code(302).redirect(`/readersLogin?readerPin=${readerPin}&error=${encodeURIComponent(apiResponse.data.error || 'Authentication failed')}`);
-      }
     } catch (err) {
       fastify.log.error({
         event: 'readerLoginError',
@@ -185,10 +177,6 @@ export default async function readersAuthRoutes(fastify, opts) {
         error: err.message,
         stack: err.stack
       });
-      
-      if (err.response?.data?.error) {
-        return reply.code(302).redirect(`/readersLogin?readerPin=${readerPin}&error=${encodeURIComponent(err.response.data.error)}`);
-      }
 
       return reply.code(302).redirect(`/readersLogin?readerPin=${readerPin || ''}&error=${encodeURIComponent('Authentication service unavailable. Please try again.')}`);
     }
@@ -198,7 +186,15 @@ export default async function readersAuthRoutes(fastify, opts) {
   // B.2: REQUEST EMAIL VERIFICATION CODE
   // ==============================================
 
-  fastify.post('/readersAuth/requestEmailCode', async (request, reply) => {
+  fastify.post('/readersAuth/requestEmailCode', {
+    config: {
+      rateLimit: {
+        max: 3,
+        timeWindow: '10 minutes',
+        keyGenerator: (request) => request.ip
+      }
+    }
+  }, async (request, reply) => {
     const readerIP = request.ip;
     const sessionId = request.cookies?.qolaeReaderToken;
 
@@ -213,20 +209,32 @@ export default async function readersAuthRoutes(fastify, opts) {
     }
 
     try {
-      const ssotResponse = await axios.post(
-        `${process.env.API_BASE_URL || 'https://api.qolae.com'}/auth/readers/2fa/requestCode`,
-        {
+      const ssotRes = await ssotFetch('/auth/readers/2fa/requestCode', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionId}`
+        },
+        body: JSON.stringify({
           ipAddress: readerIP,
           userAgent: request.headers['user-agent']
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${sessionId}`
-          }
-        }
-      );
+        })
+      });
 
-      const ssotData = ssotResponse.data;
+      const ssotData = await ssotRes.json();
+
+      if (!ssotRes.ok) {
+        if (ssotRes.status === 401) {
+          fastify.log.warn({
+            event: 'verificationCodeRequestInvalidSession',
+            error: ssotData.error,
+            ip: readerIP,
+            gdprCategory: 'authentication'
+          });
+          return reply.code(302).redirect('/readersLogin?error=' + encodeURIComponent(ssotData.error || 'Session invalid. Please log in again.'));
+        }
+        return reply.code(302).redirect('/readers2fa?error=' + encodeURIComponent(ssotData.error || 'Failed to send verification code'));
+      }
 
       if (ssotData.success) {
         fastify.log.info({
@@ -248,22 +256,6 @@ export default async function readersAuthRoutes(fastify, opts) {
         return reply.code(302).redirect('/readers2fa?error=' + encodeURIComponent(ssotData.error || 'Failed to send verification code'));
       }
     } catch (err) {
-      if (err.response) {
-        const status = err.response.status;
-        const errorData = err.response.data;
-
-        if (status === 401) {
-          fastify.log.warn({
-            event: 'verificationCodeRequestInvalidSession',
-            error: errorData.error,
-            ip: readerIP,
-            gdprCategory: 'authentication'
-          });
-
-          return reply.code(302).redirect('/readersLogin?error=' + encodeURIComponent(errorData.error || 'Session invalid. Please log in again.'));
-        }
-      }
-
       fastify.log.error({
         event: 'verificationCodeRequestError',
         error: err.message,
@@ -279,7 +271,15 @@ export default async function readersAuthRoutes(fastify, opts) {
   // B.3: 2FA VERIFICATION
   // ==============================================
 
-  fastify.post('/readersAuth/verify2fa', async (request, reply) => {
+  fastify.post('/readersAuth/verify2fa', {
+    config: {
+      rateLimit: {
+        max: 3,
+        timeWindow: '10 minutes',
+        keyGenerator: (request) => request.ip
+      }
+    }
+  }, async (request, reply) => {
     const { verificationCode } = request.body;
     const readerIP = request.ip;
 
@@ -307,28 +307,43 @@ export default async function readersAuthRoutes(fastify, opts) {
     }
 
     try {
-      const ssotResponse = await axios.post(
-        `${process.env.API_BASE_URL || 'https://api.qolae.com'}/auth/readers/2fa/verifyCode`,
-        {
+      const ssotRes = await ssotFetch('/auth/readers/2fa/verifyCode', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionId}`
+        },
+        body: JSON.stringify({
           verificationCode: verificationCode,
           ipAddress: readerIP,
           userAgent: request.headers['user-agent']
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${sessionId}`
-          }
-        }
-      );
+        })
+      });
 
-      const ssotData = ssotResponse.data;
+      const ssotData = await ssotRes.json();
+
+      if (!ssotRes.ok) {
+        if (ssotRes.status === 401) {
+          fastify.log.warn({
+            event: '2faVerificationInvalidSession',
+            error: ssotData.error,
+            ip: readerIP,
+            gdprCategory: 'authentication'
+          });
+          if (ssotData.redirect) {
+            return reply.code(302).redirect('/readersLogin?error=' + encodeURIComponent(ssotData.error || 'Session invalid. Please log in again.'));
+          }
+          return reply.code(302).redirect('/readers2fa?error=' + encodeURIComponent(ssotData.error || 'Invalid verification code'));
+        }
+        return reply.code(302).redirect('/readers2fa?error=' + encodeURIComponent(ssotData.error || '2FA verification failed'));
+      }
 
       if (ssotData.success) {
         const readerPin = ssotData.reader.readerPin;
         const readerData = ssotData.reader;
         const jwtToken = ssotData.accessToken;
 
-        console.log(`🔑 JWT token received from SSOT for Reader PIN: ${readerPin}`);
+        fastify.log.info({ event: '2faJwtReceived', readerPin });
 
         fastify.log.info({
           event: '2faVerificationSuccess',
@@ -344,7 +359,7 @@ export default async function readersAuthRoutes(fastify, opts) {
         // Readers MUST complete compliance before password setup
         // ═══════════════════════════════════════════════════════════
         if (!readerData.complianceSubmitted) {
-          console.log(`[2FA] Reader ${readerPin} needs compliance - redirecting to HRCompliance`);
+          fastify.log.info({ event: '2faComplianceRedirect', readerPin });
           return reply.code(302).redirect(`${process.env.HRCOMPLIANCE_URL || 'https://hrcompliance.qolae.com'}/readersCompliance?readerPin=${readerPin}`);
         }
 
@@ -364,26 +379,6 @@ export default async function readersAuthRoutes(fastify, opts) {
         return reply.code(302).redirect('/readers2fa?error=' + encodeURIComponent(ssotData.error || '2FA verification failed'));
       }
     } catch (err) {
-      if (err.response) {
-        const status = err.response.status;
-        const errorData = err.response.data;
-
-        if (status === 401) {
-          fastify.log.warn({
-            event: '2faVerificationInvalidSession',
-            error: errorData.error,
-            ip: readerIP,
-            gdprCategory: 'authentication'
-          });
-
-          if (errorData.redirect) {
-            return reply.code(302).redirect('/readersLogin?error=' + encodeURIComponent(errorData.error || 'Session invalid. Please log in again.'));
-          }
-
-          return reply.code(302).redirect('/readers2fa?error=' + encodeURIComponent(errorData.error || 'Invalid verification code'));
-        }
-      }
-
       fastify.log.error({
         event: '2faVerificationError',
         error: err.message,
@@ -399,7 +394,15 @@ export default async function readersAuthRoutes(fastify, opts) {
   // B.4: SECURE LOGIN - PASSWORD SETUP/VERIFY
   // ==============================================
 
-  fastify.post('/readersAuth/secureLogin', async (request, reply) => {
+  fastify.post('/readersAuth/secureLogin', {
+    config: {
+      rateLimit: {
+        max: 3,
+        timeWindow: '15 minutes',
+        keyGenerator: (request) => request.ip
+      }
+    }
+  }, async (request, reply) => {
     const { password, passwordConfirm, isNewUser, reset, readerPin } = request.body;
     const readerIP = request.ip;
 
@@ -448,7 +451,7 @@ export default async function readersAuthRoutes(fastify, opts) {
           ? '/auth/readers/passwordSetup'
           : '/auth/readers/passwordVerify';
 
-      console.log(`🔐 Calling SSOT ${endpoint}`);
+      fastify.log.info({ event: 'secureLoginSsotCall', endpoint });
 
       // passwordReset takes PIN in body (no JWT auth header needed)
       // passwordSetup and passwordVerify use JWT auth header
@@ -456,17 +459,43 @@ export default async function readersAuthRoutes(fastify, opts) {
         ? { readerPin: readerPin, password: password, ipAddress: readerIP, userAgent: request.headers['user-agent'] }
         : { password: password, ipAddress: readerIP, userAgent: request.headers['user-agent'] };
 
-      const requestConfig = isReset
-        ? {}
-        : { headers: { 'Authorization': `Bearer ${jwtToken}` } };
+      const requestHeaders = isReset
+        ? { 'Content-Type': 'application/json' }
+        : { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwtToken}` };
 
-      const ssotResponse = await axios.post(
-        `${process.env.API_BASE_URL || 'https://api.qolae.com'}${endpoint}`,
-        requestBody,
-        requestConfig
-      );
+      const ssotRes = await ssotFetch(endpoint, {
+        method: 'POST',
+        headers: requestHeaders,
+        body: JSON.stringify(requestBody)
+      });
 
-      const ssotData = ssotResponse.data;
+      const ssotData = await ssotRes.json();
+
+      if (!ssotRes.ok) {
+        if (ssotRes.status === 401) {
+          const apiError = ssotData.error || '';
+          const isInvalidPassword = apiError.toLowerCase().includes('invalid password');
+
+          fastify.log.warn({
+            event: isInvalidPassword ? 'secureLoginInvalidPassword' : 'secureLoginInvalidSession',
+            error: apiError,
+            ip: readerIP,
+            gdprCategory: 'authentication'
+          });
+
+          if (isInvalidPassword) {
+            const resetParam = isReset ? '&reset=true' : '';
+            return reply.code(302).redirect('/secureLogin?readerPin=' + encodeURIComponent(readerPin || '') + resetParam + '&error=' + encodeURIComponent('Invalid password. Please try again.'));
+          }
+          return reply.code(302).redirect('/readersLogin?error=' + encodeURIComponent('Session expired. Please click your PIN link again.'));
+        }
+
+        if (ssotRes.status === 409) {
+          return reply.code(302).redirect(`/secureLogin?readerPin=${readerPin || ''}&setupCompleted=true&error=` + encodeURIComponent('Password already set up. Please enter your password.'));
+        }
+
+        return reply.code(302).redirect(`/secureLogin?readerPin=${readerPin || ''}&error=` + encodeURIComponent(ssotData.error || 'Password operation failed'));
+      }
 
       if (ssotData.success) {
         if (ssotData.accessToken) {
@@ -479,7 +508,7 @@ export default async function readersAuthRoutes(fastify, opts) {
           });
 
           const opType = isReset ? 'reset' : (isNewUser ? 'setup' : 'verify');
-          console.log(`🔑 Updated JWT cookie after password ${opType}`);
+          fastify.log.info({ event: 'jwtCookieUpdated', operation: opType });
         }
 
         const eventName = isReset ? 'passwordResetSuccess' : (isNewUser ? 'passwordSetupSuccess' : 'passwordVerifySuccess');
@@ -507,33 +536,6 @@ export default async function readersAuthRoutes(fastify, opts) {
       }
 
     } catch (err) {
-      if (err.response) {
-        const status = err.response.status;
-        const errorData = err.response.data;
-
-        if (status === 401) {
-          const apiError = errorData.error || '';
-          const isInvalidPassword = apiError.toLowerCase().includes('invalid password');
-
-          fastify.log.warn({
-            event: isInvalidPassword ? 'secureLoginInvalidPassword' : 'secureLoginInvalidSession',
-            error: apiError,
-            ip: readerIP,
-            gdprCategory: 'authentication'
-          });
-
-          if (isInvalidPassword) {
-            const resetParam = isReset ? '&reset=true' : '';
-            return reply.code(302).redirect('/secureLogin?readerPin=' + encodeURIComponent(readerPin || '') + resetParam + '&error=' + encodeURIComponent('Invalid password. Please try again.'));
-          }
-          return reply.code(302).redirect('/readersLogin?error=' + encodeURIComponent('Session expired. Please click your PIN link again.'));
-        }
-
-        if (status === 409) {
-          return reply.code(302).redirect(`/secureLogin?readerPin=${readerPin || ''}&setupCompleted=true&error=` + encodeURIComponent('Password already set up. Please enter your password.'));
-        }
-      }
-
       fastify.log.error({
         event: 'secureLoginError',
         error: err.message,

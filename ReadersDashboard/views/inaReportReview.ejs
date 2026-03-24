@@ -1033,9 +1033,6 @@
                 }, 300);
             }, 1500);
             
-            console.log('Saving changes via endpoint: /api/report/save-draft');
-            console.log('Changes saved:', editorContent);
-            
             // TODO: Backend integration
             /*
             fetch('/api/report/save-draft', {
@@ -1053,7 +1050,6 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Draft saved:', data);
                 goToStep(3);
             });
             */
@@ -1062,8 +1058,6 @@
         function finalizeReport() {
             goToStep(4);
             triggerConfetti();
-            
-            console.log('Submitting report via endpoint: /api/report/submit');
             
             // TODO: Backend integration
             /*
@@ -1084,7 +1078,6 @@
         }
 
         function returnToDashboard() {
-            console.log('Returning to dashboard - Report review complete');
             updateParentDashboard();
             document.querySelector('.modal-overlay').style.display = 'none';
             
@@ -1096,11 +1089,6 @@
         }
 
         function updateParentDashboard() {
-            console.log('Updating parent dashboard:');
-            console.log('1. Marking Report Review card as submitted');
-            console.log('2. Payment card updates to "Pending Review"');
-            console.log('3. Workflow progress updated');
-            
             // TODO: Update parent dashboard elements
             /*
             const reviewCard = document.querySelector('.review-card');
@@ -1177,8 +1165,6 @@
             }
         });
 
-        console.log('QOLAE Report Review Modal - Ready for testing!');
-        console.log('Current step:', currentStep);
     </script>
 </body>
 </html>

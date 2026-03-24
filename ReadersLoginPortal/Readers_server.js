@@ -3,7 +3,7 @@
 // QOLAE Readers Login & Authentication Hub
 // THE BRIDGE: Between HRCompliance and Readers-Dashboard
 // Organized by Location Block Workflow Pattern
-// Author: Liz 👑
+// Author: Liz
 // Port: 3015
 // ==============================================
 
@@ -20,14 +20,14 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
-import axios from 'axios';
+import ssotFetch from './utils/ssotFetch.js';
 import cors from '@fastify/cors';
 import formbody from '@fastify/formbody';
 import fastifyView from '@fastify/view';
 import cookie from '@fastify/cookie';
 import ejs from 'ejs';
+import rateLimit from '@fastify/rate-limit';
 
 // ES6 module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -37,7 +37,7 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: `${__dirname}/.env` });
 
 // A.3: Server Initialization
-const fastify = Fastify({ logger: true });
+const fastify = Fastify({ logger: true, trustProxy: true });
 
 // ==============================================
 // LOCATION BLOCK B: MIDDLEWARE & PLUGINS
@@ -81,6 +81,11 @@ fastify.register(cookie, {
   parseOptions: {}
 });
 
+// B.3.2: Rate Limiting Plugin (per-route config only, no global default)
+await fastify.register(rateLimit, {
+  global: false
+});
+
 // B.4: Static File Serving (GDPR compliant)
 const staticRoots = [path.join(__dirname, 'public')];
 const staticPrefixes = ['/public/'];
@@ -101,6 +106,21 @@ fastify.register(fastifyView, {
     ejs: ejs
   },
   root: path.join(__dirname, 'views')
+});
+
+// B.6: Rate Limit Error Handler (429 → server-side redirect)
+fastify.setErrorHandler((error, request, reply) => {
+  if (error.statusCode === 429) {
+    const redirectMap = {
+      '/readersAuth/login': '/readersLogin?error=' + encodeURIComponent('Too many login attempts. Please try again in 15 minutes.'),
+      '/readersAuth/requestEmailCode': '/readers2fa?error=' + encodeURIComponent('Too many code requests. Please wait 10 minutes.'),
+      '/readersAuth/verify2fa': '/readers2fa?error=' + encodeURIComponent('Too many verification attempts. Please wait 10 minutes.'),
+      '/readersAuth/secureLogin': '/secureLogin?error=' + encodeURIComponent('Too many password attempts. Please try again in 15 minutes.')
+    };
+    const redirectUrl = redirectMap[request.url.split('?')[0]] || '/readersLogin?error=' + encodeURIComponent('Too many requests. Please try again later.');
+    return reply.code(302).redirect(redirectUrl);
+  }
+  reply.send(error);
 });
 
 // ==============================================
@@ -193,25 +213,42 @@ fastify.get('/readersLogin', async (request, reply) => {
   // ═══════════════════════════════════════════════════════════
 
   try {
-    console.log(`🔒 [SSOT] PIN Access request for: ${readerPin}`);
+    fastify.log.info({ event: 'pinAccessRequest', readerPin });
 
     const deviceFingerprint = generateDeviceFingerprint(request);
 
-    const ssotResponse = await axios.post(`${process.env.API_BASE_URL || 'https://api.qolae.com'}/auth/readers/pinAccess`, {
-      readerPin: readerPin,
-      deviceFingerprint: deviceFingerprint,
-      ipAddress: readerIP,
-      userAgent: userAgent
+    const ssotResponse = await ssotFetch('/auth/readers/pinAccess', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        readerPin: readerPin,
+        deviceFingerprint: deviceFingerprint,
+        ipAddress: readerIP,
+        userAgent: userAgent
+      })
     });
 
-    const ssotData = ssotResponse.data;
+    const ssotData = await ssotResponse.json();
+
+    if (!ssotResponse.ok) {
+      if (ssotResponse.status === 401) {
+        return reply.code(404).send('Invalid Reader PIN');
+      }
+      if (ssotResponse.status === 403) {
+        return reply.code(403).send(`
+          <h2>Access Revoked</h2>
+          <p>Your access has been revoked. Contact support@qolae.com</p>
+        `);
+      }
+      return reply.code(500).send('Internal server error');
+    }
 
     if (!ssotData.success) {
-      console.log(`[SSOT] PIN Access failed: ${ssotData.error}`);
+      fastify.log.warn({ event: 'pinAccessFailed', error: ssotData.error });
       return reply.code(401).send('Invalid Reader PIN');
     }
 
-    console.log(`[SSOT] PIN Access successful for: ${readerPin}, isNew: ${ssotData.isNewReader}`);
+    fastify.log.info({ event: 'pinAccessSuccess', readerPin, isNewReader: ssotData.isNewReader });
 
     // Initialize session if it doesn't exist
     if (!request.session) {
@@ -253,22 +290,7 @@ fastify.get('/readersLogin', async (request, reply) => {
     });
 
   } catch (error) {
-    console.error('❌ [SSOT] ReadersLogin error:', error.message);
-
-    if (error.response) {
-      const status = error.response.status;
-
-      if (status === 401) {
-        return reply.code(404).send('Invalid Reader PIN');
-      }
-      if (status === 403) {
-        return reply.code(403).send(`
-          <h2>Access Revoked</h2>
-          <p>Your access has been revoked. Contact support@qolae.com</p>
-        `);
-      }
-    }
-
+    fastify.log.error({ event: 'readersLoginError', error: error.message });
     return reply.code(500).send('Internal server error');
   }
 });
@@ -304,17 +326,19 @@ fastify.get('/readers2fa', async (request, reply) => {
   }
 
   try {
-    const sessionResponse = await axios.post(
-      `${process.env.API_BASE_URL || 'https://api.qolae.com'}/auth/readers/session/validate`,
-      { token: sessionId }
-    );
+    const sessionRes = await ssotFetch('/auth/readers/session/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: sessionId })
+    });
+    const sessionData = await sessionRes.json();
 
-    if (!sessionResponse.data.success) {
-      viewData.error = sessionResponse.data.error || 'Session invalid. Please return to login.';
+    if (!sessionRes.ok || !sessionData.success) {
+      viewData.error = sessionData.error || 'Session invalid. Please return to login.';
       return reply.view('readers2fa.ejs', viewData);
     }
 
-    const reader = sessionResponse.data.reader;
+    const reader = sessionData.reader;
 
     viewData.readerPin = reader.readerPin || '';
     viewData.readerEmail = reader.readerEmail || '';
@@ -344,27 +368,26 @@ fastify.get('/secureLogin', async (req, reply) => {
   }
 
   if (!token) {
-    console.log('[SecureLogin] No JWT token found, redirecting to login');
+    fastify.log.warn({ event: 'secureLoginNoToken', readerPin });
     return reply.redirect(`/readersLogin?readerPin=${readerPin}&error=sessionExpired`);
   }
 
   try {
-    const statusResponse = await axios.get(
-      `${process.env.API_BASE_URL || 'https://api.qolae.com'}/auth/readers/loginStatus`,
-      {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+    const statusRes = await ssotFetch('/auth/readers/loginStatus', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
       }
-    );
+    });
+    const statusData = await statusRes.json();
 
-    if (!statusResponse.data.success) {
-      console.log('[SecureLogin] SSOT status check failed:', statusResponse.data.error);
+    if (!statusRes.ok || !statusData.success) {
+      fastify.log.warn({ event: 'secureLoginStatusFailed', error: statusData.error });
       return reply.redirect(`/readersLogin?readerPin=${readerPin}&error=statusCheckFailed`);
     }
 
-    const reader = statusResponse.data.reader;
-    console.log(`[SecureLogin] SSOT status retrieved for: ${reader.readerPin}`);
+    const reader = statusData.reader;
+    fastify.log.info({ event: 'secureLoginStatusRetrieved', readerPin: reader.readerPin });
 
     // NOTE: Compliance gate is handled at 2FA stage, not here
     // If reader reaches secureLogin, they have already passed compliance check
@@ -418,21 +441,25 @@ fastify.get('/secureLogin', async (req, reply) => {
     }
 
     // Security logging (non-blocking)
-    await axios.post(`${process.env.API_BASE_URL || 'https://api.qolae.com'}/auth/readers/securityLog`, {
-      readerPin: readerPin,
-      eventType: 'secureLoginPageAccessed',
-      eventStatus: 'success',
-      details: {
-        uiState: uiState,
-        progressPercentage: progressPercentage,
-        completedSteps: completedSteps,
-        isPasswordReset: isPasswordReset,
-        source: 'ReadersLoginPortal'
-      },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent'],
-      riskScore: 0
-    }).catch(err => console.log('[SecureLogin] Security log failed (non-blocking):', err.message));
+    await ssotFetch('/auth/readers/securityLog', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        readerPin: readerPin,
+        eventType: 'secureLoginPageAccessed',
+        eventStatus: 'success',
+        details: {
+          uiState: uiState,
+          progressPercentage: progressPercentage,
+          completedSteps: completedSteps,
+          isPasswordReset: isPasswordReset,
+          source: 'ReadersLoginPortal'
+        },
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        riskScore: 0
+      })
+    }).catch(() => {});
 
     return reply.view('secureLogin.ejs', {
       title: 'Secure Login - QOLAE Readers Portal',
@@ -458,17 +485,21 @@ fastify.get('/secureLogin', async (req, reply) => {
     });
 
   } catch (error) {
-    console.error('❌ SecureLogin SSOT error:', error.message);
+    fastify.log.error({ event: 'secureLoginSsotError', error: error.message });
 
-    await axios.post(`${process.env.API_BASE_URL || 'https://api.qolae.com'}/auth/readers/securityLog`, {
-      readerPin: readerPin,
-      eventType: 'secureLoginError',
-      eventStatus: 'failure',
-      details: { error: error.message, source: 'ReadersLoginPortal' },
-      ipAddress: req.ip,
-      userAgent: req.headers['user-agent'],
-      riskScore: 30
-    }).catch(err => console.log('[SecureLogin] Error log failed (non-blocking):', err.message));
+    await ssotFetch('/auth/readers/securityLog', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        readerPin: readerPin,
+        eventType: 'secureLoginError',
+        eventStatus: 'failure',
+        details: { error: error.message, source: 'ReadersLoginPortal' },
+        ipAddress: req.ip,
+        userAgent: req.headers['user-agent'],
+        riskScore: 30
+      })
+    }).catch(() => {});
 
     return reply.redirect(`/readersLogin?readerPin=${readerPin}&error=secureLoginFailed`);
   }
@@ -506,8 +537,7 @@ const start = async () => {
       host: '0.0.0.0'
     });
     const address = fastify.server.address();
-    console.log(`🚀 ReadersLoginPortal bound to: ${address.address}:${address.port}`);
-    fastify.log.info(`Readers Login Portal running on port ${fastify.server.address().port}`);
+    fastify.log.info(`ReadersLoginPortal running on port ${address.port}`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
