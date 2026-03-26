@@ -21,9 +21,7 @@ async function ndaRoutes(fastify, options) {
   // POST /nda/continueToSign
   // Step 1 → Step 2: Validate reader, transition to signing
   // ==============================================
-  fastify.post('/nda/continueToSign', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.post('/nda/continueToSign', async (request, reply) => {
     const readerPin = request.user.readerPin;
 
     try {
@@ -55,9 +53,7 @@ async function ndaRoutes(fastify, options) {
   // POST /nda/preview
   // Step 2 → Step 3: Submit signature, generate preview
   // ==============================================
-  fastify.post('/nda/preview', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.post('/nda/preview', async (request, reply) => {
     const readerPin = request.user.readerPin;
     const { signatureData, acknowledgmentConfirmed } = request.body;
 
@@ -94,9 +90,7 @@ async function ndaRoutes(fastify, options) {
   // GET /nda/previewPdf
   // Serve cached preview PDF (proxy stream from SSOT)
   // ==============================================
-  fastify.get('/nda/previewPdf', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.get('/nda/previewPdf', async (request, reply) => {
     const readerPin = request.user.readerPin;
 
     try {
@@ -124,9 +118,7 @@ async function ndaRoutes(fastify, options) {
   // POST /nda/sign
   // Step 3 → Step 4: Flatten PDF, blockchain hash, complete
   // ==============================================
-  fastify.post('/nda/sign', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.post('/nda/sign', async (request, reply) => {
     const readerPin = request.user.readerPin;
     const { confirmFromPreview } = request.body;
 
@@ -163,9 +155,7 @@ async function ndaRoutes(fastify, options) {
   // GET /nda/view
   // Serve signed NDA inline (proxy stream from SSOT)
   // ==============================================
-  fastify.get('/nda/view', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.get('/nda/view', async (request, reply) => {
     const readerPin = request.user.readerPin;
 
     try {
@@ -193,9 +183,7 @@ async function ndaRoutes(fastify, options) {
   // GET /nda/download
   // Download signed NDA (proxy stream from SSOT)
   // ==============================================
-  fastify.get('/nda/download', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.get('/nda/download', async (request, reply) => {
     const readerPin = request.user.readerPin;
 
     try {

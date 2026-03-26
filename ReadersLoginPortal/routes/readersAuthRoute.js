@@ -104,7 +104,8 @@ export default async function readersAuthRoutes(fastify, opts) {
       });
 
         try {
-          const jwtToken = request.cookies?.qolaeReaderToken;
+          // Use fresh token from requestToken if available, fall back to cookie
+          const jwtToken = apiResponse?.accessToken || request.cookies?.qolaeReaderToken;
 
           if (!jwtToken) {
             fastify.log.warn({
@@ -504,7 +505,8 @@ export default async function readersAuthRoutes(fastify, opts) {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'strict',
-            maxAge: 60 * 60 * 24
+            maxAge: 60 * 60 * 24,
+            domain: '.qolae.com'
           });
 
           const opType = isReset ? 'reset' : (isNewUser ? 'setup' : 'verify');
@@ -553,31 +555,36 @@ export default async function readersAuthRoutes(fastify, opts) {
 
   fastify.post('/readersAuth/logout', async (request, reply) => {
     const jwtToken = request.cookies?.qolaeReaderToken;
-    const readerIP = request.ip;
 
     fastify.log.info({
       event: 'readerLogoutRequest',
       hasToken: !!jwtToken,
-      ip: readerIP,
       timestamp: new Date().toISOString(),
       gdprCategory: 'authentication'
     });
 
     if (jwtToken) {
       try {
-        fastify.log.info({
-          event: 'jwtCleared',
-          gdprCategory: 'authentication'
-        });
+        const decoded = jwt.verify(jwtToken, process.env.READERS_LOGIN_JWT_SECRET, { algorithms: ['HS256'] });
+        if (decoded.readerPin) {
+          await ssotFetch('/auth/invalidateSession', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userType: 'readers', pin: decoded.readerPin })
+          });
+        }
       } catch (err) {
-        fastify.log.error({
-          event: 'logoutError',
-          error: err.message
-        });
+        console.error('Session invalidation failed:', err.message);
       }
     }
 
-    reply.header('Set-Cookie', 'qolaeReaderToken=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0');
+    reply.clearCookie('qolaeReaderToken', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/',
+      domain: '.qolae.com'
+    });
 
     return reply.send({
       success: true,

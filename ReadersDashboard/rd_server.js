@@ -6,6 +6,7 @@
 // Date: 28th October 2025
 // ==============================================
 
+import 'dotenv/config';
 import Fastify from 'fastify';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -16,10 +17,8 @@ import fastifyFormbody from '@fastify/formbody';
 import fastifyCors from '@fastify/cors';
 import fastifyJwt from '@fastify/jwt';
 import fastifyCookie from '@fastify/cookie';
-import dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config();
+import ssotFetch from './utils/ssotFetch.js';
+import sessionMiddleware from './middleware/sessionMiddleware.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -98,44 +97,8 @@ await server.register(fastifyView, {
   },
 });
 
-// ==============================================
-// AUTHENTICATION DECORATOR
-// ==============================================
-// JWT verification decorator — single source of auth for all route plugins
-// @fastify/jwt is registered above — request.jwtVerify() is available
-server.decorate('authenticate', async (request, reply) => {
-  try {
-    await request.jwtVerify();
-    if (request.user.role !== 'reader') {
-      throw new Error('Unauthorized role');
-    }
-  } catch (error) {
-    reply.code(401).send({ success: false, error: 'Authentication required' });
-  }
-});
-
-// ==============================================
-// PT-9: GLOBAL SESSION VALIDATION — preHandler
-// ==============================================
-// Protects ALL routes except /public/ static assets
-// Uses request.jwtVerify() directly with redirect on failure
-// Does NOT call fastify.authenticate (wrong failure behaviour for browsers)
-server.addHook('preHandler', async (request, reply) => {
-  const urlPath = request.url.split('?')[0];
-
-  if (urlPath.startsWith('/public/')) {
-    return;
-  }
-
-  try {
-    await request.jwtVerify();
-    if (request.user.role !== 'reader') {
-      return reply.redirect('https://readers.qolae.com/readersLogin');
-    }
-  } catch (err) {
-    return reply.redirect('https://readers.qolae.com/readersLogin');
-  }
-});
+// SSOT-compliant session validation (replaces inline jwtVerify preHandler + authenticate decorator)
+server.addHook('preHandler', sessionMiddleware);
 
 // ==============================================
 // ROUTES REGISTRATION
@@ -158,14 +121,29 @@ await server.register(import('./routes/readersManagementHubRoutes.js'));
 // ==============================================
 server.get('/logout', async (request, reply) => {
   try {
+    const pin = request.user?.readerPin;
+    if (pin) {
+      try {
+        await ssotFetch('/auth/invalidateSession', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userType: 'readers', pin })
+        });
+      } catch (invalidateError) {
+        console.error('Session invalidation failed:', invalidateError.message);
+      }
+    }
+
     reply.clearCookie('qolaeReaderToken', {
       httpOnly: true,
       secure: true,
-      sameSite: 'Strict'
+      sameSite: 'strict',
+      path: '/',
+      domain: '.qolae.com'
     });
     return reply.redirect('https://readers.qolae.com/readersLogin');
   } catch (error) {
-    server.log.error('Logout error:', error);
+    console.error('Logout error:', error.message);
     return reply.redirect('https://readers.qolae.com/readersLogin');
   }
 });

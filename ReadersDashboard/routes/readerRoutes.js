@@ -146,9 +146,7 @@ export default async function readerRoutes(fastify, options) {
   // ==============================================
   // Proxy → ReadersController → SSOT /api/readers/corrections/save
 
-  fastify.post('/api/readers/saveCorrections', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.post('/api/readers/saveCorrections', async (request, reply) => {
     return await ReadersController.saveReaderCorrections(request, reply);
   });
 
@@ -157,9 +155,7 @@ export default async function readerRoutes(fastify, options) {
   // ==============================================
   // Proxy → ReadersController → SSOT /api/readers/corrections/submit
 
-  fastify.post('/api/readers/submitCorrections', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.post('/api/readers/submitCorrections', async (request, reply) => {
     return await ReadersController.submitReaderCorrections(request, reply);
   });
 
@@ -169,9 +165,7 @@ export default async function readerRoutes(fastify, options) {
   // Proxy → ReadersController → SSOT /api/readers/payment/processing
   // VIEW: paymentProcessing.ejs (rendered by controller)
 
-  fastify.get('/paymentProcessing', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.get('/paymentProcessing', async (request, reply) => {
     return await ReadersController.getReaderPaymentProcessing(request, reply);
   });
 
@@ -180,9 +174,7 @@ export default async function readerRoutes(fastify, options) {
   // ==============================================
   // Proxy → ReadersController → SSOT /api/readers/payment/status/:assignmentId
 
-  fastify.get('/api/readers/payment/status/:assignmentId', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.get('/api/readers/payment/status/:assignmentId', async (request, reply) => {
     return await ReadersController.getReaderPaymentStatus(request, reply);
   });
 
@@ -191,9 +183,7 @@ export default async function readerRoutes(fastify, options) {
   // ==============================================
   // Proxy → ReadersController → SSOT /api/readers/payment/history
 
-  fastify.get('/readers/paymentHistory', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.get('/readers/paymentHistory', async (request, reply) => {
     return await ReadersController.getReaderPaymentHistory(request, reply);
   });
 
@@ -202,16 +192,14 @@ export default async function readerRoutes(fastify, options) {
   // ==============================================
   // No DB, no SSOT — simple mailto redirect (stays inline)
 
-  fastify.get('/readers/support', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.get('/readers/support', async (request, reply) => {
     try {
       const { assignmentId, subject } = request.query;
-      const { pin, name, email } = request.user;
+      const { readerPin, readerName, readerEmail } = request.user;
 
       const supportEmail = 'support@qolae.com';
       const emailSubject = subject || 'Payment Inquiry';
-      const emailBody = `Reader PIN: ${pin}\nReader Name: ${name}\nReader Email: ${email}\nAssignment ID: ${assignmentId || 'N/A'}`;
+      const emailBody = `Reader PIN: ${readerPin}\nReader Name: ${readerName}\nReader Email: ${readerEmail}\nAssignment ID: ${assignmentId || 'N/A'}`;
 
       return reply.redirect(`mailto:${supportEmail}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`);
 

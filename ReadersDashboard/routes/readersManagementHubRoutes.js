@@ -21,9 +21,7 @@ export default async function readersManagementHubRoutes(fastify, opts) {
   // VIEW: readersManagementHub.ejs (rendered by controller)
   // Proxy → ReadersController → SSOT /api/readers/managementHub/bootstrap
 
-  fastify.get('/readersManagementHub', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.get('/readersManagementHub', async (request, reply) => {
     return await ReadersController.getReaderManagementHub(request, reply);
   });
 
@@ -36,27 +34,19 @@ export default async function readersManagementHubRoutes(fastify, opts) {
   // POST /calendar/removeOverride → remove date-specific override
   // All routes: thin proxy via ReadersController → SSOT api.qolae.com
 
-  fastify.get('/calendar', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.get('/calendar', async (request, reply) => {
     return await ReadersController.getReaderCalendar(request, reply);
   });
 
-  fastify.post('/calendar/setPattern', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.post('/calendar/setPattern', async (request, reply) => {
     return await ReadersController.setReaderCalendarPattern(request, reply);
   });
 
-  fastify.post('/calendar/addOverride', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.post('/calendar/addOverride', async (request, reply) => {
     return await ReadersController.addReaderCalendarOverride(request, reply);
   });
 
-  fastify.post('/calendar/removeOverride', {
-    preHandler: fastify.authenticate
-  }, async (request, reply) => {
+  fastify.post('/calendar/removeOverride', async (request, reply) => {
     return await ReadersController.removeReaderCalendarOverride(request, reply);
   });
 
