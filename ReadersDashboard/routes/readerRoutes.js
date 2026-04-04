@@ -131,7 +131,8 @@ export default async function readerRoutes(fastify, options) {
         showModal: showModal,
         modalData: modalData,
         csrfToken: csrfToken,
-        currentStep: currentStep
+        currentStep: currentStep,
+        degradedMode: request.degradedMode || false
       });
 
     } catch (error) {
